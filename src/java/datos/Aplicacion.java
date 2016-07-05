@@ -23,7 +23,7 @@ public class Aplicacion {
             Class.forName("com.mysql.jdbc.Driver");
             //Nombre del servidor. localhost:3306 es la ruta y el puerto de la conexión MySQL
             //panamahitek_text es el nombre que le dimos a la base de datos
-            String servidor = "jdbc:mysql://104.236.81.248:3306/logycus360?noAccessToProcedureBodies=true";
+            String servidor = "jdbc:mysql://192.241.240.91:3306/logycus360?noAccessToProcedureBodies=true";
             //String servidor = "jdbc:mysql://localhost:3306/"+bd;
             //El root es el nombre de usuario por default. No hay contraseña
             //Se inicia la conexión
