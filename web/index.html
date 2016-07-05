@@ -14,8 +14,7 @@
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-datetimepicker.css" rel="stylesheet">
-
-    
+    <link href="css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
     <link href="css/sb-admin.css" rel="stylesheet">
 
@@ -43,78 +42,33 @@
     <script src="js/jquery.js"></script>
     <script src="https://maps.google.com/maps/api/js?libraries=placeses,visualization,drawing,geometry,places&key=AIzaSyCqUEyO3rTumxb0G-oRsyBnZLn4O9VKtiM"></script>
     <script src="js/angular.min.js"></script>
-    <script src="js/ng-map.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>    
+    
+
+    <script src="js/bootstrap.min.js"></script>  
+    <script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/dataTables.responsive.min.js"></script>
     <script src="js/moment-with-locales.js"></script>
     <script src="js/bootstrap-datetimepicker.js"></script>
+    <script src="js/dist/angular-datatables.min.js"></script>
+    
+    <script type="text/javascript" src="js/date.js"></script>
+    <script type="text/javascript" src="js/angular/dirPagination.js"></script>
+    <script type="text/javascript" src="js/angular/angular-validator.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+    <script type="text/javascript" src="js/angular/ng-map.min.js"></script>
+    <script type="text/javascript" src="js/angular/servicios.js"></script>
     
     <!-- Morris Charts JavaScript -->
     <script src="js/plugins/morris/raphael.min.js"></script>
     <script src="js/plugins/morris/morris.min.js"></script>
     <script src="js/plugins/morris/morris-data.js"></script>
-    <script type="text/javascript">
-
-        angular.module('myApp', ['ngMap']).controller('MyCtrl', function(NgMap) {
-            var vm = this;
-            vm.date = new Date();
-    
-            vm.placeChangedOrigin = function() {
-              vm.placeO = this.getPlace();
-            };
-            vm.placeChangedDestination = function() {
-              vm.placeD = this.getPlace();
-            };
-            NgMap.getMap().then(function(map) {
-              vm.map = map;
-            });
-       }).directive('datetimepicker', [
-            '$timeout',
-            function($timeout) {
-              return {
-                require: '?ngModel',
-                restrict: 'EA',
-                scope: {
-                  datetimepickerOptions: '@',
-                  onDateChangeFunction: '&',
-                  onDateClickFunction: '&'
-                },
-                link: function($scope, $element, $attrs, controller) {
-                  $element.on('dp.change', function() {
-                    $timeout(function() {
-                      var dtp = $element.data('DateTimePicker');
-                      controller.$setViewValue(dtp.date());
-                      $scope.onDateChangeFunction();
-                    });
-                  });
-
-                  $element.on('click', function() {
-                    $scope.onDateClickFunction();
-                  });
-
-                  controller.$render = function() {
-                    if (!!controller && !!controller.$viewValue) {
-                      var result = controller.$viewValue;
-                      $element.data('DateTimePicker').date(result);
-                    }
-                  };
-
-                  $element.datetimepicker($scope.$eval($attrs.datetimepickerOptions));
-                }
-              };
-            }
-          ]);
-       
-       $(function () {
-            $('#datetimepicker1').datetimepicker();
-        });
-
-    </script>
     
 </head>
 
 <body ng-app="myApp" class="ng-cloak" >
     
-    <div id="wrapper" style="height: 600px;" ng-controller="MyCtrl as vm">
+    <div id="wrapper" style="height: 600px;" ng-controller="ServiciosController as ctrl">
 
         <!-- Navigation -->
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -244,9 +198,9 @@
                                 <span class="glyphicon glyphicon-map-marker"></span>
                             </span>
                             <input places-auto-complete
-                            ng-model="vm.addressOrigin"
+                            ng-model="ctrl.servicio.nameOrigin"
                             types="['establishment']"
-                            on-place-changed="vm.placeChangedOrigin()" 
+                            on-place-changed="ctrl.placeChangedOrigin()" 
                             class="form-control"
                             placeholder="Ingrese Origen"/>
                         </div>
@@ -258,29 +212,29 @@
                                 <span class="glyphicon glyphicon-map-marker"></span>
                             </span>
                             <input places-auto-complete 
-                            ng-model="vm.addressDestination"
+                            ng-model="ctrl.servicio.nameDestination"
                             types="['establishment']"
-                            on-place-changed="vm.placeChangedDestination()" 
+                            on-place-changed="ctrl.placeChangedDestination()" 
                             class="form-control"
                             placeholder="Ingrese Destino"/>
                         </div>                        
                     </div>
                     <div class="form-group">
-                        <label>Tipo de servicio</label>
+                        <label>Tipo de carga</label>
                         <div class='input-group date'>
                             <span class="input-group-addon">
                                 <span class="fa fa-truck"></span>
                             </span>
-                            <select class="form-control">
-                                <option>Liquido</option>
-                                <option>Solido</option>
+                            <select class="form-control" ng-model="ctrl.servicio.carga" 
+                            ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.TipoCarga">
+                                <option value="">--- Seleccione Tipo ---</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Fecha de cargue:</label>
                         <div class="input-group input-group-sm date" 
-                            datetimepicker ng-model="vm.date">
+                            datetimepicker ng-model="ctrl.servicio.dateCargue">
                               <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                               </span>
@@ -291,7 +245,7 @@
                     <div class="form-group">
                         <label>Fecha de descargue:</label>
                         <div class="input-group input-group-sm date" 
-                            datetimepicker ng-model="vm.date">
+                            datetimepicker ng-model="ctrl.servicio.dateDescargue">
                               <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                               </span>
@@ -304,7 +258,7 @@
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-phone"></span>
                             </span>
-                            <input type='number' class="form-control" />
+                            <input type='number' class="form-control" ng-model="ctrl.servicio.equipos"/>
                         </div>
                     </div>
                     <div class="form-group">
@@ -313,7 +267,7 @@
                             <span class="input-group-addon">
                                 <span class="fa fa-file-text"></span>
                             </span>
-                            <input type='number' class="form-control" />
+                            <input type='number' class="form-control" ng-model="ctrl.servicio.orden"/>
                         </div>
                     </div>
                     <div style="text-align: right;">
@@ -337,8 +291,8 @@
                                 draggable="true"
                                 travel-mode="DRIVING"
                                 component-restrictions="{country:'co'}"
-                                origin="{{vm.placeO.geometry.location}}"
-                                destination="{{vm.placeD.geometry.location}}">
+                                origin="{{ctrl.placeO.geometry.location}}"
+                                destination="{{ctrl.placeD.geometry.location}}">
                             </ng-map>
                         </div>
                     </div>
@@ -350,7 +304,10 @@
 
         </div>
         <!-- /#page-wrapper -->
-
+        <b style="color: white;">{{ctrl.servicio}}</b>
+        
+        <b style="color: white;">{{map.directionsRenderers[0].directions.routes[0].legs.distance}}</b>
+        <b style="color: white;">{{map.directionsRenderers[0].directions.routes[0].legs.duration}}</b>
     </div>
     <!-- /#wrapper -->
 
