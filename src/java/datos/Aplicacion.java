@@ -3,8 +3,11 @@ package datos;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 
 public class Aplicacion {
+    
+    static SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     public static Connection conexion() throws ClassNotFoundException{
         Connection conn = null;
@@ -23,4 +26,5 @@ public class Aplicacion {
         }
         return conn;
     }
+    
 }

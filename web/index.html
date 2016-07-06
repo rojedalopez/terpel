@@ -26,17 +26,10 @@
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <style>
         .google-maps {
-            position: relative;
-            padding-bottom: 59%; 
-            height: 0;
-            overflow: hidden;
+            height: 600px;
         }
-        .google-maps ng-map {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100% !important;
-            height: 100% !important;
+        .google-maps ng-map{
+            height: 100%;
         }
     </style>
     <script src="js/jquery.js"></script>
@@ -187,7 +180,7 @@
         
         <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
-                <form role="form" class="nav navbar-nav side-nav form-group-sm" style="padding: 5px; color: gray;">
+                <form role="form" class="nav navbar-nav side-nav form-group-sm" ng-submit="ctrl.sendServicio()" style="padding: 5px; color: gray;">
                     <div class="form-group" style="color: white; text-align: center;">
                         <label><u>Generador de carga</u></label>
                     </div>
@@ -199,7 +192,8 @@
                             </span>
                             <input places-auto-complete
                             ng-model="ctrl.servicio.nameOrigin"
-                            types="['establishment']"
+                            types="[{'geocode'},{'establishment'},{'address'}]"
+                            component-restrictions="{country:'co'}"
                             on-place-changed="ctrl.placeChangedOrigin()" 
                             class="form-control"
                             placeholder="Ingrese Origen"/>
@@ -213,7 +207,8 @@
                             </span>
                             <input places-auto-complete 
                             ng-model="ctrl.servicio.nameDestination"
-                            types="['establishment']"
+                            types="[{'geocode'},{'establishment'},{'address'}]"
+                            component-restrictions="{country:'co'}"
                             on-place-changed="ctrl.placeChangedDestination()" 
                             class="form-control"
                             placeholder="Ingrese Destino"/>
@@ -267,7 +262,7 @@
                             <span class="input-group-addon">
                                 <span class="fa fa-file-text"></span>
                             </span>
-                            <input type='number' class="form-control" ng-model="ctrl.servicio.orden"/>
+                            <input type='text' class="form-control" ng-model="ctrl.servicio.orden"/>
                         </div>
                     </div>
                     <div style="text-align: right;">
@@ -288,26 +283,27 @@
                         <div class="google-maps">
                             <ng-map height="100%" center="Bogotá, Colombia" zoom="8">
                                 <directions
-                                draggable="true"
+                                draggable="false"
                                 travel-mode="DRIVING"
-                                component-restrictions="{country:'co'}"
                                 origin="{{ctrl.placeO.geometry.location}}"
                                 destination="{{ctrl.placeD.geometry.location}}">
+                                <marker id='{{vehiculo.cod}}' position="{{vehiculo.position}}" ng-repeat="vehiculo in ctrl.vehiculos"
+                                on-click="ctrl.showDetail(vehiculo)" reload></marker>
+                                <info-window id="foo-iw">
+                                    <div ng-non-bindable="">
+                                      placa: {{ctrl.vehiculo.placa}}<br/>
+                                    </div>
+                                </info-window>
                             </ng-map>
                         </div>
                     </div>
                 </div>
-                
-
             </div>
             <!-- /.container-fluid -->
 
         </div>
         <!-- /#page-wrapper -->
-        <b style="color: white;">{{ctrl.servicio}}</b>
         
-        <b style="color: white;">{{map.directionsRenderers[0].directions.routes[0].legs[0].distance.text}}</b>
-        <b style="color: white;">{{map.directionsRenderers[0].directions.routes[0].legs[0].duration.text}}</b>
     </div>
     <!-- /#wrapper -->
 
