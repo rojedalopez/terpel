@@ -5,7 +5,9 @@ angular.module('myApp',[
     'datatables',
     'angularValidator',
     'angularUtils.directives.dirPagination',
-    'ngMap'
+    'ngMap',
+    'ae-datetimepicker',
+    'mgcrea.ngStrap'
 ]);
 
 

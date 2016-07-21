@@ -1,0 +1,55 @@
+
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" ng-show="title">
+        <button type="button" class="close" aria-label="Close" ng-click="$hide()"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" ng-bind="title"></h4>
+      </div>
+        <div class="modal-body">
+                <div class="form-group">
+                        <label>Fecha de cargue:</label>
+                            <div class="input-group input-group-sm date" 
+                                datetimepicker ng-model="dateCargue" options="options" ng-disabled="enviado">
+                                  <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                  </span>
+                                  <input type="text" class="form-control" ng-disabled="enviado"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fecha de descargue:</label>
+                            <div class="input-group input-group-sm date" 
+                                datetimepicker ng-model="dateDescargue" options="options" ng-disabled="enviado">
+                                  <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                  </span>
+                                  <input type="text" class="form-control" ng-disabled="enviado"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>N° equipos:</label>
+                            <div class='input-group date'>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-phone"></span>
+                                </span>
+                                <input type='number' class="form-control" min="1" ng-model="servicio.equipos" ng-disabled="ctrl.enviado"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Orden de servicio:</label>
+                            <div class='input-group date'>
+                                <span class="input-group-addon">
+                                    <span class="fa fa-file-text"></span>
+                                </span>
+                                <input type='text' class="form-control" ng-model="servicio.orden" ng-disabled="enviado"/>
+                            </div>
+                        </div>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

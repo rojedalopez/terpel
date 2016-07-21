@@ -1,3 +1,14 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<% 
+response.setHeader("Pragma", "No-chache"); 
+response.setHeader("Expires", "0"); 
+response.setHeader("Cache-Control", "no-cache"); 
+response.setHeader("Cache", "no-cache"); 
+if(session.getAttribute("user") == null){
+   //redirijo al login
+   response.sendRedirect("../?mensaje=Acabo su sesion.");
+}
+%>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,8 +24,8 @@
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/bootstrap-datetimepicker.css" rel="stylesheet">
-    
+    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+    <link href="css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
     <link href="css/sb-admin.css" rel="stylesheet">
 
@@ -25,45 +36,52 @@
     <!-- Custom Fonts -->
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <style>
-      #map {
-        height: 570px;
+        .google-maps {
+            height: 600px;
+        }
+        .google-maps ng-map{
+            height: 100%;
+        }
         
-      }
+        .google-maps_mdl {
+            height: 150px;
+        }
+        .google-maps_mdl ng-map{
+            height: 100%;
+        }
     </style>
     <script src="js/jquery.js"></script>
     <script src="https://maps.google.com/maps/api/js?libraries=placeses,visualization,drawing,geometry,places&key=AIzaSyCqUEyO3rTumxb0G-oRsyBnZLn4O9VKtiM"></script>
-    <script src="https://code.angularjs.org/1.3.15/angular.js"></script>
-    <script src="https://rawgit.com/allenhwkim/angularjs-google-maps/master/build/scripts/ng-map.js"></script>
-    <script src="js/bootstrap.min.js"></script>    
-    <script src="js/moment-with-locales.js"></script>
-    <script src="js/bootstrap-datetimepicker.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/angular-strap.min.js"></script>
+    <script src="js/angular-strap.tpl.min.js"></script>
+
+    <script src="js/bootstrap.min.js"></script>  
+    <script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/dataTables.responsive.min.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.min.js"></script>
+    <script src="js/angular-eonasdan-datetimepicker.min.js"></script>
+    <script src="js/dist/angular-datatables.min.js"></script>
+    
+    <script type="text/javascript" src="js/date.js"></script>
+    <script type="text/javascript" src="js/angular/dirPagination.js"></script>
+    <script type="text/javascript" src="js/angular/angular-validator.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+    <script type="text/javascript" src="js/angular/ng-map.min.js"></script>
+    <script type="text/javascript" src="js/angular/servicios.js"></script>
     
     <!-- Morris Charts JavaScript -->
     <script src="js/plugins/morris/raphael.min.js"></script>
     <script src="js/plugins/morris/morris.min.js"></script>
     <script src="js/plugins/morris/morris-data.js"></script>
-    <script type="text/javascript">
-
-        angular.module('myApp', ['ngMap']).controller('MyCtrl', function(NgMap) {
-            var vm = this;
-            vm.placeChangedOrigin = function() {
-              vm.placeO = this.getPlace();
-            };
-            vm.placeChangedDestination = function() {
-              vm.placeD = this.getPlace();
-            };
-            NgMap.getMap().then(function(map) {
-              vm.map = map;
-            });
-       });
-
-    </script>
     
 </head>
 
 <body ng-app="myApp" class="ng-cloak" >
     
-    <div id="wrapper" style="height: 600px;" ng-controller="MyCtrl as vm">
+    <div id="wrapper" style="height: 600px;" ng-controller="CamionesController as ctrl">
 
         <!-- Navigation -->
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -178,127 +196,62 @@
                     </ul>
                 </li>
             </ul>
-            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
-            <div class="collapse navbar-collapse navbar-ex1-collapse">
-                <form role="form" class="nav navbar-nav side-nav form-group-sm" style="padding: 5px; color: gray;">
-                    <div class="form-group" style="color: white; text-align: center;">
-                        <label><u>Generador de carga</u></label>
-                    </div>
-                    <div class="form-group">
-                        <label>Punto de cargue:</label>
-                        <div class='input-group date'>
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-map-marker"></span>
-                            </span>
-                            <input places-auto-complete
-                            ng-model="vm.addressOrigin"
-                            types="['establishment']"
-                            on-place-changed="vm.placeChangedOrigin()" 
-                            class="form-control"
-                            placeholder="Ingrese Origen"/>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Punto de descargue:</label>
-                        <div class='input-group date'>
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-map-marker"></span>
-                            </span>
-                            <input places-auto-complete 
-                            ng-model="vm.addressDestination"
-                            types="['establishment']"
-                            on-place-changed="vm.placeChangedDestination()" 
-                            class="form-control"
-                            placeholder="Ingrese Destino"/>
-                        </div>                        
-                    </div>
-                    <div class="form-group">
-                        <label>Tipo de servicio</label>
-                        <div class='input-group date'>
-                            <span class="input-group-addon">
-                                <span class="fa fa-truck"></span>
-                            </span>
-                            <select class="form-control">
-                                <option>Liquido</option>
-                                <option>Solido</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Fecha de cargue:</label>
-                        <div class='input-group date' id='datetimepicker1'>
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                            <input type='text' class="form-control" />                            
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Fecha de descargue:</label>
-                        <div class='input-group date' id='datetimepicker2'>
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                            <input type='text' class="form-control" />                            
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>N° equipos:</label>
-                        <div class='input-group date'>
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-phone"></span>
-                            </span>
-                            <input type='number' class="form-control" />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Orden de servicio:</label>
-                        <div class='input-group date'>
-                            <span class="input-group-addon">
-                                <span class="fa fa-file-text"></span>
-                            </span>
-                            <input type='number' class="form-control" />
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <button type="submit" class="btn btn-success">Submit Button</button>
-                    </div>
-                </form>
-                
-            </div>
-            <!-- /.navbar-collapse -->
         </nav>
-
+        
+        
         <div id="page-wrapper">
 
             <div class="container-fluid">
 
                 <!-- Page Heading -->
-                <div class="row" >
-                    <div class="col-lg-12">
-                        <div id="map">
-                            <div style="width: 58%; float:left; height: 100%;">
-                                <ng-map>
-                                    <directions
-                                    draggable="true"
-                                    travel-mode="DRIVING"
-                                    panel="panel"
-                                    origin="{{vm.placeO.geometry.location}}"
-                                    destination="{{vm.placeD.geometry.location}}">
-                                </ng-map>
-                              </div>
-                            <div id="panel" style="width: 32%; height: 100%; float:left; overflow: scroll;"></div>
+                <div class="row">
+                    <div class="col-lg-12" >
+                        <div class="google-maps">
+                            <ng-map height="100%" center="10.97978516762394,-74.80676651000977" zoom="12" map-type-control-options="{style:'HORIZONTAL_BAR', position:'BOTTOM_CENTER'}">
+                                <custom-control id="home" position="TOP_LEFT" index="1">
+                                    <div style="margin: 7px 7px 0 7px;">
+                                        <input places-auto-complete
+                                        ng-model="ctrl.mapa.nameOrigin"
+                                        component-restrictions="{country:'co'}"
+                                        on-place-changed="ctrl.placeChangedOrigin()" 
+                                        class="form-control" style="width: 350px;"
+                                        placeholder="Ingrese punto central de busqueda..."/>
+                                    </div>
+                                </custom-control>
+                                <custom-control id="home" position="TOP_RIGHT" index="1">
+                                    <div style="margin: 7px 7px 0 7px;">
+                                        <select class="form-control" ng-model="ctrl.mapa.radio" 
+                                            ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.Distancias" ng-change="ctrl.cambiarDistancia(ctrl.mapa.radio)">
+                                            <option value="">--- Radio ---</option>
+                                        </select>
+                                    </div>
+                                    <div style="margin: 7px;">
+                                        <select class="form-control" ng-model="ctrl.mapa.carga" 
+                                        ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.TipoCarga" ng-change="ctrl.cambiarCarga(ctrl.mapa.carga)">
+                                            <option value="">--- Tipo Carga ---</option>
+                                        </select>
+                                    </div>
+                                </custom-control>
+                                <marker id='{{vehiculo.cod}}' position="{{vehiculo.position}}" ng-repeat="vehiculo in ctrl.vehiculos"
+                                on-click="ctrl.showDetail(vehiculo)" icon="{{vehiculo.icono}}" reload></marker>
+                                <info-window id="foo-iw">
+                                    <div ng-non-bindable="">
+                                      placa: {{ctrl.vehiculo.placa}}<br/>
+                                      ult reporte : {{ctrl.vehiculo.ult_reporte}}<br/>
+                                    </div>
+                                </info-window>
+                                <shape id="circle" name="circle" stroke-color="#01DF3A" stroke-opacity="0.5" 
+                                center="{{ctrl.shape.center}}" radius="{{ctrl.shape.radius}}" stroke-weight="1"></shape>
+                            </ng-map>
                         </div>
                     </div>
                 </div>
-                
-
             </div>
             <!-- /.container-fluid -->
 
         </div>
         <!-- /#page-wrapper -->
-
+        
     </div>
     <!-- /#wrapper -->
 

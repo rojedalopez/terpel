@@ -1,0 +1,107 @@
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" ng-show="title">
+        <button type="button" class="close" aria-label="Close" ng-click="$hide()"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" ng-bind="title"></h4>
+      </div>
+        <div class="modal-body">
+            <table class="table table-bordered compact">
+                <tr>
+                    <td style="background-color: #E8E8E8;"># SOLICITUD</td>
+                    <td><span ng-bind="servicio.id"></span></td>
+                    <td style="background-color: #E8E8E8;">ESTADO</td>
+                    <td><span ng-bind="servicio.nestado"></span></td>
+                </tr>
+                <tr>
+                    <td style="background-color: #E8E8E8;">ORIGEN</td>
+                    <td colspan="3">
+                            <span ng-bind="servicio.origen"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background-color: #E8E8E8;">DESTINO</td>
+                    <td colspan="3"><span ng-bind="servicio.destino"></span></td>
+                </tr>
+                <tr>
+                    <td style="background-color: #E8E8E8;">FECHA/HORA CARGUE</td>
+                    <td><span ng-bind="servicio.cargue"></span></td>
+                    <td style="background-color: #E8E8E8;">FECHA/HORA DESCARGUE</td>
+                    <td><span ng-bind="servicio.descargue"></span></td>
+                </tr>
+            </table>
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <div class="panel-group" id="accordion">
+                    <div class="panel panel-default" ng-repeat="vehiculo in servicio.vehiculos">
+                        <div class="panel-heading">
+                          <a data-toggle="collapse"  href="#{{vehiculo.placa}}" style="text-decoration: none; color: #808080;">
+                            <h4 class="panel-title">
+                                {{vehiculo.nombre}} - {{vehiculo.placa}} 
+                            </h4>
+                          </a>
+                        </div>
+                        <div id="{{vehiculo.placa}}" class="panel-collapse collapse in container-fluid" style="margin: 10px auto;">
+                            <div class="noticia-content box">
+                                <div class="foto">
+                                    <div style="background-image: url('{{vehiculo.imagen}}');background-size: cover !important;background-repeat: no-repeat;position: absolute;top: 0;left: 0;right: 0;bottom: 0;"> </div>
+                                </div>
+                                 <div class="foto2">
+                                    <div style="background-image: url('upload/{{vehiculo.imagen_cumplido}}');background-size: cover !important;background-repeat: no-repeat;position: absolute;top: 0;left: 0;right: 0;bottom: 0;"> </div>
+                                 </div>
+                                <div class="titulo">
+                                    <table class="table table-bordered compact">
+                                        <tr>
+                                            <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DE VIAJE</th>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">TURNO DE CARGUE</td>
+                                            <td>{{(vehiculo.turno_cargue==='0')?'-':vehiculo.turno_cargue}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">TURNO DE DESCARGUE</td>
+                                            <td>{{(vehiculo.turno_descargue==='0')?'-':vehiculo.turno_descargue}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DEL CONDUCTOR</th>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">{{vehiculo.tipo_doc}}</td>
+                                            <td><span ng-bind="vehiculo.doc"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;"># DE TIPO DE LICENCIA {{vehiculo.tipo_lic}}</td>
+                                            <td><span ng-bind="vehiculo.lic"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">TELEFONO</td>
+                                            <td><span ng-bind="vehiculo.telefono"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DEL VEHICULO</th>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">PROPIETARIO</td>
+                                            <td><span ng-bind="vehiculo.propietario"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">TIPO CARGA</td>
+                                            <td><span ng-bind="vehiculo.carga"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;"># POLIZA</td>
+                                            <td><span ng-bind="vehiculo.poliza"></span></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
