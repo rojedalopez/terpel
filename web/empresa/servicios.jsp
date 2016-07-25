@@ -23,18 +23,19 @@ if(session.getAttribute("user") == null){
     <title>SB Admin - Bootstrap Admin Template</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
-    <link href="css/dataTables.bootstrap.min.css" rel="stylesheet" />
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/bootstrap-datetimepicker.min.css">
+    <link href="../css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
-    <link href="css/sb-admin.css" rel="stylesheet">
+    <link href="../css/sb-admin.css" rel="stylesheet">
 
     <!-- Morris Charts CSS -->
-    <link href="css/plugins/morris.css" rel="stylesheet">
-    
+    <link href="../css/plugins/morris.css" rel="stylesheet">
+
+    <!-- load Galleria -->
 
     <!-- Custom Fonts -->
-    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="../font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <style>
         .google-maps {
             height: 600px;
@@ -66,46 +67,39 @@ if(session.getAttribute("user") == null){
             height:200px;
         }
         
-        .foto2{
-            order:2;
-            border:2px black solid; 
-            margin:auto;
-            position: relative;
-            width:20%;
-            height:200px;
-        }
         .titulo{
             margin-left: 2%;
-            width: 48%;
-            order:3;
+            width: 68%;
+            order:2;
         }
-    </style>
-    <script src="js/jquery.js"></script>
-    <script src="https://maps.google.com/maps/api/js?libraries=placeses,visualization,drawing,geometry,places&key=AIzaSyCqUEyO3rTumxb0G-oRsyBnZLn4O9VKtiM"></script>
-    <script src="js/angular.min.js"></script>
-    <script src="js/angular-strap.min.js"></script>
-    <script src="js/angular-strap.tpl.min.js"></script>
-
-    <script src="js/bootstrap.min.js"></script>  
-    <script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="js/dataTables.bootstrap.min.js"></script>
-    <script type="text/javascript" src="js/dataTables.responsive.min.js"></script>
-    <script src="js/moment.min.js"></script>
-    <script src="js/bootstrap-datetimepicker.min.js"></script>
-    <script src="js/angular-eonasdan-datetimepicker.min.js"></script>
-    <script src="js/dist/angular-datatables.min.js"></script>
         
-    <script type="text/javascript" src="js/date.js"></script>
-    <script type="text/javascript" src="js/angular/dirPagination.js"></script>
-    <script type="text/javascript" src="js/angular/angular-validator.js"></script>
-    <script type="text/javascript" src="js/app.js"></script>
-    <script type="text/javascript" src="js/angular/ng-map.min.js"></script>
-    <script type="text/javascript" src="js/angular/servicios.js"></script>
+    </style>
+    <script src="../js/jquery.js"></script>
+    <script src="https://maps.google.com/maps/api/js?libraries=placeses,visualization,drawing,geometry,places&key=AIzaSyCqUEyO3rTumxb0G-oRsyBnZLn4O9VKtiM"></script>
+    <script src="../js/angular.min.js"></script>
+    <script src="../js/angular-strap.min.js"></script>
+    <script src="../js/angular-strap.tpl.min.js"></script>
+
+    <script src="../js/bootstrap.min.js"></script>  
+    <script type="text/javascript" src="../js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="../js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/dataTables.responsive.min.js"></script>
+    <script src="../js/moment.min.js"></script>
+    <script src="../js/bootstrap-datetimepicker.min.js"></script>
+    <script src="../js/angular-eonasdan-datetimepicker.min.js"></script>
+    <script src="../js/dist/angular-datatables.min.js"></script>
+        
+    <script type="text/javascript" src="../js/date.js"></script>
+    <script type="text/javascript" src="../js/angular/dirPagination.js"></script>
+    <script type="text/javascript" src="../js/angular/angular-validator.js"></script>
+    <script type="text/javascript" src="../js/app.js"></script>
+    <script type="text/javascript" src="../js/angular/ng-map.min.js"></script>
+    <script type="text/javascript" src="../js/angular/servicios.js"></script>
     
     <!-- Morris Charts JavaScript -->
-    <script src="js/plugins/morris/raphael.min.js"></script>
-    <script src="js/plugins/morris/morris.min.js"></script>
-    <script src="js/plugins/morris/morris-data.js"></script>
+    <script src="../js/plugins/morris/raphael.min.js"></script>
+    <script src="../js/plugins/morris/morris.min.js"></script>
+    <script src="../js/plugins/morris/morris-data.js"></script>
     <style>
         .modal-backdrop.am-fade {
           opacity: .5;
@@ -238,7 +232,7 @@ if(session.getAttribute("user") == null){
                         </li>
                         <li class="divider"></li>
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                            <a href="../logout"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
                         </li>
                     </ul>
                 </li>

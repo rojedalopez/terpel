@@ -67,7 +67,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
                 vm.servicio.dcarguemax = new Date(vm.dateMaxCargue).toString("yyyy-MM-dd HH:mm:ss");
                 vm.servicio.ddescarguemin = new Date(vm.dateMinDescargue).toString("yyyy-MM-dd HH:mm:ss");
                 vm.servicio.ddescarguemax = new Date(vm.dateMaxDescargue).toString("yyyy-MM-dd HH:mm:ss");
-                $http.post("saveServicio", vm.servicio).success(function(d){
+                $http.post("../saveServicio", vm.servicio).success(function(d){
                    if(d.mensaje!=="error"){
                         vm.vehiculos = d.lista;
                         vm.map.setCenter(vm.servicio.addressOrigin);
@@ -85,7 +85,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             };
             
             vm.ReloadVehiculos = function(){
-                $http.post("list_all_vehiculos", vm.mapa).success(function(d){
+                $http.post("../list_all_vehiculos", vm.mapa).success(function(d){
                 vm.vehiculos = [];
                     if(d!=="false"){
                         vm.vehiculos = d;
@@ -145,9 +145,10 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
     vm.ddescargue=null;
     vm.busqueda={porpage:20, pageno:1, q:"", cargue:"", descargue:"", orden:"", carga:"", estado:""};
     vm.servicios = [];
+    vm.foto={id:"", url:"", desc:"", fecha:"", tipo_foto:""};
     vm.servicio={origen:"", destino:"", carge:"", descarge:"", id:"-1", nestado:"" ,estado:"",solicitud:0,orden:"", vehiculos:[]};
     vm.vehiculo = {cod:"", ult_reporte:"", placa:"", position:[], icono:"", imagen:"", tipo_doc:"",
-    doc:"", tipo_lic:"", lic:"", telefono:"",propietario:"",carga:"",poliza:"", turno_cargue:"", turno_descargue:"", imagen_cumplido:""};
+    doc:"", tipo_lic:"", lic:"", telefono:"",propietario:"",carga:"",poliza:"", turno_cargue:"", turno_descargue:"", fotos:[]};
     vm.date = new Date();
     vm.pageno = 1; // initialize page no to 1
     vm.total_count = 0;
@@ -164,7 +165,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
         if(vm.ddescargue!=="" && vm.ddescargue!==null){
             vm.busqueda.descargue = new Date(vm.ddescargue).toString("yyyy/MM/dd");
         }
-        $http.post("list_solicitudes", vm.busqueda).success(function(response){ 
+        $http.post("../list_solicitudes", vm.busqueda).success(function(response){ 
             //ajax request to fetch data into vm.data
             vm.servicios = response.data;  // data to be displayed on current page.
             vm.total_count = response.total_count; // total data count.
@@ -181,8 +182,8 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
     }
      MyModalController.$inject = ['$scope'];
     var myAlert = $alert({title: 'Holy guacamole!', content: 'Best check yo self, you\'re not looking too good.', placement: 'top', type: 'success', container:'#alerta-busqueda', show: false});
-    var detSolicitud = $modal({controller: MyModalController, templateUrl: 'modal/det-solicitud.html', show: false});
-    var cumplido = $modal({controller: MyModalController, templateUrl: 'modal/cumplido.html', show: false});
+    var detSolicitud = $modal({controller: MyModalController, templateUrl: '../modal/det-solicitud.html', show: false});
+    var fotos = $modal({controller: MyModalController, templateUrl: '../modal/fotos.html', show: true});
     
     vm.showAlert = function() {
       myAlert.show(); // or myAlert.$promise.then(myAlert.show) if you use an external html template
@@ -193,8 +194,9 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
       detSolicitud.show();
     };
     
-    vm.showModalCumplido = function() {
-      cumplido.show();
+    
+    vm.showModalFotos = function() {
+      fotos.show();
     };
     
     vm.verDetalleSol = function(id){
@@ -208,12 +210,12 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
         }
     };
     
-    vm.verCumplido = function(id){
+    vm.verFotos = function(id){
         for(var i = 0; i < vm.servicios.length; i++){
             if(vm.servicios[i].id === id) {
                vm.servicio = angular.copy(vm.servicios[i]);
                console.log(vm.servicio);
-               vm.showModalCumplido();
+               vm.showModalFotos();
                break;
             }
         }
@@ -313,7 +315,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             };
             
             vm.ReloadVehiculos = function(){
-                $http.post("list_all_vehiculos", vm.mapa).success(function(d){
+                $http.post("../list_all_vehiculos", vm.mapa).success(function(d){
                 vm.vehiculos = [];
                     if(d!=="false"){
                         vm.vehiculos = d;
@@ -401,7 +403,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             };
             
             vm.ReloadVehiculos = function(){
-                $http.post("list_all_vehiculos", vm.mapa).success(function(d){
+                $http.post("../list_all_vehiculos", vm.mapa).success(function(d){
                 vm.vehiculos = [];
                     if(d!=="false"){
                         vm.vehiculos = d;

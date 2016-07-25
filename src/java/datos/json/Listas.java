@@ -155,7 +155,7 @@ public class Listas {
                 conn=conexion();
                 String instruccion="SELECT ec.plca_equipo, CONCAT(nomb_conductor, ' ', apll_conductor), tipo_doc_conductor, doc_conductor,  " +
                 "tipo_lic_conductor, num_lic_conductor, tel_conductor, img_conductor, CONCAT(nomb_prop_equipo, ' ', apll_prop_equipo), " +
-                "polz_segu_equipo, t.desc_tipocarga, turn_carg_servicio, turn_desc_servicio, img_cump_servicio FROM tblServicio AS s INNER JOIN tblEquipoConductor AS ec ON s.id_equipoconductor = ec.id_equipoconductor  " +
+                "polz_segu_equipo, t.desc_tipocarga, turn_carg_servicio, turn_desc_servicio, id_servicio FROM tblServicio AS s INNER JOIN tblEquipoConductor AS ec ON s.id_equipoconductor = ec.id_equipoconductor  " +
                 "INNER JOIN tblConductor AS c ON c.cod_conductor = ec.cod_conductor  " +
                 "INNER JOIN tblEquipo AS e ON e.plca_equipo = ec.plca_equipo INNER JOIN tblTipoCarga AS t ON t.id_tipocarga = e.id_tipocarga " +
                 "WHERE id_solicitud = ?;";	        
@@ -178,7 +178,49 @@ public class Listas {
                     objeto.put("carga",datos.getString(11));
                     objeto.put("turno_cargue",datos.getString(12));
                     objeto.put("turno_descargue",datos.getString(13));
-                    objeto.put("imagen_cumplido", datos.getString(14));
+                    objeto.put("fotos",listaFotosByServicio(datos.getString(14)));
+                    lista.add(objeto);
+                }
+                System.out.println(lista.toJSONString());
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+           System.out.println();
+        return lista;
+    }
+    
+    public static JSONArray listaFotosByServicio(String id) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT id_fotos, url_fotos, fech_fotos, desc_fotos, desc_tipofoto " +
+                "FROM tblFotos AS f INNER JOIN tblTipoFoto AS t ON f.id_tipofoto = t.id_tipofoto " +
+                "WHERE id_servicio = ?;";	        
+
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, id);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("id", datos.getInt(1));
+                    objeto.put("url", datos.getString(2));
+                    objeto.put("fecha", datos.getString(3));
+                    objeto.put("desc", datos.getString(4));
+                    objeto.put("tipo_foto", datos.getString(5));
                     lista.add(objeto);
                 }
                 System.out.println(lista.toJSONString());
@@ -273,7 +315,7 @@ public class Listas {
                 conn=conexion();
                 int desde = ((pageno-1)*porpage);
                 String instruccion="SELECT  id_solicitud, s.id_estados, e.desc_estados, orden_solicitud, fech_carg_solicitud, fech_desc_solicitud, orig_solicitud, dest_solicitud ";
-                instruccion+=      "FROM tblSolicitud AS s INNER JOIN tblEstadoSol AS e ON s.id_estados = e.id_estados WHERE nit_empresa = ? " ;
+                instruccion+=      "FROM tblSolicitud AS s INNER JOIN tblEstados AS e ON s.id_estados = e.id_estados WHERE nit_empresa = ? " ;
                 if(!q.isEmpty()){
                     instruccion += " AND (orig_solicitud like '%"+q+"%' OR dest_solicitud like '%"+q+"%') ";
                 }
@@ -347,7 +389,7 @@ public class Listas {
             try{
                 conn=conexion();
                 String instruccion="SELECT  count(1) ";
-                instruccion+=      "FROM tblSolicitud AS s INNER JOIN tblEstadoSol AS e ON s.id_estados = e.id_estados WHERE nit_empresa = ? " ;
+                instruccion+=      "FROM tblSolicitud AS s INNER JOIN tblEstados AS e ON s.id_estados = e.id_estados WHERE nit_empresa = ? " ;
                 if(!q.isEmpty()){
                     instruccion += " AND (orig_solicitud like '%"+q+"%' OR dest_solicitud like '%"+q+"%') ";
                 }

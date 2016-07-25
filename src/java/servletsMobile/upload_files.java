@@ -30,7 +30,7 @@ public class upload_files extends HttpServlet {
         Part filePart = request.getPart("file"); // Retrieves <input type="file" name="file">
         String filename = getFilename(filePart);
         String[] vector_nombre = filename.split("\\.");
-        String nuevo_nombre = vector_nombre[0]+"_"+tipo+"."+vector_nombre[1];
+        String nuevo_nombre = vector_nombre[0]+"_"+((tipo==1)?5:10)+"."+vector_nombre[1];
         InputStream filecontent = filePart.getInputStream();
         String c = "";
         
@@ -55,7 +55,7 @@ public class upload_files extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             JSONObject jSONObject = new JSONObject();
             /* TODO output your page here. You may use following sample code. */
-            int resultado = CambioEstadoServicio(vector_nombre[0], (tipo==1)?5:10, 0, filename);
+            int resultado = CambioEstadoServicio(vector_nombre[0], (tipo==1)?5:10, 0, nuevo_nombre);
             if(resultado<=-1){
                 jSONObject.put("mensaje", false);
             }else{

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package servletsSession;
 
 import bean.Usuario;
@@ -17,16 +12,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.json.simple.JSONObject;
+import servletsMobile.login;
 
-public class login extends HttpServlet {
+public class login_conductor extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, SQLException {
-        
+            throws ServletException, IOException {
+
     }
 
-    @Override
+@Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
@@ -37,7 +32,7 @@ public class login extends HttpServlet {
  
         session = request.getSession(true);
 
-        Usuario u = Aplicacion.obtenerUsuario(usuario, contrasena, 2);
+        Usuario u = Aplicacion.obtenerUsuario(usuario, contrasena, 1);
         
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
@@ -56,7 +51,7 @@ public class login extends HttpServlet {
                     
 
                     session.setAttribute("usr", u.getNombre());
-                    response.sendRedirect((url_forward)?url:"/servicios.jsp");
+                    response.sendRedirect((url_forward)?url:"/conductor/tomarserv.jsp");
                     
                  }else{
                     System.out.println("error en: " +u.getMensaje());
@@ -71,25 +66,6 @@ public class login extends HttpServlet {
         }
     }
     
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        try {
-            response.setContentType("text/html;charset=UTF-8");
-            String usuario = request.getParameter("nick");
-            String contrasena = request.getParameter("pass");
-            
-            JSONObject u = Aplicacion.obtenerUsuarioJSON(usuario, contrasena);
-
-            try (PrintWriter out = response.getWriter()) {
-                out.println(u.toJSONString());
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(login.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-
     @Override
     public String getServletInfo() {
         return "Short description";
