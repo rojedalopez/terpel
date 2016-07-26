@@ -79,6 +79,8 @@ if(session.getAttribute("user") == null){
     <script src="../js/angular.min.js"></script>
     <script src="../js/angular-strap.min.js"></script>
     <script src="../js/angular-strap.tpl.min.js"></script>
+    <script src="../js/angular-animate.js"></script>
+    <script src="../js/ui-bootstrap-tpls-2.0.0.js"></script>
 
     <script src="../js/bootstrap.min.js"></script>  
     <script type="text/javascript" src="../js/jquery.dataTables.min.js"></script>
@@ -222,10 +224,10 @@ if(session.getAttribute("user") == null){
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> John Smith <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
+                            <a href="generar.jsp"><i class="fa fa-fw fa-plus"></i> Generación</a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
+                            <a href="camiones.jsp"><i class="fa fa-fw fa-truck"></i> En ruta</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
@@ -243,7 +245,7 @@ if(session.getAttribute("user") == null){
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <form role="form" class="nav navbar-nav side-nav form-group-sm" style="padding: 5px; color: gray;">
                     <div class="form-group" style="color: white; text-align: center;">
-                        <label><u>Generador de carga</u></label>
+                        <a href="generar.jsp"><u>Generador de carga</u></a>
                     </div>
                             <div class="panel-group" id="accordion">
                                 <div class="panel panel-default">

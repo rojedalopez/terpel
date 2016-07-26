@@ -56,6 +56,14 @@
         <servlet-name>logout</servlet-name>
         <servlet-class>servletsSession.logout</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>list_vehiculos_empresa</servlet-name>
+        <servlet-class>servletsList.list_vehiculos_empresa</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_empresas</servlet-name>
+        <servlet-class>servletsMobile.list_empresas</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>saveServicio</servlet-name>
         <url-pattern>/saveServicio</url-pattern>
@@ -111,6 +119,14 @@
     <servlet-mapping>
         <servlet-name>logout</servlet-name>
         <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_vehiculos_empresa</servlet-name>
+        <url-pattern>/list_vehiculos_empresa</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_empresas</servlet-name>
+        <url-pattern>/list_empresas</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

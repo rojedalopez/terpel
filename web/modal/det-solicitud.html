@@ -32,15 +32,15 @@
             </table>
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <div class="panel-group" id="accordion">
-                    <div class="panel panel-default" ng-repeat="vehiculo in servicio.vehiculos">
+                    <div class="panel panel-default" ng-repeat="vehiculo in servicio.vehiculos ">
                         <div class="panel-heading">
                           <a data-toggle="collapse"  href="#{{vehiculo.placa}}" style="text-decoration: none; color: #808080;">
                             <h4 class="panel-title">
-                                {{vehiculo.nombre}} - {{vehiculo.placa}} 
+                                {{vehiculo.nombre}} - {{vehiculo.placa}}
                             </h4>
                           </a>
                         </div>
-                        <div id="{{vehiculo.placa}}" class="panel-collapse collapse in container-fluid" style="margin: 10px auto;">
+                        <div id="{{vehiculo.placa}}" class="panel-collapse collapse container-fluid in" style="margin: 10px auto;">
                             <div class="noticia-content box">
                                 <div class="foto">
                                     <div style="background-image: url('{{vehiculo.imagen}}');background-size: cover !important;background-repeat: no-repeat;position: absolute;top: 0;left: 0;right: 0;bottom: 0;"> </div>
@@ -87,6 +87,11 @@
                                         <tr>
                                             <td style="background-color: #E8E8E8;width: 40%;"># POLIZA</td>
                                             <td><span ng-bind="vehiculo.poliza"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">
+                                                <button class="btn btn-lg btn-info" ng-click="abrirFotos(vehiculo.servicio)">Fotos</button>
+                                            </td>
                                         </tr>
                                     </table>
                                 </div>

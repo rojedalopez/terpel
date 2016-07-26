@@ -24,6 +24,8 @@ if(session.getAttribute("user") == null){
 
     <!-- Bootstrap Core CSS -->
     <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://mgcrea.github.io/angular-strap/styles/libs.min.css">
+    <link rel="stylesheet" href="http://mgcrea.github.io/angular-strap/styles/docs.min.css">
     <link rel="stylesheet" href="../css/bootstrap-datetimepicker.min.css">
     <link href="../css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
@@ -52,6 +54,9 @@ if(session.getAttribute("user") == null){
     <script src="../js/angular.min.js"></script>
     <script src="../js/angular-strap.min.js"></script>
     <script src="../js/angular-strap.tpl.min.js"></script>
+    <script src="../js/angular-animate.js"></script>
+    <script src="../js/ui-bootstrap-tpls-2.0.0.js"></script>
+    <script src="../js/angular-sanitize.min.js"></script>
 
     <script src="../js/bootstrap.min.js"></script>  
     <script type="text/javascript" src="../js/jquery.dataTables.min.js"></script>
@@ -178,10 +183,10 @@ if(session.getAttribute("user") == null){
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> John Smith <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
+                            <a href="servicios.jsp"><i class="fa fa-fw fa-plus"></i> Servicios</a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
+                            <a href="camiones.jsp"><i class="fa fa-fw fa-truck"></i> En ruta</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
@@ -387,7 +392,7 @@ if(session.getAttribute("user") == null){
                 <div class="row">
                     <div class="col-lg-12" >
                         <div class="google-maps">
-                            <ng-map height="100%" center="10.97978516762394,-74.80676651000977"  zoom="12">
+                            <ng-map height="100%" center="10.97978516762394,-74.80676651000977"  zoom="10">
                                 <custom-control id="home" position="TOP_RIGHT" index="1">
                                     <div style="margin: 7px 7px 0 7px;">
                                         <select class="form-control" ng-model="ctrl.mapa.radio" 
@@ -397,9 +402,16 @@ if(session.getAttribute("user") == null){
                                     </div>
                                     <div style="margin: 7px;">
                                         <select class="form-control" ng-model="ctrl.mapa.carga" 
-                                        ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.TipoCarga" ng-change="ctrl.cambiarCarga(ctrl.mapa.carga)">
+                                        ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.TipoCarga" ng-change="ctrl.cambiarTipo(ctrl.mapa.carga)">
                                             <option value="">--- Tipo Carga ---</option>
                                         </select>
+                                    </div>
+                                    <div style="margin: 7px;">
+                                        <button type="button" class="btn btn-default" ng-disabled="(ctrl.Remolques.length==0)?true:false" ng-model="ctrl.mapa.remolques" data-html="1" max-length-html="Seleccionados"
+                                                data-multiple="1" data-animation="am-flip-x"  max-length="1" placeholder="--- Tipo Remolque ---"
+                                                bs-options="Remolque.ID as Remolque.Value for Remolque in ctrl.Remolques" bs-select>
+                                            Action <span class="caret"></span>
+                                          </button>
                                     </div>
                                 </custom-control>
                                 <directions

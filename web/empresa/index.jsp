@@ -51,6 +51,8 @@ if(session.getAttribute("user") != null){
     <script src="../js/angular.min.js"></script>
     <script src="../js/angular-strap.min.js"></script>
     <script src="../js/angular-strap.tpl.min.js"></script>
+    <script src="../js/angular-animate.js"></script>
+    <script src="../js/ui-bootstrap-tpls-2.0.0.js"></script>
 
     <script src="../js/bootstrap.min.js"></script>  
     <script type="text/javascript" src="../js/jquery.dataTables.min.js"></script>

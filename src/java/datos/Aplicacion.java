@@ -26,7 +26,7 @@ public class Aplicacion {
             //El root es el nombre de Usuario por default. No hay contraseña
             //Se inicia la conexión
             conn = DriverManager.getConnection(servidor, "logycus360_platf", "5c026fde033e58a1747437ee8468f4b624dab3ee");
-            System.out.println("conexion perfecta");           
+                      
         }catch ( SQLException excepcionSql){ //excepcionSql = puede ponerle otro nombre
             System.out.println("error en la conexion a la base de datos"+excepcionSql.getMessage());           
         }
@@ -44,12 +44,14 @@ public class Aplicacion {
                     conn=conexion();
                     String instruccion = "";
                     if(tipo==1){
-                        instruccion= "SELECT salt_conductor, pass_conductor, cod_conductor, mail_conductor, nomb_conductor,  apll_conductor, " +
-                                            "tel_conductor, img_conductor, tipo_doc_conductor, doc_conductor, tipo_lic_conductor, num_lic_conductor " +
+                        instruccion= "SELECT salt_conductor, pass_conductor, cod_conductor, '', mail_conductor, nomb_conductor,  apll_conductor, " +
+                                        "'', tel_conductor, img_conductor, '', 0, tipo_doc_conductor, doc_conductor, tipo_lic_conductor, num_lic_conductor " +
                                         "FROM logycus360.tblConductor WHERE mail_conductor = ? AND acti_conductor = 1;";
                     }else{
-                        instruccion="SELECT salt_empresa, pass_empresa, nit_empresa, mail_empresa, razn_soci_empresa, '', tel_empresa, " +
-                                    "url_img_empresa FROM logycus360.tblEmpresa WHERE mail_empresa = ? AND acti_empresa = 1;";
+                        instruccion="SELECT salt_usuario, pass_usuario, cod_usuario, e.nit_empresa, mail_usuario, nomb_usuario, apll_usuario, " +
+                                    "razn_soci_empresa, tel_empresa, url_img_usuario, url_img_empresa, id_rol " +
+                                    "FROM tblUsuario AS u INNER JOIN tblEmpresa AS e ON e.nit_empresa = u.nit_empresa " +
+                                    "WHERE mail_usuario = ? AND acti_empresa = 1;";
                     }
                     insertar=conn.prepareStatement(instruccion);
                     insertar.setString(1, correo);
@@ -58,15 +60,21 @@ public class Aplicacion {
                         //valido las credenciales
                         String hash = datos.getString(1);
                         String pasw = datos.getString(2);
+                        System.out.println(pasw);
+                        System.out.println(Metodos.sha512(pass, hash));
                         if(pasw.equals(Metodos.sha512(pass, hash))){
                             //obtengo el Usuario
                             u = new Usuario();
                             u.setCodigo(datos.getString(3));
-                            u.setCorreo(datos.getString(4));
-                            u.setNombre(datos.getString(5));
-                            u.setApellido(datos.getString(6));
-                            u.setTelefono(datos.getString(7));
-                            u.setUrl_imagen(datos.getString(8));
+                            u.setNit(datos.getString(4));
+                            u.setCorreo(datos.getString(5));
+                            u.setNombre(datos.getString(6));
+                            u.setApellido(datos.getString(7));
+                            u.setRazon_social(datos.getString(8));
+                            u.setTelefono(datos.getString(9));
+                            u.setUrl_imagen(datos.getString(10));
+                            u.setUrl_empresa(datos.getString(11));
+                            u.setRol(datos.getInt(12));
                             u.setMensaje("true");
                             return u;
                         }else{

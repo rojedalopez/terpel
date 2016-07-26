@@ -7,7 +7,10 @@ angular.module('myApp',[
     'angularUtils.directives.dirPagination',
     'ngMap',
     'ae-datetimepicker',
-    'mgcrea.ngStrap'
+    'mgcrea.ngStrap',
+    'ngAnimate', 
+    'ui.bootstrap',
+    'ngSanitize'
 ]);
 
 

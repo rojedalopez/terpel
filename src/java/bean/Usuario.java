@@ -14,12 +14,16 @@ public class Usuario {
     private String nombre;
     private String apellido;
     private String codigo;
-    private String telefono;
     private String mensaje;
     private String url_imagen;
+    private String url_empresa;
     private String fecha;
     private String token;
     private int rol;
+    private String nit;
+    private String razon_social;
+    private String telefono;
+    
     
     public Usuario() {
     }
@@ -89,20 +93,44 @@ public class Usuario {
         this.codigo = codigo;
     }
 
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
     public String getMensaje() {
         return mensaje;
     }
 
     public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
+    }
+
+    public String getUrl_empresa() {
+        return url_empresa;
+    }
+
+    public void setUrl_empresa(String url_empresa) {
+        this.url_empresa = url_empresa;
+    }
+
+    public String getNit() {
+        return nit;
+    }
+
+    public void setNit(String nit) {
+        this.nit = nit;
+    }
+
+    public String getRazon_social() {
+        return razon_social;
+    }
+
+    public void setRazon_social(String razon_social) {
+        this.razon_social = razon_social;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
     
     
