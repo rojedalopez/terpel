@@ -31,8 +31,7 @@ if(session.getAttribute("user") == null){
 
     <!-- Morris Charts CSS -->
     <link href="../css/plugins/morris.css" rel="stylesheet">
-
-    <!-- load Galleria -->
+    
 
     <!-- Custom Fonts -->
     <link href="../font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -43,36 +42,13 @@ if(session.getAttribute("user") == null){
         .google-maps ng-map{
             height: 100%;
         }
-        .noticia-content{
-            padding: 15px;
-            margin-top: 10px;
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .box{
-            border: 1px solid #c6c6c6;
-            -webkit-box-shadow: 1px 1px 1px 1px #C7C7C7;
-            box-shadow: 1px 1px 1px 1px #C7C7C7;
-            -webkit-border-radius: 1px 1px 1px 1px;
-            border-radius: 1px 1px 1px 1px;
-        }
-
-        .foto{
-            order:1;
-            border:2px black solid; 
-            margin:auto;
-            position: relative;
-            width:20%;
-            height:200px;
-        }
         
-        .titulo{
-            margin-left: 2%;
-            width: 68%;
-            order:2;
+        .google-maps_mdl {
+            height: 150px;
         }
-        
+        .google-maps_mdl ng-map{
+            height: 100%;
+        }
     </style>
     <script src="../js/jquery.js"></script>
     <script src="https://maps.google.com/maps/api/js?libraries=placeses,visualization,drawing,geometry,places&key=AIzaSyCqUEyO3rTumxb0G-oRsyBnZLn4O9VKtiM"></script>
@@ -90,7 +66,7 @@ if(session.getAttribute("user") == null){
     <script src="../js/bootstrap-datetimepicker.min.js"></script>
     <script src="../js/angular-eonasdan-datetimepicker.min.js"></script>
     <script src="../js/dist/angular-datatables.min.js"></script>
-        
+    
     <script type="text/javascript" src="../js/date.js"></script>
     <script type="text/javascript" src="../js/angular/dirPagination.js"></script>
     <script type="text/javascript" src="../js/angular/angular-validator.js"></script>
@@ -103,29 +79,12 @@ if(session.getAttribute("user") == null){
     <script src="../js/plugins/morris/raphael.min.js"></script>
     <script src="../js/plugins/morris/morris.min.js"></script>
     <script src="../js/plugins/morris/morris-data.js"></script>
-    <style>
-        .modal-backdrop.am-fade {
-          opacity: .5;
-          transition: opacity .15s linear;
-          &.ng-enter {
-            opacity: 0;
-            &.ng-enter-active {
-              opacity: .5;
-            }
-          }
-          &.ng-leave {
-            opacity: .5;
-            &.ng-leave-active {
-              opacity: 0;
-            }
-          }
-        }
-    </style>
+    
 </head>
 
 <body ng-app="myApp" class="ng-cloak" >
     
-    <div id="wrapper" style="height: 600px;" ng-controller="ServiciosController as ctrl">
+    <div id="wrapper" style="height: 600px;" ng-controller="EnRutaController as ctrl">
 
         <!-- Navigation -->
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -228,7 +187,7 @@ if(session.getAttribute("user") == null){
                             <a href="generar.jsp"><i class="fa fa-fw fa-plus"></i> Generación</a>
                         </li>
                         <li>
-                            <a href="camiones.jsp"><i class="fa fa-fw fa-truck"></i> En ruta</a>
+                            <a href="camiones.jsp"><i class="fa fa-fw fa-truck"></i> Servicios</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
@@ -242,150 +201,87 @@ if(session.getAttribute("user") == null){
             </ul>
         </nav>
         
-        <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+              <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
-                <form role="form" class="nav navbar-nav side-nav form-group-sm" style="padding: 5px; color: gray;">
+                <form role="form" class="nav navbar-nav side-nav form-group-sm" angular-validator-submit="ctrl.sendServicio()" name="solicitud" 
+                      angular-validator novalidate style="padding: 5px; color: gray;">
                     <div class="form-group" style="color: white; text-align: center;">
                         <a href="generar.jsp"><u>Generador de carga</u></a>
                     </div>
-                            <div class="panel-group" id="accordion">
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                              Servicio
-                                        </h4>
-                                    </div>
-                                <div id="collapse1">
+                        <div class="panel-group" id="accordion">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                  <a data-toggle="collapse" data-parent="#accordion" href="#collapse1" style="text-decoration: none; color: #808080;">
+                                    <h4 class="panel-title">
+                                          Servicio
+                                    </h4>
+                                  </a>
+                                </div>
+                                <div id="collapse1" class="panel-collapse collapse in">
                                     <div class="form-group" style="padding: 10px;">
-                                            <div class="form-group">
-                                                <label>Estado de solicitud:</label>
-                                                <div class='input-group date'>
-                                                    <span class="input-group-addon">
-                                                        <span class="fa fa-truck"></span>
-                                                    </span>
-                                                    <select class="form-control" ng-model="ctrl.busqueda.estado" 
-                                                    ng-options="Estado.ID as Estado.Value for Estado in ctrl.EstadoSolicitud">
-                                                        <option value="">--- Seleccione Estado ---</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Puntos:</label>
-                                                <div class='input-group date'>
-                                                    <span class="input-group-addon">
-                                                        <span class="glyphicon glyphicon-map-marker"></span>
-                                                    </span>
-                                                    <input type="text"
-                                                    ng-model="ctrl.busqueda.q"
-                                                    class="form-control"
-                                                    placeholder="Ingrese Origen o Destino"/>
-                                                </div>                        
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Tipo de carga</label>
-                                                <div class='input-group date'>
-                                                    <span class="input-group-addon">
-                                                        <span class="fa fa-truck"></span>
-                                                    </span>
-                                                    <select class="form-control" ng-model="ctrl.busqueda.carga" 
-                                                    ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.TipoCarga">
-                                                        <option value="">--- Seleccione Tipo ---</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Fecha de cargue:</label>
-                                                <div class="input-group input-group-sm date" 
-                                                    datetimepicker ng-model="ctrl.dcargue" options="ctrl.options">
-                                                      <span class="input-group-addon">
-                                                        <span class="glyphicon glyphicon-calendar"></span>
-                                                      </span>
-                                                      <input type="text" class="form-control" />
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Fecha de descargue:</label>
-                                                <div class="input-group input-group-sm date" 
-                                                    datetimepicker ng-model="ctrl.ddescargue" options="ctrl.options">
-                                                      <span class="input-group-addon">
-                                                        <span class="glyphicon glyphicon-calendar"></span>
-                                                      </span>
-                                                      <input type="text" class="form-control" />
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Orden de servicio:</label>
-                                                <div class='input-group date'>
-                                                    <span class="input-group-addon">
-                                                        <span class="fa fa-file-text"></span>
-                                                    </span>
-                                                    <input type='text' class="form-control" ng-model="ctrl.busqueda.orden"/>
-                                                </div>
-                                            </div>
-                                            <div id="alerta-busqueda"></div>
-                                            <div class="form-group">
-                                                <button type="button" class="btn btn-success" ng-click="ctrl.getData(1)">Buscar</button>
+                                        <div class="form-group">
+                                            <label>Nombre de conductor:</label>
+                                            
+                                            <input ng-model="ctrl.busqueda.q"
+                                            class="form-control"
+                                            type="text"/>
+                                                
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Estado del servicio</label>
+                                            <select class="form-control" ng-model="ctrl.busqueda.estado" 
+                                            ng-options="Estado.ID as Estado.Value for Estado in ctrl.EstadoSolicitud">
+                                                <option value="">--- Seleccione Estado ---</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Tipo de carga</label>
+                                            <select class="form-control" ng-model="ctrl.busqueda.tipo" 
+                                            ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.TipoCarga">
+                                                <option value="">--- Seleccione Tipo ---</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div style="text-align: right;">    
+                                                <button type="submit" class="btn btn-success" ng-click="ctrl.filtrarBusqueda()">Enviar Solicitud</button>
+                                                <button type="button" class="btn btn-default" ng-click="ctrl.resetForm()">Limpiar</button>
                                             </div>
                                         </div>
-                                        
                                     </div>
                                 </div>
-                            </div>
+                    </div>
                 </form>
                 
             </div>
-            <!-- /.navbar-collapse -->
-
+              
         <div id="page-wrapper">
 
             <div class="container-fluid">
 
                 <!-- Page Heading -->
-                <div class="row" >
-                    <div class="col-lg-12">
-                        <h1 class="page-header">
-                            Servicios
-                        </h1>
-                    </div>
-
-                    <div class="col-lg-12">
-                        <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptions" id="dataTables-example">
-                                <thead>
-                                    <tr>
-                                        <th>No.</th>
-                                        <th>Estado</th>
-                                        <th>Orden de servicio</th>
-                                        <th>Fecha Cargue</th>
-                                        <th>Fecha Descargue</th>
-                                        <th>Origen</th>
-                                        <th>Destino</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr dir-paginate="servicio in ctrl.servicios|itemsPerPage:ctrl.itemsPerPage" total-items="ctrl.total_count">
-                                        <td>{{servicio.id}}</td>
-                                        <td>{{servicio.nestado}}</td>
-                                        <td>{{servicio.orden}}</td>
-                                        <td>{{ctrl.formatDate(servicio.cargue) | date:"yyyy/MM/dd hh:mma"}}</td>
-                                        <td>{{ctrl.formatDate(servicio.descargue) | date:"yyyy/MM/dd hh:mma"}}</td>
-                                        <td>{{servicio.origen}}</td>
-                                        <td>{{servicio.destino}}</td>
-                                        <td><button class="btn btn-xs btn-info" ng-click="ctrl.verDetalleSol(servicio.id)">Detalles</button></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <dir-pagination-controls
-                                max-size="8"
-                                direction-links="true"
-                                boundary-links="true" 
-                                on-page-change="ctrl.getData(newPageNumber)">
-                            </dir-pagination-controls>
+                <div class="row">
+                    <div class="col-lg-12" >
+                        <div class="google-maps">
+                            <ng-map height="100%" center="10.97978516762394,-74.80676651000977" zoom="10" >
+                                <marker id='{{vehiculo.servicio}}' position="{{vehiculo.position}}" ng-repeat="vehiculo in ctrl.vehiculos"
+                                on-click="ctrl.showDetail(vehiculo)" icon="../{{vehiculo.icono}}" reload></marker>
+                                <info-window id="foo-iw">
+                                    <div ng-non-bindable="">
+                                        <img width="64" src="{{ctrl.vehiculo.conductor}}" align="left" /> Conductor: {{ctrl.vehiculo.nombre}}<br/>
+                                        Servicio No.: {{ctrl.vehiculo.servicio}}<br/>
+                                        Solicitud No.: {{ctrl.vehiculo.solicitud}}<br/>
+                                        Placa: {{ctrl.vehiculo.placa}}<br/>
+                                        Estado: {{ctrl.vehiculo.estado}}<br/>
+                                        Ult Cambio de estado: {{ctrl.vehiculo.act_estado}}<br/>
+                                        Fecha/Hora Inicio: {{ctrl.vehiculo.inicio_serv}}<br/>
+                                        Ult Actualización: {{ctrl.vehiculo.act_serv}}<br/>
+                                    </div>
+                                </info-window>
+                            </ng-map>
+                        </div>
                     </div>
                 </div>
             </div>
-
             <!-- /.container-fluid -->
 
         </div>

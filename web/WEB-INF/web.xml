@@ -68,6 +68,10 @@
         <servlet-name>ticket_proceso</servlet-name>
         <servlet-class>servletsMobile.ticket_proceso</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>list_servicios</servlet-name>
+        <servlet-class>servletsList.list_servicios</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>saveServicio</servlet-name>
         <url-pattern>/saveServicio</url-pattern>
@@ -135,6 +139,10 @@
     <servlet-mapping>
         <servlet-name>ticket_proceso</servlet-name>
         <url-pattern>/ticket_proceso</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_servicios</servlet-name>
+        <url-pattern>/list_servicios</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

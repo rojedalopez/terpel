@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package servletsList;
 
 import bean.Usuario;
@@ -43,7 +38,7 @@ public class list_solicitudes extends HttpServlet {
         JSONObject joEmploye = null;
          
         joEmploye = (JSONObject) parser.parse(sb.toString());
-        
+        System.out.println(sb.toString());
         int porpage = Integer.parseInt(joEmploye.get("porpage").toString());
         int pageno = Integer.parseInt(joEmploye.get("pageno").toString());
         String q = (String) joEmploye.get("q");
@@ -77,7 +72,7 @@ public class list_solicitudes extends HttpServlet {
             /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
-                out.println(Listas.listaSolicitudes(porpage, pageno, q, cargue, descargue, carga, estado, u.getCodigo()).toJSONString());
+                out.println(Listas.listaSolicitudes(porpage, pageno, q, cargue, descargue, carga, estado, u.getNit()).toJSONString());
             }
         }
     }

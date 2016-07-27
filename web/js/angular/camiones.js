@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap', '$http', '$interval', '$templateCache', '$timeout', '$alert',  
+angular.module('MyApp.Camiones', []).controller('SolicitudLController', ['NgMap', '$http', '$interval', '$templateCache', '$timeout', '$alert',  
     function(NgMap, $http, $interval, $templateCache, $timeout, $alert) {
             var vm = this;
             vm.vehiculos = [];
@@ -246,7 +246,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             ];
     
 
-}]).controller('ServiciosController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', function($http, $templateCache, $timeout, $alert, $modal) {
+}]).controller('EquiposController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', function($http, $templateCache, $timeout, $alert, $modal) {
     var vm = this;
     vm.options = {format:"YYYY/MM/DD", allowInputToggle:true};
     vm.dcargue=null;
@@ -422,29 +422,17 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             }
         };
         
-}]).controller('SignUpController', ['NgMap', '$http', '$interval',
+}]).controller('EnRutaController', ['NgMap', '$http', '$interval',
     function(NgMap, $http, $interval) {
             var vm = this;
             vm.vehiculos = [];
-            vm.mapa = {radio:10000, carga:"", addressOrigin:[], solicitud:"", todos:false};
-            vm.shape = {center:[], radius:10000};
-            vm.vehiculo = {cod:"", ult_reporte:"", placa:"", position:[], icono:"", imagen:"", tipo_doc:"",
-            doc:"", tipo_lic:"", lic:"", telefono:"",propietario:"",carga:"",poliza:""};
-            vm.date = new Date();
+            vm.busqueda = {estado:"", carga:"", q:""};
+            vm.vehiculo = {conductor:"",servicio:"", solicitud:"", placa:"", nombre:"", estado:"", act_estado:"", inicio_serv:"",
+            act_serv:""};
             var stopTime;
-            
-            vm.placeChangedOrigin = function() {
-                vm.mapa.addressOrigin = this.getPlace().geometry.location;
-                vm.shape = {center:vm.mapa.addressOrigin};
-                vm.map.setCenter(vm.mapa.addressOrigin);
-                vm.placeO = this.getPlace();
-                vm.ReloadVehiculos();
-            };
-            
+      
             NgMap.getMap().then(function(map) {
               vm.map = map;
-              vm.mapa.addressOrigin = vm.map.getCenter();
-              vm.shape.center = vm.map.getCenter();
               vm.ReloadVehiculos();
             });
 
@@ -452,12 +440,12 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             vm.showDetail = function(e, vehiculo) {
                 console.log(vehiculo);
                 vm.vehiculo = vehiculo;
-                vm.map.showInfoWindow('foo-iw', vehiculo.cod);
+                vm.map.showInfoWindow('foo-iw', vehiculo.servicio);
             };
             
             vm.ReloadVehiculos = function(){
-                $http.post("../list_all_vehiculos", vm.mapa).success(function(d){
-                vm.vehiculos = [];
+                $http.post("../list_vehiculos_empresa", vm.busqueda).success(function(d){
+                    vm.vehiculos = [];
                     if(d!=="false"){
                         vm.vehiculos = d;
                     }
@@ -465,49 +453,39 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             };
             
             vm.resetForm = function(){
-                location.reload(); 
+                vm.busqueda = {estado:"", carga:"", q:""};
+                vm.vehiculo = {conductor:"",servicio:"", solicitud:"", placa:"", nombre:"", estado:"", act_estado:"", inicio_serv:"",
+                act_serv:""};
             };
             
-            vm.cambiarDistancia = function(distancia){
-                vm.shape.radius = distancia;
-                for(var i = 0; i < vm.Distancias.length; i++){
-                    //vm.map.setZoom();
-                    if(vm.Distancias[i].ID===distancia){
-                        if(vm.mapa.addressOrigin.length==0){
-                            vm.map.setCenter(vm.mapa.addressOrigin);
-                        }else{
-                            vm.map.setCenter(vm.map.getCenter());
-                        }
-                        vm.map.setZoom(vm.Distancias[i].Zoom);
-                        break;
-                    }
-                   
-                }
+            vm.filtrarBusqueda = function(){
                 vm.ReloadVehiculos();
             };
             
-            vm.cambiarCarga = function(carga){
-                vm.mapa.carga = carga;
-                vm.ReloadVehiculos();
-            };
-            
-           
             stopTime = $interval(vm.ReloadVehiculos, 30000);
 
-            vm.TipoCarga = [
-                {"ID":1,"Value":"Gases"},
-                {"ID":2,"Value":"Liquida"},
-                {"ID":3,"Value":"Liquida Inflamable"},
-                {"ID":4,"Value":"Reciduo Peligroso"},
-                {"ID":5,"Value":"Refrigerada"},
-                {"ID":6,"Value":"Seca"}
-            ];
-            
-            vm.Distancias = [
-                {"ID":10000,"Value":"10 Kms", "Zoom":12},
-                {"ID":50000,"Value":"50 Kms", "Zoom":10},
-                {"ID":100000,"Value":"100 Kms", "Zoom":9},
-                {"ID":150000,"Value":"150 Kms", "Zoom":8}
-            ];
+                vm.TipoCarga = [
+                    {"ID":1,"Value":"Gases"},
+                    {"ID":2,"Value":"Liquida"},
+                    {"ID":3,"Value":"Liquida Inflamable"},
+                    {"ID":4,"Value":"Reciduo Peligroso"},
+                    {"ID":5,"Value":"Refrigerada"},
+                    {"ID":6,"Value":"Seca"}
+                ];
+
+                vm.EstadoSolicitud = [
+                    {"ID":1, "Value": "Lanzada"},
+                    {"ID":2, "Value": "Asignada"},
+                    {"ID":3, "Value": "Enturnada para cargue"},
+                    {"ID":4, "Value": "Cargando"},
+                    {"ID":5, "Value": "Cargada"},
+                    {"ID":6, "Value": "En ruta"},
+                    {"ID":7, "Value": "En destino"},
+                    {"ID":8, "Value": "Enturnada para Descargue"},
+                    {"ID":9, "Value": "Descargando"},
+                    {"ID":10, "Value": "Entregada"},
+                    {"ID":11, "Value": "Terminada"},
+                    {"ID":12, "Value": "Cerrada"}
+                ];
 
 }]);

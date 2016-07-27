@@ -67,6 +67,7 @@ if(session.getAttribute("user") != null){
     <script type="text/javascript" src="../js/app.js"></script>
     <script type="text/javascript" src="../js/angular/ng-map.min.js"></script>
     <script type="text/javascript" src="../js/angular/servicios.js"></script>
+    <script type="text/javascript" src="../js/angular/camiones.js"></script>
     
     <!-- Morris Charts JavaScript -->
     <script src="../js/plugins/morris/raphael.min.js"></script>

@@ -340,6 +340,8 @@ public class Listas {
                 instruccion+=      " ORDER BY fech_carg_solicitud DESC ";	        
                 instruccion+=      " LIMIT "+desde+","+porpage+";";
                 
+                System.out.println(instruccion);
+                System.out.println(nit);
                 
                 st=conn.prepareStatement(instruccion);
                 st.setString(1, nit);
@@ -361,6 +363,7 @@ public class Listas {
                 retorno.put("total_count", totalFiltrados(nit, q, cargue, descargue, carga, estado));
                 retorno.put("data", lista);
                 retorno.put("error", 0);
+                System.out.println(retorno.toJSONString());
                 return retorno;
 
             }catch (SQLException e) {
