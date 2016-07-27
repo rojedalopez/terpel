@@ -54,9 +54,7 @@ if(session.getAttribute("user") == null){
     <script src="../js/angular.min.js"></script>
     <script src="../js/angular-strap.min.js"></script>
     <script src="../js/angular-strap.tpl.min.js"></script>
-    <script src="../js/angular-animate.js"></script>
     <script src="../js/ui-bootstrap-tpls-2.0.0.js"></script>
-    <script src="../js/angular-sanitize.min.js"></script>
 
     <script src="../js/bootstrap.min.js"></script>  
     <script type="text/javascript" src="../js/jquery.dataTables.min.js"></script>
@@ -394,24 +392,30 @@ if(session.getAttribute("user") == null){
                         <div class="google-maps">
                             <ng-map height="100%" center="10.97978516762394,-74.80676651000977"  zoom="10">
                                 <custom-control id="home" position="TOP_RIGHT" index="1">
-                                    <div style="margin: 7px 7px 0 7px;">
+                                    <div style="margin: 7px 7px 0 7px; ">
                                         <select class="form-control" ng-model="ctrl.mapa.radio" 
                                             ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.Distancias" ng-change="ctrl.cambiarDistancia(ctrl.mapa.radio)">
                                             <option value="">--- Radio ---</option>
                                         </select>
                                     </div>
                                     <div style="margin: 7px;">
-                                        <select class="form-control" ng-model="ctrl.mapa.carga" 
-                                        ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.TipoCarga" ng-change="ctrl.cambiarTipo(ctrl.mapa.carga)">
+                                        <select class="form-control" ng-model="ctrl.mapa.tipocarga" 
+                                        ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.TipoCarga" ng-change="ctrl.cambiarTipo(ctrl.mapa.tipocarga)">
                                             <option value="">--- Tipo Carga ---</option>
                                         </select>
                                     </div>
                                     <div style="margin: 7px;">
-                                        <button type="button" class="btn btn-default" ng-disabled="(ctrl.Remolques.length==0)?true:false" ng-model="ctrl.mapa.remolques" data-html="1" max-length-html="Seleccionados"
-                                                data-multiple="1" data-animation="am-flip-x"  max-length="1" placeholder="--- Tipo Remolque ---"
+                                        <button type="button" class="btn btn-default form-control" ng-disabled="(ctrl.Remolques.length==0)?true:false" ng-model="ctrl.mapa.remolques" 
+                                                max-length-html="Seleccionados" ng-change="ctrl.cambiarRemolque()" data-multiple="1" max-length="1" placeholder="--- Tipo Remolque ---" all-none-buttons="true"
                                                 bs-options="Remolque.ID as Remolque.Value for Remolque in ctrl.Remolques" bs-select>
                                             Action <span class="caret"></span>
                                           </button>
+                                    </div>
+                                    <div style="margin: 7px;">
+                                        <select class="form-control" ng-model="ctrl.mapa.carga" ng-disabled="(ctrl.Cargas.length==0)?true:false"
+                                        ng-options="Carga.ID as Carga.Value for Carga in ctrl.Cargas" >
+                                            <option value="">--- Carga ---</option>
+                                        </select>
                                     </div>
                                 </custom-control>
                                 <directions
@@ -420,7 +424,7 @@ if(session.getAttribute("user") == null){
                                 origin="{{ctrl.placeO.geometry.location}}"
                                 destination="{{ctrl.placeD.geometry.location}}" suppressMarkers='true'>
                                 <marker id='{{vehiculo.cod}}' position="{{vehiculo.position}}" ng-repeat="vehiculo in ctrl.vehiculos"
-                                on-click="ctrl.showDetail(vehiculo)" icon="{{vehiculo.icono}}" reload></marker>
+                                on-click="ctrl.showDetail(vehiculo)" icon="../{{vehiculo.icono}}" reload></marker>
                                 <info-window id="foo-iw">
                                     <div ng-non-bindable="">
                                       placa: {{ctrl.vehiculo.placa}}<br/>

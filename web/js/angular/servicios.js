@@ -8,7 +8,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             vm.dateMinDescargue=null;
             vm.dateMaxCargue=null;
             vm.dateMaxDescargue=null;
-            vm.mapa = {radio:50000, carga:"", addressOrigin:[], solicitud:"", todos:false, remolques:[]};
+            vm.mapa = {radio:50000, carga:"", tipocarga:"", addressOrigin:[], solicitud:"", todos:false, remolques:[]};
             vm.options = {format: "YYYY/MM/DD hh:mm A", allowInputToggle:true, showClose:true};
             vm.shape = {center:[], radius:50000};
             vm.vehiculo = {cod:"", ult_reporte:"", placa:"", position:[], icono:"", imagen:"", tipo_doc:"",
@@ -18,6 +18,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             nota_detalle:"", nota_pago:"", flete:"", radio:10000};
             vm.enviado = false;
             vm.Remolques=[];
+            vm.Cargas=[];
             vm.alerta = {title: 'Solicitud Enviada', container:'#alerta-submit', duration:5, animation:'am-fade-and-slide-top', show: false};
             vm.date = new Date();
             var stopTime;
@@ -119,13 +120,51 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             vm.cambiarTipo = function(tipo){
                 vm.mapa.remolques=[];
                 vm.Remolques=[];
+                vm.Cargas=[];
                 for(var i = 0; i < vm.TipoRemolque.length; i++){
-                    console.log(vm.TipoRemolque[i].Carga);
                     if(vm.TipoRemolque[i].Carga===tipo){
                         vm.Remolques = vm.TipoRemolque[i].Remolques;
                         break;
                     }
                    
+                }
+                for(var i = 0; i < vm.Carga.length; i++){
+                    if(vm.Carga[i].TipoCarga===tipo){
+                        vm.Cargas = vm.Carga[i].Cargas;
+                        break;
+                    }
+                   
+                }
+            };
+            
+            vm.cambiarRemolque = function(){
+                var flag = false;
+                var flag2 = false;
+                console.log(vm.mapa.remolques);
+                for(var i = 0; i < vm.mapa.remolques.length; i++){
+
+                    if(vm.mapa.remolques[i] === 9){
+                        flag2 = true;
+                    }
+                    
+                    if(vm.mapa.remolques[i] === 9 && vm.Cargas.length === 6){
+                        vm.Cargas.splice(4,1);
+                        flag = true;
+                        break;
+                    }
+                }
+
+                if(flag===false && flag2===false){
+                    vm.Cargas = [];
+                    for(var i = 0; i < vm.Carga.length; i++){
+                        if(vm.Carga[i].TipoCarga===vm.mapa.tipocarga){
+                            vm.Cargas = vm.Carga[i].Cargas;
+                            console.log(vm.Cargas);
+                            console.log(vm.Carga[i].Cargas);
+                            break;
+                        }
+
+                    }
                 }
             };
             
@@ -133,7 +172,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
                 vm.mapa.carga = carga;
                 vm.ReloadVehiculos();
             };
-            
+
             stopTime = $interval(vm.ReloadVehiculos, 30000);
 
             vm.TipoCarga = [
@@ -153,31 +192,59 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             vm.TipoRemolque = [
                 {"Carga":6,
                  "Remolques": [
-                        {"ID":1, Value:"Tolva"},
-                        {"ID":2, Value:"Plancha"},
-                        {"ID":3, Value:"Carroceria"},
-                        {"ID":4, Value:"Carbonera"},
-                        {"ID":5, Value:"Carbonera con varilla"},
-                        {"ID":6, Value:"Porta contenedor"},
-                        {"ID":7, Value:"Van"}
-                    ]
+                    {"ID":1, Value:"Carbonera"},
+                    {"ID":2, Value:"Carbonera con varilla"},
+                    {"ID":3, Value:"Carroceria"},
+                    {"ID":4, Value:"Plancha"},
+                    {"ID":5, Value:"Porta contenedor"},
+                    {"ID":6, Value:"Tolva"},
+                    {"ID":7, Value:"Van"}
+                ]
                 },
                 {"Carga":2,
                  "Remolques" : [
-                    {"ID":8, Value:"Tanque aluminio"},
-                    {"ID":9, Value:"Tanque lamina"},
-                    {"ID":10, Value:"Tanque acero inoxidable"}
+                    {"ID":8, Value:"Tanque acero inoxidable"},
+                    {"ID":9, Value:"Tanque aluminio"},
+                    {"ID":10, Value:"Tanque lamina"}
                  ]
                 }
             ];
             
-            vm.selectedIcons = ['Globe', 'Heart'];
-  vm.icons = [
-    {value: 'Gear', label: '<i class="fa fa-gear"></i> Gear'},
-    {value: 'Globe', label: '<i class="fa fa-globe"></i> Globe'},
-    {value: 'Heart', label: '<i class="fa fa-heart"></i> Heart'},
-    {value: 'Camera', label: '<i class="fa fa-camera"></i> Camera'}
-  ];
+            vm.TipoEquipo = [
+                {"ID": 1,"Value":"Camión 3.5 Ton"},
+                {"ID": 2,"Value":"Camión 7 Ton"},
+                {"ID": 3,"Value":"Camión 10.5 Ton"},
+                {"ID": 4,"Value":"Camión Sencillo S2"},
+                {"ID": 5,"Value":"Camión Sencillo S3"},
+                {"ID": 6,"Value":"Patineta"},
+                {"ID": 7,"Value":"Tractomula 3S2"},
+                {"ID": 8,"Value":"Tractomula 3S3"}
+            ];
+            
+            vm.Carga = [
+                {   
+                    "TipoCarga":2,
+                    "Cargas":[
+                        {"ID": 1,"Value":"Aceites y grasas"},
+                        {"ID": 2,"Value":"ACPM"},
+                        {"ID": 3,"Value":"Alcohol y derivados"},
+                        {"ID": 4,"Value":"Gasolinas"},
+                        {"ID": 5,"Value":"JP-1 (Jet Full)"},
+                        {"ID": 6,"Value":"Petróleo"}
+                    ]
+                },
+                {   
+                    "TipoCarga":6,
+                    "Cargas":[
+                        {"ID": 7,"Value":"Bolsones"},
+                        {"ID": 8,"Value":"Bolsas"},
+                        {"ID": 9,"Value":"Contenedor"},
+                        {"ID": 10,"Value":"Granel"},
+                        {"ID": 11,"Value":"Pallets"}
+                    ]
+                }
+            ];
+    
 
 }]).controller('ServiciosController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', function($http, $templateCache, $timeout, $alert, $modal) {
     var vm = this;

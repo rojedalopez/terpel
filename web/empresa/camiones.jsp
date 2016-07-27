@@ -263,7 +263,7 @@ if(session.getAttribute("user") == null){
                         <div class="google-maps">
                             <ng-map height="100%" center="10.97978516762394,-74.80676651000977" zoom="10" >
                                 <marker id='{{vehiculo.servicio}}' position="{{vehiculo.position}}" ng-repeat="vehiculo in ctrl.vehiculos"
-                                on-click="ctrl.showDetail(vehiculo)" icon="{{vehiculo.icono}}" reload></marker>
+                                on-click="ctrl.showDetail(vehiculo)" icon="../{{vehiculo.icono}}" reload></marker>
                                 <info-window id="foo-iw">
                                     <div ng-non-bindable="">
                                         <img width="64" src="{{ctrl.vehiculo.conductor}}" align="left" /> Conductor: {{ctrl.vehiculo.nombre}}<br/>

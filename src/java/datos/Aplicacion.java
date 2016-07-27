@@ -115,7 +115,7 @@ public class Aplicacion {
                 try{
                     conn=conexion();
                     String instruccion="SELECT c.cod_conductor, tipo_doc_conductor, doc_conductor, tipo_lic_conductor, " +
-                    "num_lic_conductor, nomb_conductor, apll_conductor, tel_conductor, mail_conductor, salt_conductor, pass_conductor, img_conductor, id_equipoconductor " +
+                    "num_lic_conductor, nomb_conductor, apll_conductor, tel_conductor, mail_conductor, salt_conductor, pass_conductor, img_conductor, id_equipoconductor, plca_equipo, pila_equipoconductor " +
                     "FROM tblConductor AS c LEFT JOIN tblEquipoConductor AS e ON c.cod_conductor = e.cod_conductor AND acti_equipoconductor = 1 WHERE mail_conductor = ? AND acti_conductor = 1;";
                     insertar=conn.prepareStatement(instruccion);
                     insertar.setString(1, correo);
@@ -138,6 +138,8 @@ public class Aplicacion {
                             u.put("num_lic",datos.getString(5));
                             u.put("url_imagen",datos.getString(12));
                             u.put("equipo_conductor",datos.getInt(13));
+                            u.put("placa",datos.getString(14));
+                            u.put("pila",datos.getBoolean(15));
                             u.put("mensaje","true");
                             
                             return u;

@@ -8,9 +8,7 @@ angular.module('myApp',[
     'ngMap',
     'ae-datetimepicker',
     'mgcrea.ngStrap',
-    'ngAnimate', 
-    'ui.bootstrap',
-    'ngSanitize'
+    'ui.bootstrap'
 ]);
 
 

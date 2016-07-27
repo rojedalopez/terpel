@@ -529,6 +529,46 @@ public class Listas {
                     objeto.put("direccion", datos.getString(3));
                     objeto.put("telefono",datos.getString(4));
                     objeto.put("url_imagen",datos.getString(5));
+                    objeto.put("procesos", listaProcesosEmpresasEnturne(datos.getString(1)));
+                    lista.add(objeto);
+                }
+                
+                return lista;
+
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaProcesosEmpresasEnturne(String empresa) throws SQLException{
+        JSONArray lista=new JSONArray();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT id_tipocargue, nit_empresa, desc_tipocargue FROM tblTipoCargue WHERE nit_empresa = ?;" ;
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("id", datos.getString(1));
+                    objeto.put("id_empresa", datos.getString(2));
+                    objeto.put("desc", datos.getString(3));
                     lista.add(objeto);
                 }
                 

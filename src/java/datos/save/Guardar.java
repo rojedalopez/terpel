@@ -243,6 +243,41 @@ public class Guardar {
 
     }
     
+    public static String InsertTicketProceso(String nit, int equipo_conductor, String operacion, String proceso) throws ClassNotFoundException, SQLException{
+        boolean b=false;
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        
+        
+        conn=conexion();
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.giveEnturne(?, ?, ?, ?, ?)}")) {
+                cs.setString(1, nit);
+                cs.setString(2, operacion);
+                cs.setInt(3, equipo_conductor);
+                cs.setString(4, proceso);
+                cs.registerOutParameter(5, Types.VARCHAR);
+                cs.executeQuery();
+
+                String retorno = cs.getString(5);
+
+                return retorno;
+                
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }catch (Exception e){
+                System.out.println("error Exception en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return "";
+
+    }
+    
     public static boolean InsertArchivo(String id, String url) throws ClassNotFoundException, SQLException{
         boolean b=false;
         Connection conn=null;
