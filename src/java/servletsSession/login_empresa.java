@@ -53,7 +53,11 @@ public class login_empresa extends HttpServlet {
                     
 
                     session.setAttribute("usr", u.getNombre());
-                    response.sendRedirect((url_forward)?url:"/empresa/servicios.jsp");
+                    if(u.getRol()==3){
+                        response.sendRedirect((url_forward)?url:"/empresa/enturne.jsp");
+                    }else{
+                        response.sendRedirect((url_forward)?url:"/empresa/servicios.jsp");
+                    }
                     
                  }else{
                     System.out.println("error en: " +u.getMensaje());

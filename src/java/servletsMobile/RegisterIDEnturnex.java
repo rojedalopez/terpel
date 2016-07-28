@@ -13,8 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-public class RegisterID extends HttpServlet {
+public class RegisterIDEnturnex extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, ClassNotFoundException, SQLException, InvalidKeyException {
@@ -27,7 +26,7 @@ public class RegisterID extends HttpServlet {
             System.out.println(id);
             System.out.println(imei);
             System.out.println(cod);
-            out.print(Guardar.InsertRegistro(id, imei, cod, 1));
+            out.print(Guardar.InsertRegistro(id, imei, cod, 2));
         }
     }
 

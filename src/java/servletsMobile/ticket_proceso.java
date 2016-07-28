@@ -27,14 +27,14 @@ public class ticket_proceso extends HttpServlet {
             String retorno = Guardar.InsertTicketProceso(nit, equipo_conductor, operacion, proceso);
             System.out.println(retorno);
             JSONObject json = new JSONObject();
-            if(!retorno.equals("-")){
+            if(!retorno.equals("-1") && !retorno.equals("0")){
                 String[] vector = retorno.split("\\|");
-                json.put("mensaje", true);
+                json.put("mensaje", 1);
                 json.put("ticket", vector[0]);
                 json.put("turno", vector[1]);
                 json.put("fecha", vector[2]);
             }else{
-                json.put("mensaje", false);
+                json.put("mensaje", Integer.parseInt(retorno));
             }
             
             out.println(json.toJSONString());

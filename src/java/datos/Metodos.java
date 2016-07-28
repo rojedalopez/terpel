@@ -209,7 +209,7 @@ public class Metodos {
 
 	try {
 		// Try sending the push notification
-		PushyAPI.sendPush(push);
+		PushyAPI.sendPush(push, 1);
 	}
 	catch (Exception exc) {
 		// Error, print to console
@@ -217,35 +217,35 @@ public class Metodos {
 	}
     }
 
+    public static void EnvioNotificacion(String TO, String zona, String bahia, String fecha) throws SQLException{
+        // Prepare list of target registration IDs
+	List<String> registrationIDs = new ArrayList<>();
+        
+        registrationIDs.add(TO);
+        
+
+	// Set payload (any object, it will be serialized to JSON)
+	Map<String, String> payload = new HashMap<>();
+
+	// Add "message" parameter to payload
+	payload.put("zona", zona);
+        payload.put("bahia", bahia);
+        payload.put("fecha_estimada", fecha);
+        
+	// Prepare the push request
+	PushyPushRequest push = new PushyPushRequest(payload, registrationIDs.toArray(new String[registrationIDs.size()]));
+
+	try {
+		// Try sending the push notification
+		PushyAPI.sendPush(push, 2);
+	}
+	catch (Exception exc) {
+		// Error, print to console
+		System.out.println(exc.toString());
+	}
+    }
 
     public static void main(String[] args) throws SQLException {
-        JSONArray registrationIDs = new JSONArray();
-        registrationIDs.add("83540c69033865e50b2d17");
-        registrationIDs.add("69454e0ea176e7181b1a2b");
-        
-        Solicitud sol = new Solicitud();
-        sol.setId("00000002");
-        sol.setDescarguemin("2016-07-18 05:00:00");
-        sol.setDescarguemax("2016-07-18 05:00:00");
-        sol.setAdelanto(720000);
-        sol.setLat_origen((float)10.99552);
-        sol.setCarguemin("2016-07-15 15:40:00");
-        sol.setLng_origen((float)-74.79631);
-        sol.setOrigen("Carrera 53 # 64 - 72, Barranquilla - Atlántico, Colombia");
-        sol.setCarga(6);
-        sol.setUrl("http://banderasdelujo.com/img/cms/empresas%20de%20transporte/2.png");
-        sol.setCarguemax("2016-07-15 19:00:00");
-        sol.setNota_pago("Prueba Nota Pago");
-        sol.setNit("123456789");
-        sol.setDescarguemax("2016-07-18 07:00:00");
-        sol.setNota_detalle("SOL-8544");
-        sol.setDestino("Galapa, Atlántico, Colombia");
-        sol.setLng_destino((float)-74.88382);
-        sol.setOrden("SOL-8544");
-        sol.setLat_destino((float)10.898923);
-        sol.setEmpresa("Transportes Bimbo");
-        sol.setFlete((float)1800000);
-        
-        EnvioNotificacion(sol, registrationIDs);
+
     }
 }

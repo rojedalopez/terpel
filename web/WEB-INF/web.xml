@@ -72,6 +72,26 @@
         <servlet-name>list_servicios</servlet-name>
         <servlet-class>servletsList.list_servicios</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>list_enturnes</servlet-name>
+        <servlet-class>servletsList.list_enturnes</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_enturnes_estados</servlet-name>
+        <servlet-class>servletsList.list_enturnes_estados</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>asignTurno</servlet-name>
+        <servlet-class>servletsSave.asignTurno</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_zonas_bahias</servlet-name>
+        <servlet-class>servletsList.list_zonas_bahias</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RegisterIDEnturnex</servlet-name>
+        <servlet-class>servletsMobile.RegisterIDEnturnex</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>saveServicio</servlet-name>
         <url-pattern>/saveServicio</url-pattern>
@@ -143,6 +163,26 @@
     <servlet-mapping>
         <servlet-name>list_servicios</servlet-name>
         <url-pattern>/list_servicios</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_enturnes</servlet-name>
+        <url-pattern>/list_enturnes</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_enturnes_estados</servlet-name>
+        <url-pattern>/list_enturnes_estados</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>asignTurno</servlet-name>
+        <url-pattern>/asignTurno</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_zonas_bahias</servlet-name>
+        <url-pattern>/list_zonas_bahias</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegisterIDEnturnex</servlet-name>
+        <url-pattern>/RegisterIDEnturnex</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

@@ -24,7 +24,7 @@ public class Listas {
         
             try{
                 conn=conexion();
-                String instruccion="SELECT id_equipoconductor, cod_conductor, ec.plca_equipo, lat_equipoconductor, long_equipoconductor, " +
+                String instruccion="SELECT ec.id_equipoconductor, cod_conductor, ec.plca_equipo, lat_equipoconductor, long_equipoconductor, " +
                 "velo_equipoconductor, ult_actualizacion, id_tipocarga, regs_imei_conductor "+
                 "FROM tblEquipoConductor AS ec INNER JOIN tblEquipo AS eq ON ec.plca_equipo = eq.plca_equipo "+
                 "WHERE id_tipocarga = "+tipo+" AND disp_equipoconductor = 1 AND " +
@@ -145,7 +145,7 @@ public class Listas {
         return retorno;
     }
     
-    public static JSONArray listaVehiculosBySolicitud(String id) throws SQLException{
+    public static JSONArray listaServiciosBySolicitud(String id) throws SQLException{
         JSONArray lista=new JSONArray();        
         PreparedStatement st = null;
         Connection conn=null;
@@ -153,33 +153,51 @@ public class Listas {
         
             try{
                 conn=conexion();
-                String instruccion="SELECT ec.plca_equipo, CONCAT(nomb_conductor, ' ', apll_conductor), tipo_doc_conductor, doc_conductor,  " +
-                "tipo_lic_conductor, num_lic_conductor, tel_conductor, img_conductor, CONCAT(nomb_prop_equipo, ' ', apll_prop_equipo), " +
-                "polz_segu_equipo, t.desc_tipocarga, turn_carg_servicio, turn_desc_servicio, id_servicio FROM tblServicio AS s INNER JOIN tblEquipoConductor AS ec ON s.id_equipoconductor = ec.id_equipoconductor  " +
-                "INNER JOIN tblConductor AS c ON c.cod_conductor = ec.cod_conductor  " +
-                "INNER JOIN tblEquipo AS e ON e.plca_equipo = ec.plca_equipo INNER JOIN tblTipoCarga AS t ON t.id_tipocarga = e.id_tipocarga " +
-                "WHERE id_solicitud = ?;";	        
+                String instruccion="SELECT * FROM logycus360.SolicitudesAll WHERE id_solicitud = ?;";	        
                 
                 st=conn.prepareStatement(instruccion);
                 st.setString(1, id);
                 datos=(ResultSet) st.executeQuery();
                 while (datos.next()) {
                     JSONObject objeto= new JSONObject();
-                    objeto.put("servicio", datos.getString(14));
-                    objeto.put("placa", datos.getString(1));
-                    objeto.put("nombre", datos.getString(2));
-                    objeto.put("tipo_doc", datos.getString(3));
-                    objeto.put("doc", datos.getString(4));
-                    objeto.put("tipo_lic", datos.getString(5));
-                    objeto.put("lic",datos.getString(6));
-                    objeto.put("telefono",datos.getString(7));
-                    objeto.put("imagen",datos.getString(8));
-                    objeto.put("propietario",datos.getString(9));
-                    objeto.put("poliza",datos.getString(10));
-                    objeto.put("carga",datos.getString(11));
-                    objeto.put("turno_cargue",datos.getString(12));
-                    objeto.put("turno_descargue",datos.getString(13));
-                    objeto.put("fotos",listaFotosByServicio(datos.getString(14)));
+                    // datos de servicio y solicitud
+                    objeto.put("servicio", datos.getString(1));
+                    objeto.put("solicitud", datos.getString(2));
+                    // datos de equipo
+                    objeto.put("placa", datos.getString(3));
+                    objeto.put("marca", datos.getString(4));
+                    objeto.put("referencia", datos.getString(5));
+                    objeto.put("modelo", datos.getString(6));
+                    objeto.put("trailer", datos.getString(7));
+                    objeto.put("poliza", datos.getString(8));
+                    objeto.put("compania", datos.getString(9));
+                    objeto.put("exp_poliza", datos.getString(10));
+                    objeto.put("vence_poliza", datos.getString(11));
+                    objeto.put("soat", datos.getString(12));
+                    objeto.put("exp_soat",datos.getString(13));
+                    objeto.put("vence_soat",datos.getString(14));
+                    objeto.put("tecno",datos.getString(15));
+                    objeto.put("exp_tecno",datos.getString(16));
+                    objeto.put("vence_tecno",datos.getString(17));
+                    // datos de conductor
+                    objeto.put("nombre",datos.getString(18));
+                    objeto.put("tipo_doc",datos.getString(19));
+                    objeto.put("doc",datos.getString(20));
+                    objeto.put("num_lic",datos.getString(21));
+                    objeto.put("exp_lic",datos.getString(22));
+                    objeto.put("vence_lic",datos.getString(23));
+                    objeto.put("telefono",datos.getString(24));
+                    objeto.put("direccion",datos.getString(25));
+                    objeto.put("imagen",datos.getString(26));
+                    objeto.put("tipo_carga",datos.getInt(27));
+                    objeto.put("ntipo_carga",datos.getString(28));
+                    objeto.put("tipo_remolque",datos.getInt(29));
+                    objeto.put("ntipo_remolque",datos.getString(30));
+                    objeto.put("tipo_equipo",datos.getInt(31));
+                    objeto.put("ntipo_equipo",datos.getString(32));
+                    objeto.put("turno_cargue",datos.getInt(33));
+                    objeto.put("turno_descargue",datos.getInt(34));
+                    objeto.put("fotos",listaFotosByServicio(datos.getString(1)));
                     lista.add(objeto);
                 }
                 System.out.println(lista.toJSONString());
@@ -242,69 +260,6 @@ public class Listas {
         return lista;
     }
     
-    public static JSONObject infoServicio(String id) throws SQLException{
-        JSONObject objeto= new JSONObject();      
-        PreparedStatement st = null;
-        Connection conn=null;
-        ResultSet datos=null;
-        
-            try{
-                conn=conexion();
-                String instruccion="SELECT s.id_servicio, s.id_solicitud, o.orig_solicitud, o.dest_solicitud, o.fech_carg_solicitud,\n" +
-                "o.fech_desc_solicitud, tipo_doc_conductor, tipo_lic_conductor, num_lic_conductor, doc_conductor,\n" +
-                "CONCAT(nomb_conductor, ' ', apll_conductor), tel_conductor, e.plca_equipo, \n" +
-                " img_conductor, CONCAT(nomb_prop_equipo, ' ', apll_prop_equipo), \n" +
-                "polz_segu_equipo, t.desc_tipocarga, turn_carg_servicio, turn_desc_servicio, img_cump_servicio, img_remi_servicio \n" +
-                "FROM tblServicio AS s INNER JOIN tblSolicitud AS o ON s.id_solicitud = o.id_solicitud\n" +
-                "INNER JOIN tblEquipoConductor AS ec ON s.id_equipoconductor = ec.id_equipoconductor  \n" +
-                "INNER JOIN tblConductor AS c ON c.cod_conductor = ec.cod_conductor  \n" +
-                "INNER JOIN tblEquipo AS e ON e.plca_equipo = ec.plca_equipo \n" +
-                "INNER JOIN tblTipoCarga AS t ON t.id_tipocarga = e.id_tipocarga \n" +
-                "WHERE id_servicio = ?;";	        
-                
-                st=conn.prepareStatement(instruccion);
-                st.setString(1, id);
-                datos=(ResultSet) st.executeQuery();
-                while (datos.next()) {
-                    
-                    objeto.put("servicio", datos.getString(1));
-                    objeto.put("solicitud", datos.getString(2));
-                    objeto.put("origen", datos.getString(3));
-                    objeto.put("destino", datos.getString(4));
-                    objeto.put("cargue", datos.getString(5));
-                    objeto.put("descargue",datos.getString(6));
-                    objeto.put("tipo_doc",datos.getString(7));
-                    objeto.put("tipo_lic",datos.getString(8));
-                    objeto.put("licencia",datos.getString(9));
-                    objeto.put("documento",datos.getString(10));
-                    objeto.put("nombre",datos.getString(11));
-                    objeto.put("telefono",datos.getString(12));
-                    objeto.put("placa",datos.getString(13));
-                    objeto.put("imagen_conductor", datos.getString(14));
-                    objeto.put("propietario", datos.getString(14));
-                    objeto.put("poliza", datos.getString(14));
-                    objeto.put("tipo_carga", datos.getString(14));
-                    objeto.put("imagen_cumplido", datos.getString(14));
-                    objeto.put("imagen_remision", datos.getString(14));
-                    
-                }
-                
-            }catch (SQLException e) {
-                    System.out.println("error SQLException en ObtenerUsuario");
-                    System.out.println(e.getMessage());
-            }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
-                    System.out.println(e.getMessage());
-            }finally{
-                if(conn!=null){
-                    if(!conn.isClosed()){
-                        conn.close();
-                    }
-                }
-            }
-        return objeto;
-    }
-    
     public static JSONObject listaSolicitudes(int porpage, int pageno, String q, String cargue, String descargue, int carga, int estado, String nit) throws SQLException{
         JSONArray lista=new JSONArray();
         JSONObject retorno = new JSONObject();
@@ -356,7 +311,7 @@ public class Listas {
                     objeto.put("descargue",formateador.format(formateador.parse(datos.getString(6))));
                     objeto.put("origen", datos.getString(7));
                     objeto.put("destino", datos.getString(8));
-                    objeto.put("vehiculos", listaVehiculosBySolicitud(datos.getString(1)));
+                    objeto.put("vehiculos", listaServiciosBySolicitud(datos.getString(1)));
                     lista.add(objeto);
                 }
                 
@@ -562,7 +517,11 @@ public class Listas {
         
             try{
                 conn=conexion();
-                String instruccion="SELECT id_tipocargue, nit_empresa, desc_tipocargue FROM tblTipoCargue WHERE nit_empresa = ?;" ;
+                
+                String instruccion="SELECT id_tipocargue, nit_empresa, desc_tipocargue FROM tblTipoCargue "
+                        + " WHERE nit_empresa = ?;" ;
+                
+                
                 
                 st=conn.prepareStatement(instruccion);
                 st.setString(1, empresa);
@@ -592,6 +551,209 @@ public class Listas {
             }
         return lista;
     }
+    
+    public static int totalEnturneEmpresas(String empresa) throws SQLException{
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT COUNT(1) " +
+                "FROM tblTicketEnturne AS tk INNER JOIN tblTipoCargue AS tc ON tk.id_tipocargue = tc.id_tipocargue " +
+                "INNER JOIN tblEquipoConductor AS ec ON ec.id_equipoconductor = tk.id_equipoconductor " +
+                "INNER JOIN tblEquipo AS eq ON eq.plca_equipo = ec.plca_equipo " +
+                "INNER JOIN tblRemolque AS rm ON rm.id_remolque = eq.id_remolque " +
+                "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = eq.id_tipoequipo " +
+                "WHERE tk.nit_empresa = ?;" ;
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+                datos=(ResultSet) st.executeQuery();
+                if (datos.next()) {
+                    return datos.getInt(1);
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return 0;
+    }
+    
+    public static JSONObject listaEnturneEmpresas(int porpage, int pageno, String empresa) throws SQLException{
+        JSONArray lista=new JSONArray();
+        JSONObject retorno = new JSONObject();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                int desde = ((pageno-1)*porpage);
+                String instruccion="SELECT id_ticketenturne, fech_enturne, CASE WHEN oper_enturne = 'C' THEN 'Cargue' ELSE 'Descargue' END, " +
+                "tc.desc_tipocargue, fech_ticket_enturne, " +
+                "eq.plca_equipo, rm.desc_remolque, te.desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, " +
+                "plac_trailer_equipo, poliza_equipo, soat_equipo, tecno_equipo " +
+                "FROM tblTicketEnturne AS tk INNER JOIN tblTipoCargue AS tc ON tk.id_tipocargue = tc.id_tipocargue " +
+                "INNER JOIN tblEquipoConductor AS ec ON ec.id_equipoconductor = tk.id_equipoconductor " +
+                "INNER JOIN tblEquipo AS eq ON eq.plca_equipo = ec.plca_equipo " +
+                "INNER JOIN tblRemolque AS rm ON rm.id_remolque = eq.id_remolque " +
+                "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = eq.id_tipoequipo " +
+                "WHERE tk.nit_empresa = ? " ;
+                instruccion+=      " ORDER BY fech_ticket_enturne DESC ";	        
+                instruccion+=      " LIMIT "+desde+","+porpage+";";
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+                System.out.println(instruccion);
+                System.out.println(empresa);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("ticket", datos.getString(1));
+                    objeto.put("fecha", datos.getString(2));
+                    objeto.put("operacion", datos.getString(3));
+                    objeto.put("tipo_cargue", datos.getString(4));
+                    objeto.put("fecha_enturne", datos.getString(5));
+                    objeto.put("placa", datos.getString(6));
+                    objeto.put("remolque", datos.getString(7));
+                    objeto.put("tipo_equipo", datos.getString(8));
+                    objeto.put("marca", datos.getString(9));
+                    objeto.put("modelo", datos.getString(10));
+                    objeto.put("referencia", datos.getString(11));
+                    objeto.put("trailer", datos.getString(12));
+                    objeto.put("poliza", datos.getString(12));
+                    objeto.put("soat", datos.getString(14));
+                    objeto.put("tecno", datos.getString(15));
+                    lista.add(objeto);
+                }
+                
+                retorno.put("total_count", totalEnturneEmpresas(empresa));
+                retorno.put("data", lista);
+                retorno.put("error", 0);
+                
+                return retorno;
+
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+            
+            retorno.put("total_count", 0);
+            retorno.put("data", "[]");
+            retorno.put("error", 0);
+            return retorno;
+    }
+    
+    
+    public static JSONObject listaEnturneEmpresasPorEstados(int porpage, int pageno, String empresa, int tipo) throws SQLException{
+        JSONArray lista=new JSONArray();
+        JSONObject retorno = new JSONObject();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                int desde = ((pageno-1)*porpage);
+                String instruccion="SELECT id_ticketenturne, fech_enturne, CASE WHEN oper_enturne = 'C' THEN 'Cargue' ELSE 'Descargue' END, " +
+                "tc.desc_tipocargue, fech_ticket_enturne, fecha_enturne,  desc_zonaempresa, desc_habia, " +
+                "eq.plca_equipo, rm.desc_remolque, te.desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, " +
+                "plac_trailer_equipo, poliza_equipo, soat_equipo, tecno_equipo, fech_term_enturne " +
+                "FROM tblTicketEnturne AS tk INNER JOIN tblTipoCargue AS tc ON tk.id_tipocargue = tc.id_tipocargue " +
+                "INNER JOIN tblEquipoConductor AS ec ON ec.id_equipoconductor = tk.id_equipoconductor " +
+                "INNER JOIN tblEquipo AS eq ON eq.plca_equipo = ec.plca_equipo " +
+                "INNER JOIN tblRemolque AS rm ON rm.id_remolque = eq.id_remolque " +
+                "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = eq.id_tipoequipo " +
+                "LEFT JOIN tblZonaEmpresa AS ze ON ze.id_zonaempresa = tk.id_zonaempresa "+
+                "LEFT JOIN tblBahia AS ba ON ba.id_bahia = tk.id_bahia "+
+                "WHERE tk.nit_empresa = ? AND fech_enturne = CURDATE() " ;
+                
+                if(tipo == 1){
+                    instruccion+= " AND term_enturne = 0 ";	        
+                }else if(tipo == 2){
+                    instruccion+= " AND fecha_enturne IS NOT NULL ";	        
+                }else if(tipo == 3){
+                    instruccion+= " AND term_enturne = 1 ";	        
+                }
+                
+                instruccion+= " ORDER BY fech_ticket_enturne DESC ";	        
+                instruccion+= " LIMIT "+desde+","+porpage+";";
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+                System.out.println(instruccion);
+                System.out.println(empresa);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("ticket", datos.getString(1));
+                    objeto.put("fecha", datos.getString(2));
+                    objeto.put("operacion", datos.getString(3));
+                    objeto.put("tipo_cargue", datos.getString(4));
+                    objeto.put("fecha_enturne", datos.getString(5));
+                    objeto.put("fecha_enturnado", datos.getString(6));
+                    objeto.put("zona", datos.getString(7));
+                    objeto.put("bahia", datos.getString(8));
+                    objeto.put("placa", datos.getString(9));
+                    objeto.put("remolque", datos.getString(10));
+                    objeto.put("tipo_equipo", datos.getString(11));
+                    objeto.put("marca", datos.getString(12));
+                    objeto.put("modelo", datos.getString(13));
+                    objeto.put("referencia", datos.getString(14));
+                    objeto.put("trailer", datos.getString(15));
+                    objeto.put("poliza", datos.getString(16));
+                    objeto.put("soat", datos.getString(17));
+                    objeto.put("tecno", datos.getString(18));
+                    objeto.put("fecha_termina", datos.getString(19));
+                    lista.add(objeto);
+                }
+                
+                retorno.put("total_count", totalEnturneEmpresas(empresa));
+                retorno.put("data", lista);
+                retorno.put("error", 0);
+                
+                return retorno;
+
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+            
+            retorno.put("total_count", 0);
+            retorno.put("data", "[]");
+            retorno.put("error", 0);
+            return retorno;
+    }
+    
     
     public static String listaPuntos(String servicio) throws SQLException{
         JSONArray lista=new JSONArray();  
@@ -640,4 +802,89 @@ public class Listas {
         return lista.toJSONString();
     }
     
+    public static JSONArray listaZonasEmpresa(String empresa) throws SQLException{
+        JSONArray lista=new JSONArray();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                
+                String instruccion="SELECT id_zonaempresa, nit_empresa, desc_zonaempresa FROM tblZonaEmpresa WHERE nit_empresa = ?;" ;
+                
+                
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("id", datos.getInt(1));
+                    objeto.put("id_empresa", datos.getString(2));
+                    objeto.put("desc", datos.getString(3));
+                    objeto.put("bahias", listaBahiasByZonasEmpresa(datos.getInt(1)));
+                    lista.add(objeto);
+                }
+                
+                return lista;
+
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaBahiasByZonasEmpresa(int bahia) throws SQLException{
+        JSONArray lista=new JSONArray();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                
+                String instruccion="SELECT id_bahia, id_zonaempresa, desc_habia, nota_bahia, cargues_bahia FROM tblBahia WHERE id_zonaempresa = ?;" ;
+                
+                
+                
+                st=conn.prepareStatement(instruccion);
+                st.setInt(1, bahia);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("id", datos.getInt(1));
+                    objeto.put("id_zona", datos.getInt(2));
+                    objeto.put("desc", datos.getString(3));
+                    objeto.put("nota", datos.getString(4));
+                    lista.add(objeto);
+                }
+                
+                return lista;
+
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
 }

@@ -21,13 +21,20 @@ public class PushyAPI {
     
     // Insert your Secret API Key here
     public static final String SECRET_API_KEY = "79abeae53ea7d50510640d89c8d2c4122c14f1f8be0b0cf8d7532f24fba42412";
+    public static final String SECRET_API_KEY_ENTURNEX = "b057b33b0aabf0afb852a931c25635330758ab3ce9f44940d9aeb5fa20287081";
 
-    public static void sendPush(PushyPushRequest req) throws Exception {
+    public static void sendPush(PushyPushRequest req, int app) throws Exception {
         // Get custom HTTP client
         HttpClient client = new DefaultHttpClient();
-
+        
+        String secreto = "";                
+        if(app==1){
+            secreto = SECRET_API_KEY;
+        }else{
+            secreto = SECRET_API_KEY_ENTURNEX;
+        }
         // Create POST request
-        HttpPost request = new HttpPost("https://api.pushy.me/push?api_key=" + SECRET_API_KEY);
+        HttpPost request = new HttpPost("https://api.pushy.me/push?api_key=" + secreto);
 
         // Set content type to JSON
         request.addHeader("Content-Type", "application/json");

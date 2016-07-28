@@ -1,3 +1,4 @@
+
 package servletsSave;
 
 import bean.Usuario;
@@ -18,7 +19,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 
-public class saveServicio extends HttpServlet {
+public class asignTurno extends HttpServlet {
 
    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -41,26 +42,11 @@ public class saveServicio extends HttpServlet {
         System.out.println(sb.toString());
         joSolicitud = (JSONObject) parser.parse(sb.toString());
         
-        JSONObject origen = (JSONObject) joSolicitud.get("addressOrigin");
-        float lat_origen = Float.parseFloat(origen.get("lat").toString());
-        float lng_origen = Float.parseFloat(origen.get("lng").toString());
-        String norigen = (String) joSolicitud.get("nameOrigin");
-        JSONObject destino = (JSONObject) joSolicitud.get("addressDestination");
-        float lat_destino = Float.parseFloat(destino.get("lat").toString());
-        float lng_destino = Float.parseFloat(destino.get("lng").toString());
-        String ndestino = (String) joSolicitud.get("nameDestination");
-        int tipo_carga = Integer.parseInt(joSolicitud.get("carga").toString());
-        String carguemin = (String) joSolicitud.get("dcarguemin");
-        String carguemax = (String) joSolicitud.get("dcarguemax");
-        String descarguemax = (String) joSolicitud.get("ddescarguemax");
-        String descarguemin = (String) joSolicitud.get("ddescarguemin");
-        int equipos = Integer.parseInt(joSolicitud.get("equipos").toString());
-        int flete = Integer.parseInt(joSolicitud.get("flete").toString());
-        String orden = (String) joSolicitud.get("orden");
-        String nota_detalle = (String) joSolicitud.get("nota_detalle");
-        String nota_pago = (String) joSolicitud.get("nota_pago");
-        String kms = (String) joSolicitud.get("kms");
-        String time = (String) joSolicitud.get("time");
+        String ticket = (String) joSolicitud.get("ticket");
+        int zona = Integer.parseInt(joSolicitud.get("zona").toString());
+        int bahia = Integer.parseInt(joSolicitud.get("bahia").toString());
+        String hora = (String) joSolicitud.get("fecha_enturnada");
+        String nota = (String) joSolicitud.get("nota");
         
         HttpSession session =  null;
  
@@ -70,26 +56,31 @@ public class saveServicio extends HttpServlet {
             /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
-                JSONObject x = Guardar.SaveServicio(norigen, lat_origen, lng_origen, ndestino, lat_destino, lng_destino, 
-                carguemin, carguemax, descarguemin, descarguemax, equipos, tipo_carga, orden, nota_detalle, u.getNit(),
-                flete, nota_pago, kms, time);
-                System.out.println(x);
-                out.println(x.toJSONString());
+                boolean x = Guardar.AsignTurno(ticket, zona, bahia, hora, nota);
+                out.println(x);
             }
         }
     }
 
-  
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (ParseException | ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(saveServicio.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParseException ex) {
+            Logger.getLogger(asignTurno.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(asignTurno.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(asignTurno.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
     @Override
     public String getServletInfo() {
         return "Short description";

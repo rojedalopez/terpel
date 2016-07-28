@@ -257,8 +257,11 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
     vm.fotos=[];
     vm.servicio={origen:"", destino:"", carge:"", descarge:"", id:"-1", nestado:"" ,estado:"",solicitud:0,orden:"", vehiculos:[]};
     vm.vehiculos=[];
-    vm.vehiculo = {cod:"", ult_reporte:"", placa:"", position:[], icono:"", imagen:"", tipo_doc:"", servicio:"",
-    doc:"", tipo_lic:"", lic:"", telefono:"",propietario:"",carga:"",poliza:"", turno_cargue:"", turno_descargue:"", fotos:[]};
+    vm.vehiculo = {servicio:"", solicitud:"", placa:"", marca:"", referencia:"", modelo:"", trailer:"", poliza:"", compania:"", 
+    exp_poliza:"", vence_poliza:"", soat:"", exp_soat:"", vence_soat:"", tecno:"", exp_tecno:"", vence_tecno:"", 
+    nombre:"", tipo_doc:"", doc:"", num_lic:"", exp_lic:"",  vence_lic:"", telefono:"", direccion:"", imagen:"", 
+    tipo_carga:"", ntipocarga:"", tipo_remolque:"", ntipo_remolque:"", tipo_equipo:"", ntipo_equipo:"", turno_cargue:"", 
+    turno_descargue:"", fotos:[]};
     vm.date = new Date();
     vm.pageno = 1; // initialize page no to 1
     vm.total_count = 0;
@@ -422,7 +425,195 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             }
         };
         
-}]).controller('SignUpController', ['NgMap', '$http', '$interval',
+}]).controller('EnturneController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', '$interval',
+function($http, $templateCache, $timeout, $alert, $modal, $interval) {
+    var vm = this;
+    vm.options = {format:"YYYY/MM/DD", allowInputToggle:true};
+    vm.dcargue=null;
+    vm.ddescargue=null;
+    vm.zonas = []
+    vm.zona = {id:"", id_empresa:"", desc:"", bahias:[]};
+    vm.bahias = [];
+    vm.bahia = {id:"", id_zona:"", desc:"", nota:""};
+    vm.ticketsR = [];
+    vm.ticketsA = [];
+    vm.ticketsT = [];
+    vm.ticketR={ticket:"", fecha:"", operacion:"", tipo_cargue:"", fecha_enturne:"", placa:"", remolque:"", 
+    tipo_equipo:"", marca:"", modelo:"", referencia:"", trailer:"", poliza:"", soat:"", 
+    tecno:"", zona:"1", bahia:"", fecha_enturnada:"", fecha_terminada:""};
+    vm.ticketA={ticket:"", fecha:"", operacion:"", tipo_cargue:"", fecha_enturne:"", placa:"", remolque:"", 
+    tipo_equipo:"", marca:"", modelo:"", referencia:"", trailer:"", poliza:"", soat:"", 
+    tecno:"", zona:"", bahia:"", fecha_enturnada:"", fecha_terminada:""};
+    vm.ticketT={ticket:"", fecha:"", operacion:"", tipo_cargue:"", fecha_enturne:"", placa:"", remolque:"", 
+    tipo_equipo:"", marca:"", modelo:"", referencia:"", trailer:"", poliza:"", soat:"", 
+    tecno:"", zona:"", bahia:"", fecha_enturnada:"", fecha_terminada:""};
+    vm.pagenoR = 1; // initialize page no to 1
+    vm.total_countR = 0;
+    vm.itemsPerPageR = 20; //this could be a dynamic value from a drop down
+    vm.pagenoA = 1; // initialize page no to 1
+    vm.total_countA = 0;
+    vm.itemsPerPageA = 20; //this could be a dynamic value from a drop down
+    vm.pagenoT = 1; // initialize page no to 1
+    vm.total_countT = 0;
+    vm.itemsPerPageT = 20; //this could be a dynamic value from a drop down
+    var stopTimeR;
+    var stopTimeA;
+    var stopTimeT;
+
+    
+    vm.getDataRegistradas = function(page){ // This would fetch the data on page change.
+        vm.ticketsR = []; 
+        $http.post("../list_enturnes_estados", {porpage:vm.itemsPerPageR, pageno:page,estado:1}).success(function(response){ 
+            //ajax request to fetch data into vm.data
+            vm.ticketsR = response.data;  // data to be displayed on current page.
+            vm.total_countR = response.total_count; // total data count.
+            //Modal_filter.modal('hide');
+        });
+    };
+    
+    vm.getDataAsignadas = function(page){ // This would fetch the data on page change.
+        vm.ticketsA = []; 
+        $http.post("../list_enturnes_estados", {porpage:vm.itemsPerPageA, pageno:page,estado:2}).success(function(response){ 
+            //ajax request to fetch data into vm.data
+            vm.ticketsA = response.data;  // data to be displayed on current page.
+            vm.total_countA = response.total_count; // total data count.
+            //Modal_filter.modal('hide');
+        });
+    };
+    
+    vm.getDataTerminadas = function(page){ // This would fetch the data on page change.
+        vm.ticketsT = []; 
+        $http.post("../list_enturnes_estados", {porpage:vm.itemsPerPageT, pageno:page,estado:3}).success(function(response){ 
+            //ajax request to fetch data into vm.data
+            vm.ticketsT = response.data;  // data to be displayed on current page.
+            vm.total_countT = response.total_count; // total data count.
+            //Modal_filter.modal('hide');
+        });
+    };
+    
+    vm.getDataRegistradas(vm.pagenoR);
+    vm.getDataAsignadas(vm.pagenoA);
+    vm.getDataTerminadas(vm.pagenoT);
+    //vm.llenarZonasBahias();
+    
+    stopTimeR = $interval(vm.getDataRegistradas(vm.pagenoR), 60 * 1000);
+    stopTimeA = $interval(vm.getDataAsignadas(vm.pagenoA), 60 * 1000);
+    stopTimeT = $interval(vm.getDataTerminadas(vm.pagenoT), 60 * 1000);
+    
+    
+    vm.formatDate = function(date){
+        var dateOut = new Date(date);
+        return dateOut;
+    };
+    
+    function MyModalController($scope) {
+        $scope.title = 'Asignar ticket: ' + vm.ticketR.ticket;
+        $scope.ticket = vm.ticketR;
+        $scope.zonas = vm.zonas;
+        console.log($scope.zonas);
+        $scope.bahias = [];
+        
+        $scope.llenarZonasBahias = function(){ // This would fetch the data on page change.
+            $http.post("../list_zonas_bahias").success(function(response){ 
+                //ajax request to fetch data into vm.data
+                $scope.zonas = response;  // data to be displayed on current page.
+                console.log($scope.zonas);
+            });
+        };
+
+        $scope.sendAsignacion = function(){ // This would fetch the data on page change.
+            $scope.ticket.fecha_enturnada = new Date($scope.ticket.fecha_enturnada).toString("yyyy-MM-dd HH:mm:ss");
+            $http.post("../asignTurno", $scope.ticket).success(function(response){ 
+                //ajax request to fetch data into vm.data
+                console.log(response);
+                if(response==='true'){
+                    vm.getDataRegistradas(vm.pagenoR);
+                    vm.getDataAsignadas(vm.pagenoA);
+                    vm.getDataTerminadas(vm.pagenoT);
+                    asignar_turno.hide();
+                }
+            });
+        };
+        
+        $scope.selectZonas = function(id){
+            console.log(id);
+            $scope.bahias = [];
+            for(var i = 0; i < $scope.zonas.length; i++){
+                if($scope.zonas[i].id === id) {
+                   $scope.bahias = angular.copy($scope.zonas[i].bahias);
+                   break;
+                }
+            }
+        };
+        
+        $scope.llenarZonasBahias();
+    }
+    
+     MyModalController.$inject = ['$scope'];
+    
+    var asignar_turno = $modal({controller: MyModalController, templateUrl: '../modal/asignar_turno.html', show: false});
+    
+    
+    vm.showAsignacion = function() {
+      asignar_turno.show();
+    };
+        
+    vm.asignarTickets = function(id){
+        for(var i = 0; i < vm.ticketsR.length; i++){
+            if(vm.ticketsR[i].ticket === id) {
+               vm.ticketR = angular.copy(vm.ticketsR[i]);
+               vm.showAsignacion();
+               break;
+            }
+        }
+    };
+    
+    vm.TipoCarga = [
+        {"ID":1,"Value":"Gases"},
+        {"ID":2,"Value":"Liquida"},
+        {"ID":3,"Value":"Liquida Inflamable"},
+        {"ID":4,"Value":"Reciduo Peligroso"},
+        {"ID":5,"Value":"Refrigerada"},
+        {"ID":6,"Value":"Seca"}
+    ];
+    
+    vm.EstadoSolicitud = [
+        {"ID":1, "Value": "Lanzada"},
+        {"ID":2, "Value": "Asignada"},
+        {"ID":3, "Value": "Enturnada para cargue"},
+        {"ID":4, "Value": "Cargando"},
+        {"ID":5, "Value": "Cargada"},
+        {"ID":6, "Value": "En ruta"},
+        {"ID":7, "Value": "En destino"},
+        {"ID":8, "Value": "Enturnada para Descargue"},
+        {"ID":9, "Value": "Descargando"},
+        {"ID":10, "Value": "Entregada"},
+        {"ID":11, "Value": "Terminada"},
+        {"ID":12, "Value": "Cerrada"}
+    ];
+        
+    vm.dtOptions = {
+        bAutoWidth:true,
+        scrollY: 120,
+        stateSave: true,
+        paging:false,
+        ordering: false,
+        bFilter: false,
+        info:false
+    };
+        
+    vm.dtOptionsAll = {
+        bAutoWidth:true,
+        scrollY: 390,
+        stateSave: true,
+        paging:false,
+        ordering: false,
+        bFilter: false,
+        info:false
+    };
+        
+}])
+    .controller('SignUpController', ['NgMap', '$http', '$interval',
     function(NgMap, $http, $interval) {
             var vm = this;
             vm.vehiculos = [];
