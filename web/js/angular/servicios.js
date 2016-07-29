@@ -456,11 +456,8 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
     vm.pagenoT = 1; // initialize page no to 1
     vm.total_countT = 0;
     vm.itemsPerPageT = 20; //this could be a dynamic value from a drop down
-    var stopTimeR;
-    var stopTimeA;
-    var stopTimeT;
-
-    
+    var stopTime;
+        
     vm.getDataRegistradas = function(page){ // This would fetch the data on page change.
         vm.ticketsR = []; 
         $http.post("../list_enturnes_estados", {porpage:vm.itemsPerPageR, pageno:page,estado:1}).success(function(response){ 
@@ -491,14 +488,16 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
         });
     };
     
-    vm.getDataRegistradas(vm.pagenoR);
-    vm.getDataAsignadas(vm.pagenoA);
-    vm.getDataTerminadas(vm.pagenoT);
-    //vm.llenarZonasBahias();
+    vm.init = function(){
+        vm.getDataRegistradas(vm.pagenoR);
+        vm.getDataAsignadas(vm.pagenoA);
+        vm.getDataTerminadas(vm.pagenoT);
+        //vm.llenarZonasBahias();
+    };
     
-    stopTimeR = $interval(vm.getDataRegistradas(vm.pagenoR), 60 * 1000);
-    stopTimeA = $interval(vm.getDataAsignadas(vm.pagenoA), 60 * 1000);
-    stopTimeT = $interval(vm.getDataTerminadas(vm.pagenoT), 60 * 1000);
+    vm.init();
+    
+    stopTime = $interval(vm.init, 60 * 1000);
     
     
     vm.formatDate = function(date){
@@ -506,7 +505,7 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
         return dateOut;
     };
     
-    function MyModalController($scope) {
+    function AsignarController($scope) {
         $scope.title = 'Asignar ticket: ' + vm.ticketR.ticket;
         $scope.ticket = vm.ticketR;
         $scope.zonas = vm.zonas;
@@ -526,10 +525,8 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
             $http.post("../asignTurno", $scope.ticket).success(function(response){ 
                 //ajax request to fetch data into vm.data
                 console.log(response);
-                if(response==='true'){
-                    vm.getDataRegistradas(vm.pagenoR);
-                    vm.getDataAsignadas(vm.pagenoA);
-                    vm.getDataTerminadas(vm.pagenoT);
+                if(response!=="false"){
+                    vm.init();
                     asignar_turno.hide();
                 }
             });
@@ -549,20 +546,77 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
         $scope.llenarZonasBahias();
     }
     
-     MyModalController.$inject = ['$scope'];
+    function ReasignarController($scope) {
+        $scope.title = 'Reasignar ticket: ' + vm.ticketA.ticket;
+        $scope.ticket = vm.ticketA;
+        $scope.zonas = vm.zonas;
+        console.log($scope.zonas);
+        $scope.bahias = [];
+        
+        $scope.llenarZonasBahias = function(){ // This would fetch the data on page change.
+            $http.post("../list_zonas_bahias").success(function(response){ 
+                //ajax request to fetch data into vm.data
+                $scope.zonas = response;  // data to be displayed on current page.
+                console.log($scope.zonas);
+            });
+        };
+
+        $scope.sendAsignacion = function(){ // This would fetch the data on page change.
+            $scope.ticket.fecha_enturnada = new Date($scope.ticket.fecha_enturnada).toString("yyyy-MM-dd HH:mm:ss");
+            $http.post("../asignTurno", $scope.ticket).success(function(response){ 
+                //ajax request to fetch data into vm.data
+                console.log(response);
+                if(response!=="false"){
+                    vm.init();
+                    asignar_turno.hide();
+                }
+            });
+        };
+        
+        $scope.selectZonas = function(id){
+            console.log(id);
+            $scope.bahias = [];
+            for(var i = 0; i < $scope.zonas.length; i++){
+                if($scope.zonas[i].id === id) {
+                   $scope.bahias = angular.copy($scope.zonas[i].bahias);
+                   break;
+                }
+            }
+        };
+        
+        $scope.llenarZonasBahias();
+    }
     
-    var asignar_turno = $modal({controller: MyModalController, templateUrl: '../modal/asignar_turno.html', show: false});
+     AsignarController.$inject = ['$scope'];
+     ReasignarController.$inject = ['$scope'];
+    
+    var asignar_turno = $modal({controller: AsignarController, templateUrl: '../modal/asignar_turno.html', show: false});
+    var reasignar_turno = $modal({controller: ReasignarController, templateUrl: '../modal/asignar_turno.html', show: false});
     
     
     vm.showAsignacion = function() {
       asignar_turno.show();
     };
-        
+    
+    vm.showReasignacion = function() {
+      reasignar_turno.show();
+    };
+    
     vm.asignarTickets = function(id){
         for(var i = 0; i < vm.ticketsR.length; i++){
             if(vm.ticketsR[i].ticket === id) {
                vm.ticketR = angular.copy(vm.ticketsR[i]);
                vm.showAsignacion();
+               break;
+            }
+        }
+    };
+    
+    vm.reasignarTickets = function(id){
+        for(var i = 0; i < vm.ticketsA.length; i++){
+            if(vm.ticketsA[i].ticket === id) {
+               vm.ticketA = angular.copy(vm.ticketsA[i]);
+               vm.showReasignacion();
                break;
             }
         }

@@ -226,7 +226,7 @@ if(session.getAttribute("user") == null){
                     <div class="col-lg-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Turnos en proceso</h3>
+                                <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Turnos en asignados y en proceso</h3>
                             </div>
                             <div class="panel-body">
                                 <div>
@@ -242,13 +242,13 @@ if(session.getAttribute("user") == null){
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr dir-paginate="ticketA in ctrl.ticketsA|itemsPerPage:ctrl.itemsPerPageA" total-items="ctrl.total_countA">
+                                            <tr dir-paginate="ticketA in ctrl.ticketsA | itemsPerPage:ctrl.itemsPerPageA: 'Asign'" pagination-id="Asign" total-items="ctrl.total_countT">
                                                 <td>{{ticketA.ticket}}</td>
                                                 <td>{{ticketA.operacion}}</td>
                                                 <td>{{ticketA.tipo_cargue}}</td>
                                                 <td>{{ctrl.formatDate(ticketA.fecha_enturne) | date:"yyyy/MM/dd hh:mma"}}</td>
                                                 <td>{{ticketA.placa}}</td>
-                                                <td><button class="btn btn-xs btn-info" >Detalles</button></td>
+                                                <td><button class="btn btn-xs btn-info" ng-click="ctrl.reasignarTickets(ticketA.ticket)">Detalles</button></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -256,12 +256,13 @@ if(session.getAttribute("user") == null){
                                         max-size="8"
                                         direction-links="true"
                                         boundary-links="true" 
-                                        on-page-change="ctrl.getDataAsignadas(newPageNumber)">
+                                        on-page-change="ctrl.getDataAsignadas(newPageNumber)"
+                                        pagination-id="Asign">
                                     </dir-pagination-controls>
                                 </div>
                             </div>
                         </div>
-
+                    
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Turnos finalizados</h3>
@@ -280,13 +281,13 @@ if(session.getAttribute("user") == null){
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr dir-paginate="ticketT in ctrl.ticketsT|itemsPerPage:ctrl.itemsPerPageT" total-items="ctrl.total_countT">
+                                            <tr dir-paginate="ticketT in ctrl.ticketsT | itemsPerPage:ctrl.itemsPerPageT: 'Term'" pagination-id="Term" total-items="ctrl.total_countT">
                                                 <td>{{ticketT.ticket}}</td>
                                                 <td>{{ticketT.operacion}}</td>
                                                 <td>{{ticketT.tipo_cargue}}</td>
                                                 <td>{{ctrl.formatDate(ticketT.fecha_enturne) | date:"yyyy/MM/dd hh:mma"}}</td>
                                                 <td>{{ticketT.placa}}</td>
-                                                <td><button class="btn btn-xs btn-info">Detalles</button></td>
+                                                <td><button class="btn btn-xs btn-info" ng-click="ctrl.asignarTickets(ticketT.ticket)">Detalles</button></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -294,7 +295,8 @@ if(session.getAttribute("user") == null){
                                         max-size="8"
                                         direction-links="true"
                                         boundary-links="true" 
-                                        on-page-change="ctrl.getDataTerminadas(newPageNumber)">
+                                        on-page-change="ctrl.getDataTerminadas(newPageNumber)"
+                                        pagination-id="Term">
                                     </dir-pagination-controls>
                                 </div>
                             </div>
@@ -320,7 +322,7 @@ if(session.getAttribute("user") == null){
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr dir-paginate="ticketR in ctrl.ticketsR|itemsPerPage:ctrl.itemsPerPageR" total-items="ctrl.total_countR">
+                                            <tr dir-paginate="ticketR in ctrl.ticketsR | itemsPerPage:ctrl.itemsPerPageR: 'Regs'" pagination-id="Regs" total-items="ctrl.total_countR">
                                                 <td>{{ticketR.ticket}}</td>
                                                 <td>{{ticketR.operacion}}</td>
                                                 <td>{{ticketR.tipo_cargue}}</td>
@@ -334,7 +336,8 @@ if(session.getAttribute("user") == null){
                                         max-size="8"
                                         direction-links="true"
                                         boundary-links="true" 
-                                        on-page-change="ctrl.getDataRegistradas(newPageNumber)">
+                                        on-page-change="ctrl.getDataRegistradas(newPageNumber)"
+                                        pagination-id="Regs">
                                     </dir-pagination-controls>
                                 </div>
                             </div>

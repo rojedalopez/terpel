@@ -689,7 +689,7 @@ public class Listas {
                 "WHERE tk.nit_empresa = ? AND fech_enturne = CURDATE() " ;
                 
                 if(tipo == 1){
-                    instruccion+= " AND term_enturne = 0 ";	        
+                    instruccion+= " AND term_enturne = 0 AND fecha_enturne IS NULL ";	        
                 }else if(tipo == 2){
                     instruccion+= " AND fecha_enturne IS NOT NULL ";	        
                 }else if(tipo == 3){
