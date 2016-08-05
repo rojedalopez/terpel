@@ -50,8 +50,12 @@ public class list_enturnes_estados extends HttpServlet {
                 if(session.getAttribute("user")!=null){
                     Usuario u = (Usuario)session.getAttribute("user"); 
                     String x = Listas.listaEnturneEmpresasPorEstados(porpage, pageno, u.getNit(), estado).toJSONString();
-                    System.out.println(x);
+                    if(estado==2){
+                        System.out.println(x);
+                    }
                     out.println(x);
+                }else{
+                    response.sendRedirect("../");
                 }
             }catch(Exception e){
                 System.out.println("Entro aqui en el error! " + e.toString());

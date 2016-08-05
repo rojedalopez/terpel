@@ -230,23 +230,27 @@ if(session.getAttribute("user") == null){
                             </div>
                             <div class="panel-body">
                                 <div>
-                                    <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptions" id="dataTables-example">
+                                    <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptionsAsign" id="dataTables-asign">
                                         <thead>
                                             <tr>
-                                                <th>Ticket</th>
+                                                <th>Turno</th>
                                                 <th>Operacion</th>
                                                 <th>Tipo carga</th>
-                                                <th>Fecha asignación</th>
+                                                <th>Fecha asignada</th>
+                                                <th>Zona</th>
+                                                <th>Bahia</th>
                                                 <th>Placa veh.</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr dir-paginate="ticketA in ctrl.ticketsA | itemsPerPage:ctrl.itemsPerPageA: 'Asign'" pagination-id="Asign" total-items="ctrl.total_countT">
-                                                <td>{{ticketA.ticket}}</td>
+                                                <td>{{ticketA.turno}}</td>
                                                 <td>{{ticketA.operacion}}</td>
                                                 <td>{{ticketA.tipo_cargue}}</td>
-                                                <td>{{ctrl.formatDate(ticketA.fecha_enturne) | date:"yyyy/MM/dd hh:mma"}}</td>
+                                                <td>{{ctrl.formatDate(ticketA.fecha_enturnado) | date:"yyyy/MM/dd hh:mma"}}</td>
+                                                <td>{{ticketA.nzona}}</td>
+                                                <td>{{ticketA.nbahia}}</td>
                                                 <td>{{ticketA.placa}}</td>
                                                 <td><button class="btn btn-xs btn-info" ng-click="ctrl.reasignarTickets(ticketA.ticket)">Detalles</button></td>
                                             </tr>
@@ -269,13 +273,12 @@ if(session.getAttribute("user") == null){
                             </div>
                             <div class="panel-body">
                                 <div>
-                                    <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptions" id="dataTables-example">
+                                    <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptionsTerm" id="dataTables-term">
                                         <thead>
                                             <tr>
                                                 <th>Ticket</th>
                                                 <th>Operacion</th>
                                                 <th>Tipo carga</th>
-                                                <th>Fecha asignación</th>
                                                 <th>Placa veh.</th>
                                                 <th></th>
                                             </tr>
@@ -285,7 +288,6 @@ if(session.getAttribute("user") == null){
                                                 <td>{{ticketT.ticket}}</td>
                                                 <td>{{ticketT.operacion}}</td>
                                                 <td>{{ticketT.tipo_cargue}}</td>
-                                                <td>{{ctrl.formatDate(ticketT.fecha_enturne) | date:"yyyy/MM/dd hh:mma"}}</td>
                                                 <td>{{ticketT.placa}}</td>
                                                 <td><button class="btn btn-xs btn-info" ng-click="ctrl.asignarTickets(ticketT.ticket)">Detalles</button></td>
                                             </tr>
@@ -310,13 +312,12 @@ if(session.getAttribute("user") == null){
                             </div>
                             <div class="panel-body">
                                 <div>
-                                    <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptionsAll" id="dataTables-example">
+                                    <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptionsRegs" id="dataTables-regs">
                                         <thead>
                                             <tr>
                                                 <th>Ticket</th>
                                                 <th>Operacion</th>
                                                 <th>Tipo carga</th>
-                                                <th>Fecha asignación</th>
                                                 <th>Placa veh.</th>
                                                 <th></th>
                                             </tr>
@@ -326,7 +327,6 @@ if(session.getAttribute("user") == null){
                                                 <td>{{ticketR.ticket}}</td>
                                                 <td>{{ticketR.operacion}}</td>
                                                 <td>{{ticketR.tipo_cargue}}</td>
-                                                <td>{{ctrl.formatDate(ticketR.fecha_enturne) | date:"yyyy/MM/dd hh:mma"}}</td>
                                                 <td>{{ticketR.placa}}</td>
                                                 <td><button class="btn btn-xs btn-info" ng-click="ctrl.asignarTickets(ticketR.ticket)">Detalles</button></td>
                                             </tr>

@@ -73,6 +73,8 @@ public class list_solicitudes extends HttpServlet {
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
                 out.println(Listas.listaSolicitudes(porpage, pageno, q, cargue, descargue, carga, estado, u.getNit()).toJSONString());
+            }else{
+                response.sendRedirect("../");
             }
         }
     }

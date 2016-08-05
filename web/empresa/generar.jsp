@@ -24,8 +24,6 @@ if(session.getAttribute("user") == null){
 
     <!-- Bootstrap Core CSS -->
     <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="http://mgcrea.github.io/angular-strap/styles/libs.min.css">
-    <link rel="stylesheet" href="http://mgcrea.github.io/angular-strap/styles/docs.min.css">
     <link rel="stylesheet" href="../css/bootstrap-datetimepicker.min.css">
     <link href="../css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
@@ -424,12 +422,21 @@ if(session.getAttribute("user") == null){
                                 travel-mode="DRIVING"
                                 origin="{{ctrl.placeO.geometry.location}}"
                                 destination="{{ctrl.placeD.geometry.location}}" suppressMarkers='true'>
-                                <marker id='{{vehiculo.cod}}' position="{{vehiculo.position}}" ng-repeat="vehiculo in ctrl.vehiculos"
+                                <marker id='{{vehiculo.placa}}' position="{{vehiculo.position}}" ng-repeat="vehiculo in ctrl.vehiculos"
                                 on-click="ctrl.showDetail(vehiculo)" icon="../{{vehiculo.icono}}" reload></marker>
                                 <info-window id="foo-iw">
-                                    <div ng-non-bindable="">
-                                      placa: {{ctrl.vehiculo.placa}}<br/>
-                                      ult reporte : {{ctrl.vehiculo.ult_reporte}}<br/>
+                                      <div ng-non-bindable="">
+                                        <img width="64" src="{{ctrl.vehiculo.imagen}}" align="left" /> 
+                                        Conductor: {{ctrl.vehiculo.nombre}}<br/>
+                                        Telefono: {{ctrl.vehiculo.telefono}}<br/>
+                                        Placa: {{ctrl.vehiculo.placa}}<br/>
+                                        Placa Trailer: {{ctrl.vehiculo.trailer}}<br/>
+                                        Tipo Equipo: {{ctrl.vehiculo.tipoequipo}}<br/>
+                                        Tipo Carga: {{ctrl.vehiculo.tipocarga}}<br/>
+                                        Marca: {{ctrl.vehiculo.marca}}<br/>
+                                        Modelo: {{ctrl.vehiculo.modelo}}<br/>
+                                        Referencia: {{ctrl.vehiculo.referencia}}<br/>
+                                        Ult Actualización: {{ctrl.vehiculo.ult_reporte}}<br/>
                                     </div>
                                 </info-window>
                                 <shape id="circle" name="circle" stroke-color="#01DF3A" stroke-opacity="0.5" 

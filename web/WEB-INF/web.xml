@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
     <servlet>
         <servlet-name>saveServicio</servlet-name>
         <servlet-class>servletsSave.saveServicio</servlet-class>
@@ -92,6 +94,10 @@
         <servlet-name>RegisterIDEnturnex</servlet-name>
         <servlet-class>servletsMobile.RegisterIDEnturnex</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>finishOperacion</servlet-name>
+        <servlet-class>servletsSave.finishOperacion</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>saveServicio</servlet-name>
         <url-pattern>/saveServicio</url-pattern>
@@ -183,6 +189,10 @@
     <servlet-mapping>
         <servlet-name>RegisterIDEnturnex</servlet-name>
         <url-pattern>/RegisterIDEnturnex</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>finishOperacion</servlet-name>
+        <url-pattern>/finishOperacion</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

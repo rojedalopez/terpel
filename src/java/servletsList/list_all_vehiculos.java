@@ -83,6 +83,8 @@ protected void processRequest(HttpServletRequest request, HttpServletResponse re
                 JSONArray lista = (JSONArray) objeto.get("lista");
                 String x = lista.toJSONString();
                 out.println(x);
+            }else{
+                response.sendRedirect("../");
             }
         }catch(Exception e){
             System.out.println("Entro aqui en el error! " + e.toString());

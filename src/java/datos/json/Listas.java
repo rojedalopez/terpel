@@ -25,7 +25,7 @@ public class Listas {
             try{
                 conn=conexion();
                 String instruccion="SELECT ec.id_equipoconductor, cod_conductor, ec.plca_equipo, lat_equipoconductor, long_equipoconductor, " +
-                "velo_equipoconductor, ult_actualizacion, id_tipocarga, regs_imei_conductor "+
+                "velo_equipoconductor, ult_actualizacion, id_tipocarga, IFNULL(regs_imei_conductor,'-1') "+
                 "FROM tblEquipoConductor AS ec INNER JOIN tblEquipo AS eq ON ec.plca_equipo = eq.plca_equipo "+
                 "WHERE id_tipocarga = "+tipo+" AND disp_equipoconductor = 1 AND " +
                 "(acos(sin(radians("+lat+")) * sin(radians(lat_equipoconductor)) + " +
@@ -33,6 +33,7 @@ public class Listas {
                 "cos(radians("+lng+") - radians(long_equipoconductor))) * 6378)<100;";	        
                 
                 st=conn.prepareStatement(instruccion);
+                System.out.println(instruccion);
                 datos=(ResultSet) st.executeQuery();
                 while (datos.next()) {
                     JSONObject objeto= new JSONObject();
@@ -45,7 +46,9 @@ public class Listas {
                     objeto.put("position", posicion);
                     objeto.put("velocidad", datos.getFloat(6));                    
                     objeto.put("ult_reporte", formateador.format(formateador.parse(datos.getString(7))));
-                    TOs.add(datos.getString(9));
+                    if(!datos.getString(9).equals("-1")){ 
+                        TOs.add(datos.getString(9));
+                    }
                     lista.add(objeto);
                 }
                 
@@ -77,12 +80,17 @@ public class Listas {
         
             try{
                 conn=conexion();
-                String instruccion="SELECT ec.id_equipoconductor, cod_conductor, ec.plca_equipo, lat_equipoconductor, long_equipoconductor, " +
-                "velo_equipoconductor, ult_actualizacion, eq.id_tipocarga, regs_imei_conductor, disp_equipoconductor, "+
+                String instruccion="SELECT ec.plca_equipo, lat_equipoconductor, long_equipoconductor, ult_actualizacion, " +
+                "desc_remolque, desc_tipocarga, desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, " +
+                "plac_trailer_equipo, CONCAT(nomb_conductor, ' ', apll_conductor), tel_conductor, img_conductor, " +
                 "se.id_solicitud, se.id_servicio, so.orig_solicitud, so.dest_solicitud, CASE " +
                 "WHEN disp_equipoconductor = 0 THEN 'css/images/ic_truckicon_ocup.png' " +
-                "WHEN disp_equipoconductor = 1 THEN 'css/images/ic_truckicon_disp.png' END AS icono "+
+                "WHEN disp_equipoconductor = 1 THEN 'css/images/ic_truckicon_disp.png' END AS icono " +
                 "FROM tblEquipoConductor AS ec INNER JOIN tblEquipo AS eq ON ec.plca_equipo = eq.plca_equipo " +
+                "INNER JOIN tblConductor AS co ON co.cod_conductor = ec.cod_conductor " +
+                "INNER JOIN tblRemolque AS tr ON tr.id_remolque = eq.id_remolque " +
+                "INNER JOIN tblTipoCarga AS tc ON tc.id_tipocarga = eq.id_tipocarga " +
+                "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = eq.id_tipoequipo " +
                 "LEFT JOIN tblServicio AS se ON ec.id_equipoconductor = se.id_equipoconductor " +
                 "LEFT JOIN tblSolicitud AS so ON se.id_solicitud = so.id_solicitud "+
                 "WHERE " ;
@@ -100,7 +108,7 @@ public class Listas {
                 }
                 
                 if(!todo){
-                    instruccion += " AND ult_actualizacion > DATE_ADD(NOW(),INTERVAL -17 HOUR);";
+                    instruccion += " AND ult_actualizacion > DATE_ADD(NOW(),INTERVAL -12 HOUR);";
                 }
                 
                 System.out.println(instruccion);
@@ -110,21 +118,26 @@ public class Listas {
                 while (datos.next()) {
                     JSONObject objeto= new JSONObject();
                     JSONArray posicion= new JSONArray();
-                    objeto.put("id", datos.getInt(1));
-                    objeto.put("cod", datos.getString(2));
-                    objeto.put("placa", datos.getString(3));
-                    posicion.add(datos.getFloat(4));
-                    posicion.add(datos.getFloat(5));
+                    objeto.put("placa", datos.getString(1));
+                    posicion.add(datos.getFloat(2));
+                    posicion.add(datos.getFloat(3));
                     objeto.put("position", posicion);
-                    objeto.put("velocidad", datos.getFloat(6));                    
-                    objeto.put("ult_reporte", formateador.format(formateador.parse(datos.getString(7))));
-                    objeto.put("carga", datos.getString(8));
-                    objeto.put("estado", datos.getString(10));
-                    objeto.put("solicitud", datos.getString(11));
-                    objeto.put("servicio", datos.getString(12));
-                    objeto.put("origen", datos.getString(13));
-                    objeto.put("destino", datos.getString(14));
-                    objeto.put("icono", datos.getString(15));
+                    objeto.put("ult_reporte", formateador.format(formateador.parse(datos.getString(4))));
+                    objeto.put("remolque", datos.getString(5));                    
+                    objeto.put("tipocarga", datos.getString(6));                    
+                    objeto.put("tipoequipo", datos.getString(7));
+                    objeto.put("marca", datos.getString(8));
+                    objeto.put("modelo", datos.getString(9));
+                    objeto.put("referencia", datos.getString(10));
+                    objeto.put("trailer", datos.getString(11));
+                    objeto.put("nombre", datos.getString(12));
+                    objeto.put("telefono", datos.getString(13));
+                    objeto.put("imagen", datos.getString(14));
+                    objeto.put("solicitud", datos.getString(15));
+                    objeto.put("servicio", datos.getString(16));
+                    objeto.put("origen", datos.getString(17));
+                    objeto.put("destino", datos.getString(18));
+                    objeto.put("icono", datos.getString(19));
                     lista.add(objeto);
                 }
                 
@@ -678,7 +691,7 @@ public class Listas {
                 String instruccion="SELECT id_ticketenturne, fech_enturne, CASE WHEN oper_enturne = 'C' THEN 'Cargue' ELSE 'Descargue' END, " +
                 "tc.desc_tipocargue, fech_ticket_enturne, fecha_enturne,  desc_zonaempresa, desc_habia, " +
                 "eq.plca_equipo, rm.desc_remolque, te.desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, " +
-                "plac_trailer_equipo, poliza_equipo, soat_equipo, tecno_equipo, fech_term_enturne " +
+                "plac_trailer_equipo, poliza_equipo, soat_equipo, tecno_equipo, fech_term_enturne, tk.id_zonaempresa, tk.id_bahia, turno_enturne " +
                 "FROM tblTicketEnturne AS tk INNER JOIN tblTipoCargue AS tc ON tk.id_tipocargue = tc.id_tipocargue " +
                 "INNER JOIN tblEquipoConductor AS ec ON ec.id_equipoconductor = tk.id_equipoconductor " +
                 "INNER JOIN tblEquipo AS eq ON eq.plca_equipo = ec.plca_equipo " +
@@ -691,7 +704,7 @@ public class Listas {
                 if(tipo == 1){
                     instruccion+= " AND term_enturne = 0 AND fecha_enturne IS NULL ";	        
                 }else if(tipo == 2){
-                    instruccion+= " AND fecha_enturne IS NOT NULL ";	        
+                    instruccion+= " AND term_enturne = 0 AND fecha_enturne IS NOT NULL ";	        
                 }else if(tipo == 3){
                     instruccion+= " AND term_enturne = 1 ";	        
                 }
@@ -712,8 +725,11 @@ public class Listas {
                     objeto.put("tipo_cargue", datos.getString(4));
                     objeto.put("fecha_enturne", datos.getString(5));
                     objeto.put("fecha_enturnado", datos.getString(6));
-                    objeto.put("zona", datos.getString(7));
-                    objeto.put("bahia", datos.getString(8));
+                    objeto.put("nzona", datos.getString(7));
+                    objeto.put("nbahia", datos.getString(8));
+                    objeto.put("zona", datos.getString(20));
+                    objeto.put("bahia", datos.getString(21));
+                    objeto.put("turno", datos.getString(22));
                     objeto.put("placa", datos.getString(9));
                     objeto.put("remolque", datos.getString(10));
                     objeto.put("tipo_equipo", datos.getString(11));

@@ -45,7 +45,7 @@ public class asignTurno extends HttpServlet {
         String ticket = (String) joSolicitud.get("ticket");
         int zona = Integer.parseInt(joSolicitud.get("zona").toString());
         int bahia = Integer.parseInt(joSolicitud.get("bahia").toString());
-        String hora = (String) joSolicitud.get("fecha_enturnada");
+        String hora = (String) joSolicitud.get("fecha_enturnado");
         String nota = (String) joSolicitud.get("nota");
         
         HttpSession session =  null;
@@ -57,6 +57,8 @@ public class asignTurno extends HttpServlet {
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
                 boolean x = Guardar.AsignTurno(ticket, zona, bahia, hora, nota);
+                JSONObject json = new JSONObject();
+                json.put("retorno", x);
                 out.println(x);
             }
         }

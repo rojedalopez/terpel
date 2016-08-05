@@ -11,8 +11,9 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             vm.mapa = {radio:50000, carga:"", tipocarga:"", addressOrigin:[], solicitud:"", todos:false, remolques:[]};
             vm.options = {format: "YYYY/MM/DD hh:mm A", allowInputToggle:true, showClose:true};
             vm.shape = {center:[], radius:50000};
-            vm.vehiculo = {cod:"", ult_reporte:"", placa:"", position:[], icono:"", imagen:"", tipo_doc:"",
-            doc:"", tipo_lic:"", lic:"", telefono:"",propietario:"",carga:"",poliza:""};
+            vm.vehiculo = {placa:"", position:[], ult_reporte:"", remolque:"", tipocarga:"", tipoequipo:"", marca:"",
+            modelo:"", referencia:"", trailer:"", nombre:"", telefono:"", imagen:"", solicitud:"", servicio:"", 
+            origen:"", destino:"", icono:""};
             vm.servicio={id:"",addressOrigin:[], nameOrigin:"",addressDestination:[],nameDestination:"",carga:"",
             dcarguemin:"", dcarguemax:"", ddescarguemin:"", ddescarguemax:"",equipos:"",orden:"", kms:"", time:"",
             nota_detalle:"", nota_pago:"", flete:"", radio:10000};
@@ -59,7 +60,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             vm.showDetail = function(e, vehiculo) {
                 console.log(vehiculo);
                 vm.vehiculo = vehiculo;
-                vm.map.showInfoWindow('foo-iw', vehiculo.cod);
+                vm.map.showInfoWindow('foo-iw', vehiculo.placa);
             };
 
             vm.sendServicio = function(){
@@ -135,6 +136,8 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
                     }
                    
                 }
+                
+                vm.ReloadVehiculos();
             };
             
             vm.cambiarRemolque = function(){
@@ -440,13 +443,13 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
     vm.ticketsT = [];
     vm.ticketR={ticket:"", fecha:"", operacion:"", tipo_cargue:"", fecha_enturne:"", placa:"", remolque:"", 
     tipo_equipo:"", marca:"", modelo:"", referencia:"", trailer:"", poliza:"", soat:"", 
-    tecno:"", zona:"1", bahia:"", fecha_enturnada:"", fecha_terminada:""};
+    tecno:"", zona:"", bahia:"", nzona:"", nbahia:"", fecha_enturnado:"", fecha_terminada:"", turno:""};
     vm.ticketA={ticket:"", fecha:"", operacion:"", tipo_cargue:"", fecha_enturne:"", placa:"", remolque:"", 
     tipo_equipo:"", marca:"", modelo:"", referencia:"", trailer:"", poliza:"", soat:"", 
-    tecno:"", zona:"", bahia:"", fecha_enturnada:"", fecha_terminada:""};
+    tecno:"", zona:"", bahia:"", nzona:"", nbahia:"", fecha_enturnado:"", fecha_terminada:"", turno:""};
     vm.ticketT={ticket:"", fecha:"", operacion:"", tipo_cargue:"", fecha_enturne:"", placa:"", remolque:"", 
     tipo_equipo:"", marca:"", modelo:"", referencia:"", trailer:"", poliza:"", soat:"", 
-    tecno:"", zona:"", bahia:"", fecha_enturnada:"", fecha_terminada:""};
+    tecno:"", zona:"", bahia:"", nzona:"", nbahia:"", fecha_enturnado:"", fecha_terminada:"", turno:""};
     vm.pagenoR = 1; // initialize page no to 1
     vm.total_countR = 0;
     vm.itemsPerPageR = 20; //this could be a dynamic value from a drop down
@@ -457,7 +460,16 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
     vm.total_countT = 0;
     vm.itemsPerPageT = 20; //this could be a dynamic value from a drop down
     var stopTime;
-        
+    
+    vm.llenarZonasBahias = function(){ // This would fetch the data on page change.
+        $http.post("../list_zonas_bahias").success(function(response){ 
+            //ajax request to fetch data into vm.data
+            vm.zonas = response;  // data to be displayed on current page.
+        });
+    };
+
+    vm.llenarZonasBahias();
+
     vm.getDataRegistradas = function(page){ // This would fetch the data on page change.
         vm.ticketsR = []; 
         $http.post("../list_enturnes_estados", {porpage:vm.itemsPerPageR, pageno:page,estado:1}).success(function(response){ 
@@ -492,12 +504,11 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
         vm.getDataRegistradas(vm.pagenoR);
         vm.getDataAsignadas(vm.pagenoA);
         vm.getDataTerminadas(vm.pagenoT);
-        //vm.llenarZonasBahias();
     };
     
     vm.init();
     
-    stopTime = $interval(vm.init, 60 * 1000);
+    stopTime = $interval(vm.init, 30 * 1000);
     
     
     vm.formatDate = function(date){
@@ -506,22 +517,19 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
     };
     
     function AsignarController($scope) {
+        
         $scope.title = 'Asignar ticket: ' + vm.ticketR.ticket;
         $scope.ticket = vm.ticketR;
+        $scope.fecha_enturnado = null;
+        $scope.reasignar = false;
         $scope.zonas = vm.zonas;
         console.log($scope.zonas);
         $scope.bahias = [];
         
-        $scope.llenarZonasBahias = function(){ // This would fetch the data on page change.
-            $http.post("../list_zonas_bahias").success(function(response){ 
-                //ajax request to fetch data into vm.data
-                $scope.zonas = response;  // data to be displayed on current page.
-                console.log($scope.zonas);
-            });
-        };
+        
 
         $scope.sendAsignacion = function(){ // This would fetch the data on page change.
-            $scope.ticket.fecha_enturnada = new Date($scope.ticket.fecha_enturnada).toString("yyyy-MM-dd HH:mm:ss");
+            $scope.ticket.fecha_enturnado = new Date($scope.fecha_enturnado).toString("yyyy-MM-dd HH:mm:ss");
             $http.post("../asignTurno", $scope.ticket).success(function(response){ 
                 //ajax request to fetch data into vm.data
                 console.log(response);
@@ -543,30 +551,26 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
             }
         };
         
-        $scope.llenarZonasBahias();
     }
     
     function ReasignarController($scope) {
         $scope.title = 'Reasignar ticket: ' + vm.ticketA.ticket;
         $scope.ticket = vm.ticketA;
         $scope.zonas = vm.zonas;
+        $scope.fecha_enturnado = $scope.ticket.fecha_enturnado;
+        $scope.reasignar = true;
         console.log($scope.zonas);
         $scope.bahias = [];
         
-        $scope.llenarZonasBahias = function(){ // This would fetch the data on page change.
-            $http.post("../list_zonas_bahias").success(function(response){ 
-                //ajax request to fetch data into vm.data
-                $scope.zonas = response;  // data to be displayed on current page.
-                console.log($scope.zonas);
-            });
-        };
-
+        
+        
         $scope.sendAsignacion = function(){ // This would fetch the data on page change.
-            $scope.ticket.fecha_enturnada = new Date($scope.ticket.fecha_enturnada).toString("yyyy-MM-dd HH:mm:ss");
+            console.log($scope.fecha_enturnado);
+            $scope.ticket.fecha_enturnado = new Date($scope.fecha_enturnado).toString("yyyy-MM-dd HH:mm:ss");
             $http.post("../asignTurno", $scope.ticket).success(function(response){ 
                 //ajax request to fetch data into vm.data
                 console.log(response);
-                if(response!=="false"){
+                if(response.retorno!==false){
                     vm.init();
                     asignar_turno.hide();
                 }
@@ -584,7 +588,6 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
             }
         };
         
-        $scope.llenarZonasBahias();
     }
     
      AsignarController.$inject = ['$scope'];
@@ -613,9 +616,15 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
     };
     
     vm.reasignarTickets = function(id){
+        console.log(id);
+        console.log(vm.ticketsA);
+        console.log(vm.ticketsA.length);
         for(var i = 0; i < vm.ticketsA.length; i++){
+            console.log(vm.ticketsA[i].ticket);
             if(vm.ticketsA[i].ticket === id) {
+               console.log("entro");
                vm.ticketA = angular.copy(vm.ticketsA[i]);
+               console.log(vm.ticketA);
                vm.showReasignacion();
                break;
             }
@@ -646,7 +655,7 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
         {"ID":12, "Value": "Cerrada"}
     ];
         
-    vm.dtOptions = {
+    vm.dtOptionsAsign = {
         bAutoWidth:true,
         scrollY: 120,
         stateSave: true,
@@ -655,8 +664,18 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval) {
         bFilter: false,
         info:false
     };
-        
-    vm.dtOptionsAll = {
+       
+    vm.dtOptionsTerm = {
+        bAutoWidth:true,
+        scrollY: 120,
+        stateSave: true,
+        paging:false,
+        ordering: false,
+        bFilter: false,
+        info:false
+    };
+    
+    vm.dtOptionsRegs = {
         bAutoWidth:true,
         scrollY: 390,
         stateSave: true,

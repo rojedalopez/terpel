@@ -30,6 +30,8 @@ public class list_zonas_bahias extends HttpServlet {
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
                 out.println(Listas.listaZonasEmpresa(u.getNit()).toJSONString());
+            }else{
+                response.sendRedirect("../");
             }
         }
     }

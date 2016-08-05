@@ -163,7 +163,7 @@ public class Metodos {
         return sb.toString();
     }
     
-    public static void EnvioNotificacion(Solicitud sol, JSONArray TOs) throws SQLException{
+     public static void EnvioNotificacion(Solicitud sol, JSONArray TOs) throws SQLException{
         // Prepare list of target registration IDs
 	List<String> registrationIDs = new ArrayList<>();
         
@@ -217,7 +217,7 @@ public class Metodos {
 	}
     }
 
-    public static void EnvioNotificacion(String TO, String zona, String bahia, String fecha) throws SQLException{
+    public static void EnvioNotificacion(String TO, String zona, String bahia, String fecha, String retorno) throws SQLException{
         // Prepare list of target registration IDs
 	List<String> registrationIDs = new ArrayList<>();
         
@@ -231,6 +231,7 @@ public class Metodos {
 	payload.put("zona", zona);
         payload.put("bahia", bahia);
         payload.put("fecha_estimada", fecha);
+        payload.put("retorno", retorno);
         
 	// Prepare the push request
 	PushyPushRequest push = new PushyPushRequest(payload, registrationIDs.toArray(new String[registrationIDs.size()]));

@@ -225,7 +225,11 @@ public class Guardar {
         boolean b=false;
         Connection conn=null;
         PreparedStatement insertar=null;
-        
+        System.out.println(ticket);
+        System.out.println(bahia);
+        System.out.println(zona);
+        System.out.println(fecha);
+        System.out.println(nota);
         conn=conexion();
             try (CallableStatement cs = conn.prepareCall("{CALL logycus360.asignTurno(?, ?, ?, ?, ?, ?)}")) {
                 cs.setString(1, ticket);
@@ -240,7 +244,7 @@ public class Guardar {
                 
                 if(!retorno.equals("false")){
                     String[] vector = retorno.split("\\|");
-                    Metodos.EnvioNotificacion(vector[0], vector[1], vector[2], vector[3]);
+                    Metodos.EnvioNotificacion(vector[0], vector[1], vector[2], vector[3], vector[4]);
                     return true;
                 }else{
                     return false;
@@ -277,6 +281,44 @@ public class Guardar {
                 cs.executeQuery();
 
                 return true;
+                
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }catch (Exception e){
+                System.out.println("error Exception en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return false;
+
+    }
+    
+    
+    public static boolean finishTurno(String ticket, String nota) throws ClassNotFoundException, SQLException{
+        boolean b=false;
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        
+        
+        conn=conexion();
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.finishTurno(?, ?, ?)}")) {
+                cs.setString(1, ticket);
+                cs.setString(2, nota);
+                cs.registerOutParameter(3, Types.INTEGER);
+                cs.executeQuery();
+                
+                int retorno = cs.getInt(3);
+                
+                if(retorno==1){
+                    return true;
+                }else{
+                    return false;
+                }
                 
 
             }catch (SQLException e) {

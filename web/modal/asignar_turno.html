@@ -29,8 +29,8 @@
                     <div class="form-group">
                         <label>Fecha asignada:</label>
                         <div class="input-group input-group-sm date" 
-                            datetimepicker ng-model="ticket.fecha_enturnada" options="ctrl.options">
-                              <input type="text" class="form-control"/>
+                             datetimepicker ng-model="fecha_enturnado" options="ctrl.options" ng-disabled="reasignar">
+                              <input type="text" class="form-control" ng-disabled="reasignar"/>
                               <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                               </span>

@@ -51,6 +51,8 @@ public class list_enturnes extends HttpServlet {
                     String x = Listas.listaEnturneEmpresas(porpage, pageno, u.getNit()).toJSONString();
                     System.out.println(x);
                     out.println(x);
+                }else{
+                    response.sendRedirect("../");
                 }
             }catch(Exception e){
                 System.out.println("Entro aqui en el error! " + e.toString());

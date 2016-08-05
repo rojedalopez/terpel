@@ -72,6 +72,8 @@ public class list_vehiculos_empresa extends HttpServlet {
                 String x = lista.toJSONString();
                 System.out.println(x);
                 out.println(x);
+            }else{
+                response.sendRedirect("../");
             }
         }catch(Exception e){
             System.out.println("Entro aqui en el error! " + e.toString());
