@@ -163,7 +163,7 @@ public class Metodos {
         return sb.toString();
     }
     
-     public static void EnvioNotificacion(Solicitud sol, JSONArray TOs) throws SQLException{
+    public static void EnvioNotificacion(Solicitud sol, JSONArray TOs) throws SQLException{
         // Prepare list of target registration IDs
 	List<String> registrationIDs = new ArrayList<>();
         
@@ -216,6 +216,47 @@ public class Metodos {
 		System.out.println(exc.toString());
 	}
     }
+    
+     public static void EnvioNotificacionEnturne(Solicitud sol, String TO, String nit, String nombre, String url) throws SQLException{
+        // Prepare list of target registration IDs
+	List<String> registrationIDs = new ArrayList<>();
+        
+        registrationIDs.add(TO);
+        
+
+	// Set payload (any object, it will be serialized to JSON)
+	Map<String, String> payload = new HashMap<>();
+
+	// Add "message" parameter to payload
+            payload.put("servicio", sol.getId());
+            payload.put("origen", sol.getOrigen());
+            payload.put("lat_origen", sol.getLat_origen()+"");
+            payload.put("lng_origen", sol.getLng_origen()+"");
+            payload.put("destino", sol.getDestino());
+            payload.put("lat_destino", sol.getLat_destino()+"");
+            payload.put("lng_destino", sol.getLng_destino()+"");
+            payload.put("cargue", sol.getCarguemin());
+            payload.put("descargue", sol.getDescarguemin());
+            payload.put("guia", sol.getOrden());
+            payload.put("nota", sol.getNota_detalle());
+            payload.put("nit", nit);
+            payload.put("empresa", nombre);
+            payload.put("url", url);
+        
+        System.out.println(payload);
+        
+	// Prepare the push request
+	PushyPushRequest push = new PushyPushRequest(payload, registrationIDs.toArray(new String[registrationIDs.size()]));
+
+	try {
+		// Try sending the push notification
+		PushyAPI.sendPush(push, 2);
+	}
+	catch (Exception exc) {
+		// Error, print to console
+		System.out.println(exc.toString());
+	}
+    }
 
     public static void EnvioNotificacion(String TO, String zona, String bahia, String fecha, String retorno) throws SQLException{
         // Prepare list of target registration IDs
@@ -247,6 +288,19 @@ public class Metodos {
     }
 
     public static void main(String[] args) throws SQLException {
-
+        Solicitud sol = new Solicitud();
+        sol.setId("00000001");
+        sol.setOrigen("CASA");
+        sol.setLat_origen((float)10.3443);
+        sol.setLng_origen((float)-74.6454);
+        sol.setDestino("OTRO");
+        sol.setLat_destino((float)10.3453);
+        sol.setLng_destino((float)-75.2345);
+        sol.setCarguemin("2016-08-08 18:00");
+        sol.setDescarguemin("2016-08-12 18:00");
+        sol.setOrden("SOL-09876");
+        sol.setNota_detalle("Prueba");
+            
+        EnvioNotificacionEnturne(sol, "c37cdddabfc96886c2c2a6", "123456789", "Bimbo.com", "http://www.brandemia.org/wp-content/uploads/2012/12/nuevo_logo_terpel.jpg");
     }
 }

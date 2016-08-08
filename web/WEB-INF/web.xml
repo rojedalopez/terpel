@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
     <servlet>
         <servlet-name>saveServicio</servlet-name>
         <servlet-class>servletsSave.saveServicio</servlet-class>
@@ -29,10 +27,6 @@
     <servlet>
         <servlet-name>envio</servlet-name>
         <servlet-class>pollo.envio</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>list_puntos</servlet-name>
-        <servlet-class>servletsList.list_puntos</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>list_all_vehiculos</servlet-name>
@@ -87,16 +81,44 @@
         <servlet-class>servletsSave.asignTurno</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>list_zonas_bahias</servlet-name>
-        <servlet-class>servletsList.list_zonas_bahias</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>RegisterIDEnturnex</servlet-name>
         <servlet-class>servletsMobile.RegisterIDEnturnex</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>finishOperacion</servlet-name>
         <servlet-class>servletsSave.finishOperacion</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>savePunto</servlet-name>
+        <servlet-class>servletsSave.savePunto</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>saveZona</servlet-name>
+        <servlet-class>servletsSave.saveZona</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>saveBahia</servlet-name>
+        <servlet-class>servletsSave.saveBahia</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_puntos</servlet-name>
+        <servlet-class>servletsList.list_puntos</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_vehiculos_disp_e</servlet-name>
+        <servlet-class>servletsList.list_vehiculos_disp_e</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_all_puntos</servlet-name>
+        <servlet-class>servletsList.list_all_puntos</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>saveServicioEnturne</servlet-name>
+        <servlet-class>servletsSave.saveServicioEnturne</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_cargues</servlet-name>
+        <servlet-class>servletsList.list_cargues</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>saveServicio</servlet-name>
@@ -125,10 +147,6 @@
     <servlet-mapping>
         <servlet-name>envio</servlet-name>
         <url-pattern>/envio</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>list_puntos</servlet-name>
-        <url-pattern>/list_puntos</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>list_all_vehiculos</servlet-name>
@@ -183,16 +201,44 @@
         <url-pattern>/asignTurno</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>list_zonas_bahias</servlet-name>
-        <url-pattern>/list_zonas_bahias</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>RegisterIDEnturnex</servlet-name>
         <url-pattern>/RegisterIDEnturnex</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>finishOperacion</servlet-name>
         <url-pattern>/finishOperacion</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>savePunto</servlet-name>
+        <url-pattern>/savePunto</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>saveZona</servlet-name>
+        <url-pattern>/saveZona</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>saveBahia</servlet-name>
+        <url-pattern>/saveBahia</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_puntos</servlet-name>
+        <url-pattern>/list_puntos</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_vehiculos_disp_e</servlet-name>
+        <url-pattern>/list_vehiculos_disp_e</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_all_puntos</servlet-name>
+        <url-pattern>/list_all_puntos</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>saveServicioEnturne</servlet-name>
+        <url-pattern>/saveServicioEnturne</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_cargues</servlet-name>
+        <url-pattern>/list_cargues</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

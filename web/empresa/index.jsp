@@ -5,7 +5,7 @@ response.setHeader("Expires", "0");
 response.setHeader("Cache-Control", "no-cache"); 
 response.setHeader("Cache", "no-cache"); 
 if(session.getAttribute("user") != null){
-   response.sendRedirect("/servicios.jsp");
+   response.sendRedirect("/empresa/servicios.jsp");
 }
 %>
 <!DOCTYPE html>

@@ -25,11 +25,12 @@ public class changeStateService extends HttpServlet {
         String servicio = (String) request.getParameter("servicio");
         int estado = Integer.parseInt(request.getParameter("estado"));
         int equipo_conductor = Integer.parseInt(request.getParameter("equipo_conductor"));
+        int tipo = Integer.parseInt(request.getParameter("tipo_serv"));
         
         try (PrintWriter out = response.getWriter()) {
             JSONObject jSONObject = new JSONObject();
             /* TODO output your page here. You may use following sample code. */
-            int resultado = CambioEstadoServicio(servicio, estado, equipo_conductor, "");
+            int resultado = CambioEstadoServicio(servicio, estado, equipo_conductor, "", tipo);
             if(resultado<=-1){
                 jSONObject.put("mensaje", false);
             }else{

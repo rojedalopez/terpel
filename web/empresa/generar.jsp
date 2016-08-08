@@ -373,7 +373,7 @@ if(session.getAttribute("user") == null){
                         </div>
                     <div id="alerta-submit"></div>
                     <div style="text-align: right;">
-                        <button type="submit" class="btn btn-success" ng-disabled="ctrl.enviado">Enviar Solicitud</button>
+                        <button type="button" class="btn btn-success" ng-disabled="ctrl.enviado">Enviar Solicitud</button>
                         <button type="button" class="btn btn-default" ng-click="ctrl.resetForm()">Limpiar</button>
                     </div>
                 </form>

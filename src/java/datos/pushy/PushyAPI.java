@@ -21,7 +21,7 @@ public class PushyAPI {
     
     // Insert your Secret API Key here
     public static final String SECRET_API_KEY = "79abeae53ea7d50510640d89c8d2c4122c14f1f8be0b0cf8d7532f24fba42412";
-    public static final String SECRET_API_KEY_ENTURNEX = "b057b33b0aabf0afb852a931c25635330758ab3ce9f44940d9aeb5fa20287081";
+    public static final String SECRET_API_KEY_ENTURNEX = "240b95cdd58b68810bd6948ff178079b4cf06bda01930a377b3b4d3b03179dc9";
 
     public static void sendPush(PushyPushRequest req, int app) throws Exception {
         // Get custom HTTP client

@@ -1,8 +1,7 @@
-
-package servletsList;
+package servletsSave;
 
 import bean.Usuario;
-import datos.json.Listas;
+import datos.save.Guardar;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,15 +13,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class list_puntos extends HttpServlet {
+public class saveBahia extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, ParseException {
+            throws ServletException, IOException, ParseException, ClassNotFoundException, SQLException {
         response.setContentType("text/html;charset=UTF-8");
         StringBuilder sb = new StringBuilder();
         
@@ -41,28 +39,26 @@ public class list_puntos extends HttpServlet {
         System.out.println(sb.toString());
         joSolicitud = (JSONObject) parser.parse(sb.toString());
         
-        String q = (String) joSolicitud.get("q");
-        int porpage = Integer.parseInt(joSolicitud.get("porpage").toString());
-        int pageno = Integer.parseInt(joSolicitud.get("pageno").toString());
-        
-        
+        int id = Integer.parseInt(joSolicitud.get("id").toString());
+        int id_zona = Integer.parseInt(joSolicitud.get("id_zona").toString());
+        String descripcion = (String) joSolicitud.get("desc");
+        String nota = (String) joSolicitud.get("nota");
+
         HttpSession session =  null;
  
         session = request.getSession(false);
         
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
-                JSONObject objeto = Listas.listaPuntosEmpresas(porpage, pageno, u.getNit(), q);
-                out.println(objeto.toJSONString());
-            }else{
-                response.sendRedirect("../");
+                boolean x = Guardar.InsertBahia(id, id_zona, descripcion, nota);
+                JSONObject json = new JSONObject();
+                json.put("retorno", x);
+                out.println(x);
             }
-        }catch(Exception e){
-            System.out.println("Entro aqui en el error! " + e.toString());
         }
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -70,12 +66,17 @@ public class list_puntos extends HttpServlet {
         try {
             processRequest(request, response);
         } catch (ParseException ex) {
-            Logger.getLogger(list_vehiculos.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     @Override
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
 }

@@ -47,6 +47,7 @@ public class list_enturnes_estados extends HttpServlet {
         
             try (PrintWriter out = response.getWriter()) {
                 /* TODO output your page here. You may use following sample code. */
+                System.out.println(session.getAttribute("user"));
                 if(session.getAttribute("user")!=null){
                     Usuario u = (Usuario)session.getAttribute("user"); 
                     String x = Listas.listaEnturneEmpresasPorEstados(porpage, pageno, u.getNit(), estado).toJSONString();
@@ -55,7 +56,7 @@ public class list_enturnes_estados extends HttpServlet {
                     }
                     out.println(x);
                 }else{
-                    response.sendRedirect("../");
+                    out.println("sesion");
                 }
             }catch(Exception e){
                 System.out.println("Entro aqui en el error! " + e.toString());

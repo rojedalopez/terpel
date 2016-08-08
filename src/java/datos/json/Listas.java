@@ -158,6 +158,106 @@ public class Listas {
         return retorno;
     }
     
+    public static JSONArray listaVehiculosDispEnturne(float lat, float lng, int carga, String remolques, String equipos, 
+        float zona, String empresa) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT ec.plca_equipo, lat_equipoconductor, long_equipoconductor, ult_actualizacion, desc_remolque, " +
+                "desc_tipocarga, desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, plac_trailer_equipo, " +
+                "CONCAT(nomb_conductor, ' ', apll_conductor), tel_conductor, img_conductor, ec.id_equipoconductor, imei_conductor , regs_imei_conductor, regs_imei_entur_conductor " +
+                "FROM tblEquipoConductor AS ec INNER JOIN tblEquipo AS eq ON ec.plca_equipo = eq.plca_equipo " +
+                "INNER JOIN tblConductor AS co ON co.cod_conductor = ec.cod_conductor " +
+                "INNER JOIN tblRemolque AS tr ON tr.id_remolque = eq.id_remolque " +
+                "INNER JOIN tblTipoCarga AS tc ON tc.id_tipocarga = eq.id_tipocarga " +
+                "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = eq.id_tipoequipo " +
+                "WHERE disp_equipoconductor = 1 AND pila_equipoconductor = 1 AND eq.nit_empresa = '"+ empresa +"'";
+                instruccion += " AND ult_actualizacion > DATE_ADD(NOW(),INTERVAL -12 HOUR)";
+                if(zona>0){
+                    instruccion += " AND (acos(sin(radians("+lat+")) * sin(radians(lat_equipoconductor)) + " +
+                    "cos(radians("+lat+")) * cos(radians(lat_equipoconductor)) * " +
+                    "cos(radians("+lng+") - radians(long_equipoconductor))) * 6378)<"+zona;	
+                }
+                if(!remolques.equals("")){
+                    instruccion += " AND (";
+                        String[] r = remolques.split(",");
+                        for(int i=0; i < r.length; i++){
+                            if(r.length-1 == i){
+                                instruccion += " eq.id_remolque = "+r[i];
+                            }else{
+                                instruccion += " eq.id_remolque = "+r[i] + " OR "; 
+                            }
+                        }
+                    instruccion += ")";
+                }
+                if(carga!=0){
+                    instruccion += " AND eq.id_tipocarga  = "+ carga ;
+                }
+                if(!equipos.equals("")){
+                    instruccion += " AND (";
+                        String[] r = equipos.split(",");
+                        for(int i=0; i < r.length; i++){
+                            if(r.length-1 == i){
+                                instruccion += " eq.id_tipoequipo = "+r[i];
+                            }else{
+                                instruccion += " eq.id_tipoequipo = "+r[i] + " OR "; 
+                            }
+                        }
+                    instruccion += ")";
+                }
+
+                
+                
+                System.out.println(instruccion);
+                
+                st=conn.prepareStatement(instruccion);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    JSONArray posicion= new JSONArray();
+                    objeto.put("placa", datos.getString(1));
+                    posicion.add(datos.getFloat(2));
+                    posicion.add(datos.getFloat(3));
+                    objeto.put("position", posicion);
+                    objeto.put("ult_reporte", formateador.format(formateador.parse(datos.getString(4))));
+                    objeto.put("remolque", datos.getString(5));                    
+                    objeto.put("tipocarga", datos.getString(6));                    
+                    objeto.put("tipoequipo", datos.getString(7));
+                    objeto.put("marca", datos.getString(8));
+                    objeto.put("modelo", datos.getString(9));
+                    objeto.put("referencia", datos.getString(10));
+                    objeto.put("trailer", datos.getString(11));
+                    objeto.put("nombre", datos.getString(12));
+                    objeto.put("telefono", datos.getString(13));
+                    objeto.put("imagen", datos.getString(14));
+                    objeto.put("id", datos.getString(15));                    
+                    objeto.put("imei", datos.getString(16));                    
+                    objeto.put("reg_logycus", datos.getString(17));                    
+                    objeto.put("reg_enturne", datos.getString(18));                    
+                    lista.add(objeto);
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    
     public static JSONArray listaServiciosBySolicitud(String id) throws SQLException{
         JSONArray lista=new JSONArray();        
         PreparedStatement st = null;
@@ -476,9 +576,6 @@ public class Listas {
         return 0;
     }
     
-    public static void main(String[] args) throws SQLException {
-        System.out.println(listaPuntos(""));
-    }
     
     public static JSONArray listaEmpresasEnturne() throws SQLException{
         JSONArray lista=new JSONArray();
@@ -677,6 +774,188 @@ public class Listas {
             return retorno;
     }
     
+    public static int totalPuntosEmpresas(String empresa, String q) throws SQLException{
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT id_punto, desc_punto, nota_punto, lat_punto, lng_punto " +
+                "FROM tblPunto WHERE nit_empresa = ? " ;
+                if(!q.isEmpty()){
+                    instruccion+=      " AND desc_punto LIKE '%"+q+"%'";	        
+                }
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+                datos=(ResultSet) st.executeQuery();
+                if (datos.next()) {
+                    return datos.getInt(1);
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return 0;
+    }
+    
+    public static JSONObject listaPuntosEmpresas(int porpage, int pageno, String empresa, String q) throws SQLException{
+        JSONArray lista=new JSONArray();
+        JSONObject retorno = new JSONObject();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                int desde = ((pageno-1)*porpage);   
+                String instruccion="SELECT id_punto, desc_punto, nota_punto, lat_punto, lng_punto " +
+                "FROM tblPunto WHERE nit_empresa = ? " ;
+                if(!q.isEmpty()){
+                    instruccion+=      " AND desc_punto LIKE '%"+q+"%'";	        
+                }
+                instruccion+=      " ORDER BY desc_punto DESC ";	        
+                instruccion+=      " LIMIT "+desde+","+porpage+";";
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("id", datos.getInt(1));
+                    objeto.put("desc", datos.getString(2));
+                    objeto.put("nota", datos.getString(3));
+                    objeto.put("lat",datos.getFloat(4));
+                    objeto.put("lng",datos.getFloat(5));
+                    objeto.put("zonas", listaZonasPuntos(datos.getInt(1)));
+                    lista.add(objeto);
+                }
+                
+                retorno.put("total_count", totalPuntosEmpresas(empresa, q));
+                retorno.put("data", lista);
+                retorno.put("error", 0);
+                
+                return retorno;
+
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+            
+            retorno.put("total_count", 0);
+            retorno.put("data", "[]");
+            retorno.put("error", 0);
+            return retorno;
+    }
+
+    public static JSONArray listaAllPuntosEmpresas(String empresa) throws SQLException{
+        JSONArray lista=new JSONArray();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT id_punto, desc_punto, nota_punto, lat_punto, lng_punto " +
+                "FROM tblPunto WHERE nit_empresa = ? " ;
+                instruccion+=      " ORDER BY desc_punto DESC ";	        
+
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("id", datos.getInt(1));
+                    objeto.put("desc", datos.getString(2));
+                    objeto.put("nota", datos.getString(3));
+                    objeto.put("lat",datos.getFloat(4));
+                    objeto.put("lng",datos.getFloat(5));
+                    lista.add(objeto);
+                }
+                
+
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+            
+            return lista;
+    }
+    
+    
+    public static JSONArray listaCarguesEmpresas(String empresa) throws SQLException{
+        JSONArray lista=new JSONArray();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT id_tipocargue, desc_tipocargue FROM logycus360.tblTipoCargue WHERE nit_empresa = ? " ;
+                instruccion+=      " ORDER BY desc_tipocargue DESC ";	        
+
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("id", datos.getInt(1));
+                    objeto.put("desc", datos.getString(2));
+                    lista.add(objeto);
+                }
+                
+
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+            
+            return lista;
+    }
+    
     
     public static JSONObject listaEnturneEmpresasPorEstados(int porpage, int pageno, String empresa, int tipo) throws SQLException{
         JSONArray lista=new JSONArray();
@@ -689,15 +968,16 @@ public class Listas {
                 conn=conexion();
                 int desde = ((pageno-1)*porpage);
                 String instruccion="SELECT id_ticketenturne, fech_enturne, CASE WHEN oper_enturne = 'C' THEN 'Cargue' ELSE 'Descargue' END, " +
-                "tc.desc_tipocargue, fech_ticket_enturne, fecha_enturne,  desc_zonaempresa, desc_habia, " +
+                "tc.desc_tipocargue, fech_ticket_enturne, fecha_enturne,  desc_zona, desc_habia, " +
                 "eq.plca_equipo, rm.desc_remolque, te.desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, " +
-                "plac_trailer_equipo, poliza_equipo, soat_equipo, tecno_equipo, fech_term_enturne, tk.id_zonaempresa, tk.id_bahia, turno_enturne " +
+                "plac_trailer_equipo, poliza_equipo, soat_equipo, tecno_equipo, fech_term_enturne, tk.id_zona, tk.id_bahia, turno_enturne, pu.desc_punto, tk.id_punto " +
                 "FROM tblTicketEnturne AS tk INNER JOIN tblTipoCargue AS tc ON tk.id_tipocargue = tc.id_tipocargue " +
                 "INNER JOIN tblEquipoConductor AS ec ON ec.id_equipoconductor = tk.id_equipoconductor " +
                 "INNER JOIN tblEquipo AS eq ON eq.plca_equipo = ec.plca_equipo " +
                 "INNER JOIN tblRemolque AS rm ON rm.id_remolque = eq.id_remolque " +
                 "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = eq.id_tipoequipo " +
-                "LEFT JOIN tblZonaEmpresa AS ze ON ze.id_zonaempresa = tk.id_zonaempresa "+
+                "LEFT JOIN tblPunto AS pu ON pu.id_punto = tk.id_punto "+
+                "LEFT JOIN tblZona AS ze ON ze.id_zona = tk.id_zona "+
                 "LEFT JOIN tblBahia AS ba ON ba.id_bahia = tk.id_bahia "+
                 "WHERE tk.nit_empresa = ? AND fech_enturne = CURDATE() " ;
                 
@@ -727,9 +1007,11 @@ public class Listas {
                     objeto.put("fecha_enturnado", datos.getString(6));
                     objeto.put("nzona", datos.getString(7));
                     objeto.put("nbahia", datos.getString(8));
+                    objeto.put("npunto", datos.getString(24));
                     objeto.put("zona", datos.getString(20));
                     objeto.put("bahia", datos.getString(21));
                     objeto.put("turno", datos.getString(22));
+                    objeto.put("punto", datos.getString(23));
                     objeto.put("placa", datos.getString(9));
                     objeto.put("remolque", datos.getString(10));
                     objeto.put("tipo_equipo", datos.getString(11));
@@ -769,7 +1051,6 @@ public class Listas {
             retorno.put("error", 0);
             return retorno;
     }
-    
     
     public static String listaPuntos(String servicio) throws SQLException{
         JSONArray lista=new JSONArray();  
@@ -818,7 +1099,7 @@ public class Listas {
         return lista.toJSONString();
     }
     
-    public static JSONArray listaZonasEmpresa(String empresa) throws SQLException{
+    public static JSONArray listaZonasPuntos(int punto) throws SQLException{
         JSONArray lista=new JSONArray();
         PreparedStatement st = null;
         Connection conn=null;
@@ -827,19 +1108,19 @@ public class Listas {
             try{
                 conn=conexion();
                 
-                String instruccion="SELECT id_zonaempresa, nit_empresa, desc_zonaempresa FROM tblZonaEmpresa WHERE nit_empresa = ?;" ;
+                String instruccion="SELECT id_zona, id_punto, desc_zona nota_zona FROM tblZona WHERE id_punto = ?;" ;
                 
                 
                 
                 st=conn.prepareStatement(instruccion);
-                st.setString(1, empresa);
+                st.setInt(1, punto);
                 datos=(ResultSet) st.executeQuery();
                 while (datos.next()) {
                     JSONObject objeto= new JSONObject();
                     objeto.put("id", datos.getInt(1));
-                    objeto.put("id_empresa", datos.getString(2));
+                    objeto.put("id_punto", datos.getInt(2));
                     objeto.put("desc", datos.getString(3));
-                    objeto.put("bahias", listaBahiasByZonasEmpresa(datos.getInt(1)));
+                    objeto.put("bahias", listaBahiasZona(datos.getInt(1)));
                     lista.add(objeto);
                 }
                 
@@ -861,7 +1142,7 @@ public class Listas {
         return lista;
     }
     
-    public static JSONArray listaBahiasByZonasEmpresa(int bahia) throws SQLException{
+    public static JSONArray listaBahiasZona(int zona) throws SQLException{
         JSONArray lista=new JSONArray();
         PreparedStatement st = null;
         Connection conn=null;
@@ -870,12 +1151,12 @@ public class Listas {
             try{
                 conn=conexion();
                 
-                String instruccion="SELECT id_bahia, id_zonaempresa, desc_habia, nota_bahia, cargues_bahia FROM tblBahia WHERE id_zonaempresa = ?;" ;
+                String instruccion="SELECT id_bahia, id_zona, desc_habia, nota_bahia FROM tblBahia WHERE id_zona = ?;" ;
                 
                 
                 
                 st=conn.prepareStatement(instruccion);
-                st.setInt(1, bahia);
+                st.setInt(1, zona);
                 datos=(ResultSet) st.executeQuery();
                 while (datos.next()) {
                     JSONObject objeto= new JSONObject();

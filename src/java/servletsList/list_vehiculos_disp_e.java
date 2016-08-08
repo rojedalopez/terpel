@@ -1,4 +1,3 @@
-
 package servletsList;
 
 import bean.Usuario;
@@ -6,7 +5,6 @@ import datos.json.Listas;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -19,7 +17,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class list_puntos extends HttpServlet {
+public class list_vehiculos_disp_e extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, ParseException {
@@ -41,10 +39,46 @@ public class list_puntos extends HttpServlet {
         System.out.println(sb.toString());
         joSolicitud = (JSONObject) parser.parse(sb.toString());
         
-        String q = (String) joSolicitud.get("q");
-        int porpage = Integer.parseInt(joSolicitud.get("porpage").toString());
-        int pageno = Integer.parseInt(joSolicitud.get("pageno").toString());
+        JSONObject origen = (JSONObject) joSolicitud.get("addressOrigin");
+        float lat_origen = Float.parseFloat(origen.get("lat").toString());
+        float lng_origen = Float.parseFloat(origen.get("lng").toString());
+        JSONArray remol = (JSONArray) joSolicitud.get("remolques");
+        String remolques = "";
+        for(int i = 0; i < remol.size(); i++){
+            remolques += remol.get(i)+",";
+        }
+        if(!remolques.equals("")){
+            remolques = remolques.substring(0, remolques.length()-1);
+        }
         
+        JSONArray equi = (JSONArray) joSolicitud.get("equipos");
+        String equipos = "";
+        for(int i = 0; i < equi.size(); i++){
+            equipos += equi.get(i)+",";
+        }
+        if(!equipos.equals("")){
+            equipos = equipos.substring(0, equipos.length()-1);
+        }
+        
+        int tipo_carga = 0;
+        
+        if(joSolicitud.get("tipocarga")!=null){
+            if(joSolicitud.get("tipocarga").toString().equals("")){
+                tipo_carga = 0;
+            }else{
+                tipo_carga = Integer.parseInt(joSolicitud.get("tipocarga").toString());
+            }
+        }
+        
+
+        int radio = 100000;
+        if(joSolicitud.get("radio")!=null){
+            if(joSolicitud.get("radio").toString().equals("")){
+                radio = 100000;
+            }else{
+                radio = Integer.parseInt(joSolicitud.get("radio").toString());
+            }
+        }
         
         HttpSession session =  null;
  
@@ -54,8 +88,9 @@ public class list_puntos extends HttpServlet {
             /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
-                JSONObject objeto = Listas.listaPuntosEmpresas(porpage, pageno, u.getNit(), q);
-                out.println(objeto.toJSONString());
+                JSONArray lista = Listas.listaVehiculosDispEnturne(lat_origen, lng_origen, tipo_carga, remolques, equipos, radio, u.getNit());
+                String x = lista.toJSONString();
+                out.println(x);
             }else{
                 response.sendRedirect("../");
             }
@@ -70,7 +105,7 @@ public class list_puntos extends HttpServlet {
         try {
             processRequest(request, response);
         } catch (ParseException ex) {
-            Logger.getLogger(list_vehiculos.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(list_vehiculos_disp_e.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -78,4 +113,5 @@ public class list_puntos extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
 }

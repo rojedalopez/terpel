@@ -18,13 +18,11 @@ public class ticket_proceso extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, ClassNotFoundException, SQLException {
         response.setContentType("text/html;charset=UTF-8");
-        String nit = (String) request.getParameter("nit");
         int equipo_conductor = Integer.parseInt(request.getParameter("equipo_conductor"));
-        String proceso = (String) request.getParameter("proceso");
         String operacion = (String)request.getParameter("operacion");
         
         try (PrintWriter out = response.getWriter()) {
-            String retorno = Guardar.InsertTicketProceso(nit, equipo_conductor, operacion, proceso);
+            String retorno = Guardar.InsertTicketProceso(equipo_conductor, operacion);
             System.out.println(retorno);
             JSONObject json = new JSONObject();
             if(!retorno.equals("-1") && !retorno.equals("0")){

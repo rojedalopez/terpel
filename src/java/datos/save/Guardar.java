@@ -101,6 +101,76 @@ public class Guardar {
 
     }
     
+    
+    public static JSONObject SaveServicioEnturne(int origen, String n_origen, float lat_origen, float lng_origen, int destino, String n_destino,
+            float lat_destino, float lng_destino, String fecha_cargue, String fecha_descargue, int equipo_conductor, 
+            String guia, String nota, String empresa, String kms, String time, String registro, String cargue,
+            String nombre, String url) throws ClassNotFoundException, SQLException{
+            boolean b=false;
+            Solicitud sol = new Solicitud();
+            Connection conn=null;
+            PreparedStatement insertar=null;
+            JSONObject retorno = new JSONObject();
+        
+            conn=Aplicacion.conexion();
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_servicio(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)};")) {
+                cs.setInt(1, origen);
+                cs.setInt(2, destino);
+                cs.setString(3, fecha_cargue);
+                cs.setString(4, fecha_descargue);
+                cs.setInt(5, equipo_conductor);
+                cs.setString(6, guia);
+                cs.setString(7, nota);
+                cs.setString(8, empresa);
+                cs.setString(9, kms);
+                cs.setString(10, time);
+                cs.setString(11, cargue);
+                
+                sol.setOrigen(n_origen);
+                sol.setLat_origen(lat_origen);
+                sol.setLng_origen(lng_origen);
+                sol.setDestino(n_destino);
+                sol.setLat_destino(lat_destino);
+                sol.setLng_destino(lng_destino);
+                sol.setCarguemin(fecha_cargue);
+                sol.setDescarguemin(fecha_descargue);
+                sol.setCarga(equipo_conductor);
+                sol.setOrden(guia);
+                sol.setNota_detalle(nota);
+                                
+                cs.registerOutParameter(12, Types.VARCHAR);
+                cs.executeQuery();
+
+                String num_solicitud = cs.getString(12);
+                sol.setId(num_solicitud);
+                
+                if(!num_solicitud.equals("0")){
+                    Metodos.EnvioNotificacionEnturne(sol, registro, empresa, nombre, url);
+                    retorno.put("id_solicitud", num_solicitud);
+                    retorno.put("mensaje", "OK");
+                    return retorno;
+                }else{
+                    retorno.put("mensaje", "Error");
+                    return retorno;
+                }
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en SaveServicio");
+                System.out.println(e.getMessage());
+            }catch (Exception e){
+                System.out.println("error Exception en SaveServicio");
+                System.out.println(e.getMessage());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            
+            retorno.put("mensaje", "Error");
+            return retorno;
+
+    }
+    
     /*
     pedroperez@gmail.com
     pepino
@@ -299,6 +369,125 @@ public class Guardar {
     }
     
     
+     public static boolean InsertPunto(int id, String nit, String desc, String nota, float lat, float lng) throws ClassNotFoundException, SQLException{
+        boolean b=false;
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        
+        
+        conn=conexion();
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_punto(?, ?, ?, ?, ?, ?, ?)}")) {
+                cs.setInt(1, id);
+                cs.setString(2, nit);
+                cs.setString(3, desc);
+                cs.setString(4, nota);
+                cs.setFloat(5, lat);
+                cs.setFloat(6, lng);
+                cs.registerOutParameter(7, Types.INTEGER);
+                cs.executeQuery();
+                
+                int retorno = cs.getInt(7);
+                
+                if(retorno==1){
+                    return true;
+                }else{
+                    return false;
+                }
+                
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }catch (Exception e){
+                System.out.println("error Exception en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return false;
+
+    }
+     
+    public static boolean InsertZona(int id, int punto, String desc, String nota) throws ClassNotFoundException, SQLException{
+        boolean b=false;
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        
+        
+        conn=conexion();
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_zona(?, ?, ?, ?, ?)}")) {
+                cs.setInt(1, id);
+                cs.setInt(2, punto);
+                cs.setString(3, desc);
+                cs.setString(4, nota);
+                cs.registerOutParameter(5, Types.INTEGER);
+                cs.executeQuery();
+                
+                int retorno = cs.getInt(5);
+                
+                if(retorno==1){
+                    return true;
+                }else{
+                    return false;
+                }
+                
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }catch (Exception e){
+                System.out.println("error Exception en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return false;
+
+    }
+    
+    public static boolean InsertBahia(int id, int zona, String desc, String nota) throws ClassNotFoundException, SQLException{
+        boolean b=false;
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        
+        
+        conn=conexion();
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_bahia(?, ?, ?, ?, ?)}")) {
+                cs.setInt(1, id);
+                cs.setInt(2, zona);
+                cs.setString(3, desc);
+                cs.setString(4, nota);
+                cs.registerOutParameter(5, Types.INTEGER);
+                cs.executeQuery();
+                
+                int retorno = cs.getInt(5);
+                
+                if(retorno==1){
+                    return true;
+                }else{
+                    return false;
+                }
+                
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }catch (Exception e){
+                System.out.println("error Exception en INSERTAR USUARIO");
+                System.out.println(e.getMessage());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return false;
+
+    }
+    
     public static boolean finishTurno(String ticket, String nota) throws ClassNotFoundException, SQLException{
         boolean b=false;
         Connection conn=null;
@@ -336,22 +525,20 @@ public class Guardar {
 
     }
     
-    public static String InsertTicketProceso(String nit, int equipo_conductor, String operacion, String proceso) throws ClassNotFoundException, SQLException{
+    public static String InsertTicketProceso(int equipo_conductor, String operacion) throws ClassNotFoundException, SQLException{
         boolean b=false;
         Connection conn=null;
         PreparedStatement insertar=null;
         
         
         conn=conexion();
-            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.giveEnturne(?, ?, ?, ?, ?)}")) {
-                cs.setString(1, nit);
-                cs.setString(2, operacion);
-                cs.setInt(3, equipo_conductor);
-                cs.setString(4, proceso);
-                cs.registerOutParameter(5, Types.VARCHAR);
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.giveEnturne(?, ?, ?)}")) {
+                cs.setString(1, operacion);
+                cs.setInt(2, equipo_conductor);
+                cs.registerOutParameter(3, Types.VARCHAR);
                 cs.executeQuery();
 
-                String retorno = cs.getString(5);
+                String retorno = cs.getString(3);
 
                 return retorno;
                 
@@ -448,14 +635,20 @@ public class Guardar {
     }
     
     
-    public static int CambioEstadoServicio(String servicio, int estado, int equipo_conductor, String imagen) throws ClassNotFoundException, SQLException{
+    public static int CambioEstadoServicio(String servicio, int estado, int equipo_conductor, String imagen, int tipo) throws ClassNotFoundException, SQLException{
         Connection conn=null;
         PreparedStatement insertar=null;
         System.out.println(imagen);
         System.out.println(servicio);
         
         conn=conexion();
-            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.change_state_service(?, ?, ?, ?, ?)}")) {
+        String pp = "";
+        if(tipo==1){
+            pp = "{CALL logycus360.change_state_service(?, ?, ?, ?, ?)}";
+        }else{
+            pp = "{CALL logycus360.change_state_serviceenturne(?, ?, ?, ?, ?)}";
+        }
+            try (CallableStatement cs = conn.prepareCall(pp)) {
                 cs.setString(1, servicio);
                 cs.setInt(2, estado);
                 cs.setInt(3, equipo_conductor);

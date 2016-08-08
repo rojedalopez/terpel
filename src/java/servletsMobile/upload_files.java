@@ -26,6 +26,7 @@ public class upload_files extends HttpServlet {
             throws ServletException, IOException, ClassNotFoundException, SQLException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8"); 
+        int tipo_serv = Integer.parseInt(request.getParameter("tipo_serv"));
         int tipo =  Integer.parseInt(request.getParameter("tipo"));
         Part filePart = request.getPart("file"); // Retrieves <input type="file" name="file">
         String filename = getFilename(filePart);
@@ -55,7 +56,7 @@ public class upload_files extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             JSONObject jSONObject = new JSONObject();
             /* TODO output your page here. You may use following sample code. */
-            int resultado = CambioEstadoServicio(vector_nombre[0], (tipo==1)?5:10, 0, nuevo_nombre);
+            int resultado = CambioEstadoServicio(vector_nombre[0], (tipo==1)?5:10, 0, nuevo_nombre, tipo_serv);
             if(resultado<=-1){
                 jSONObject.put("mensaje", false);
             }else{
