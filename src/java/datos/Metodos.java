@@ -5,6 +5,7 @@
  */
 package datos;
 
+import bean.Servicio;
 import datos.pushy.PushyAPI;
 import datos.pushy.PushyPushRequest;
 import bean.Solicitud;
@@ -146,6 +147,27 @@ public class Metodos {
         return desde;
     }
 
+    public static int calcularHoras(String fecha_){
+
+        Date fecha = null;
+
+        try {
+                fecha = formateador.parse(fecha_);
+        } catch (ParseException e) {
+                e.printStackTrace();
+        }
+                
+        long[] vector = new long[4];
+
+        final long MILLSECS_PER_DAY = 24 * 60 * 60 * 1000; //Milisegundos al día
+        final long MILLSECS_PER_HOUR = 60 * 60 * 1000; //Milisegundos a la hora
+        Date hoy = new Date(); //Fecha de hoy
+
+        long diferencia = (hoy.getTime() - fecha.getTime());
+        long horas = (diferencia % MILLSECS_PER_DAY) / MILLSECS_PER_HOUR;
+
+        return (int)horas;
+    }
     
     public static String SHA256(String valor) throws NoSuchAlgorithmException{
    	
@@ -163,13 +185,11 @@ public class Metodos {
         return sb.toString();
     }
     
-    public static void EnvioNotificacion(Solicitud sol, JSONArray TOs) throws SQLException{
+    public static void EnvioNotificacion(Servicio serv, JSONArray TOs) throws SQLException{
         // Prepare list of target registration IDs
 	List<String> registrationIDs = new ArrayList<>();
         
-        JSONObject jSONObject = DatosEmpresaBySolicitud(sol.getId());
-
-        // Add your registration IDs here
+       // Add your registration IDs here
         for(int i=0;i<TOs.size();i++){
             registrationIDs.add(TOs.get(i).toString());
             System.out.println(TOs.get(i).toString());
@@ -180,27 +200,25 @@ public class Metodos {
 	Map<String, String> payload = new HashMap<>();
 
 	// Add "message" parameter to payload
-	payload.put("solicitud", sol.getId());
-        payload.put("origen", sol.getOrigen());
-        payload.put("lat_origen", sol.getLat_origen()+"");
-        payload.put("lng_origen", sol.getLng_origen()+"");
-        payload.put("destino", sol.getDestino());
-        payload.put("lat_destino", sol.getLat_destino()+"");
-        payload.put("lng_destino", sol.getLng_destino()+"");
-        payload.put("cargue_min", sol.getCarguemin());
-        payload.put("cargue_max", sol.getCarguemax());
-        payload.put("descargue_min", sol.getDescarguemin());
-        payload.put("descargue_max", sol.getDescarguemax());
-        payload.put("orden", sol.getOrden());
-        payload.put("nota_detalle", sol.getNota_detalle());
-        payload.put("flete", sol.getFlete()+"");
-        payload.put("adelanto", sol.getAdelanto()+"");
-        payload.put("nota_pago", sol.getNota_pago());
-        payload.put("id_carga", sol.getCarga()+"");
-        payload.put("carga", sol.getNombre_carga(sol.getCarga()));
-        payload.put("nit", (String)jSONObject.get("nit"));
-        payload.put("empresa", (String)jSONObject.get("empresa"));
-        payload.put("url", (String)jSONObject.get("url"));
+	payload.put("servicio", serv.getServicio());
+        payload.put("origen", serv.getDesc_inicio());
+        payload.put("lat_origen", serv.getLat_inicio()+"");
+        payload.put("lng_origen", serv.getLng_inicio()+"");
+        payload.put("destino", serv.getDesc_fin());
+        payload.put("lat_destino", serv.getLat_fin()+"");
+        payload.put("lng_destino", serv.getLng_fin()+"");
+        payload.put("cargue_min", serv.getMin_carg());
+        payload.put("cargue_max", serv.getMax_carg());
+        payload.put("descargue_min", serv.getMin_desc());
+        payload.put("descargue_max", serv.getMax_desc());
+        payload.put("orden", serv.getGuia());
+        payload.put("nota_detalle", serv.getNota());
+        payload.put("flete", serv.getDesc_flete());
+        payload.put("vlr_flete", serv.getVlr_flete()+"");
+        payload.put("cargue", serv.getTipo_cargue());
+        payload.put("nit", serv.getNit_generador());
+        payload.put("empresa", serv.getGenerador());
+        payload.put("url", serv.getUrl_generador());
 
         System.out.println(payload);
         
@@ -237,6 +255,7 @@ public class Metodos {
             payload.put("lng_destino", sol.getLng_destino()+"");
             payload.put("cargue", sol.getCarguemin());
             payload.put("descargue", sol.getDescarguemin());
+            payload.put("carga", sol.getNombre_cargue());
             payload.put("guia", sol.getOrden());
             payload.put("nota", sol.getNota_detalle());
             payload.put("nit", nit);
@@ -258,7 +277,8 @@ public class Metodos {
 	}
     }
 
-    public static void EnvioNotificacion(String TO, String zona, String bahia, String fecha, String retorno) throws SQLException{
+    public static void EnvioNotificacion(String TO, String zona, String bahia, String fecha, String retorno,
+            String operacion, String servicio, int tipo) throws SQLException{
         // Prepare list of target registration IDs
 	List<String> registrationIDs = new ArrayList<>();
         
@@ -273,13 +293,16 @@ public class Metodos {
         payload.put("bahia", bahia);
         payload.put("fecha_estimada", fecha);
         payload.put("retorno", retorno);
+        payload.put("operacion", operacion);
+        payload.put("servicio", servicio);
+        
         
 	// Prepare the push request
 	PushyPushRequest push = new PushyPushRequest(payload, registrationIDs.toArray(new String[registrationIDs.size()]));
 
 	try {
 		// Try sending the push notification
-		PushyAPI.sendPush(push, 2);
+		PushyAPI.sendPush(push, tipo);
 	}
 	catch (Exception exc) {
 		// Error, print to console
@@ -301,6 +324,6 @@ public class Metodos {
         sol.setOrden("SOL-09876");
         sol.setNota_detalle("Prueba");
             
-        EnvioNotificacionEnturne(sol, "c37cdddabfc96886c2c2a6", "123456789", "Bimbo.com", "http://www.brandemia.org/wp-content/uploads/2012/12/nuevo_logo_terpel.jpg");
+        EnvioNotificacionEnturne(sol, "83540c69033865e50b2d17", "123456789", "Bimbo.com", "http://www.brandemia.org/wp-content/uploads/2012/12/nuevo_logo_terpel.jpg");
     }
 }

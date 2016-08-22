@@ -1,6 +1,5 @@
 package servletsSave;
 
-import bean.Usuario;
 import datos.save.Guardar;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,11 +12,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class savePunto extends HttpServlet {
+public class asingEquipoConductor extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, ParseException, ClassNotFoundException, SQLException {
@@ -35,47 +35,48 @@ public class savePunto extends HttpServlet {
         } catch (Exception e) {}
  
         JSONParser parser = new JSONParser();
-        JSONObject joSolicitud = null;
+        JSONArray joChanges = null;
         System.out.println(sb.toString());
-        joSolicitud = (JSONObject) parser.parse(sb.toString());
+        joChanges = (JSONArray) parser.parse(sb.toString());
         
-        String id = (String) joSolicitud.get("id").toString();
-        String descripcion = (String) joSolicitud.get("desc");
-        String nota = (String) joSolicitud.get("nota");
-        Float lat = Float.parseFloat(joSolicitud.get("lat").toString());
-        Float lng = Float.parseFloat(joSolicitud.get("lng").toString());
-
         HttpSession session =  null;
  
         session = request.getSession(false);
         
         try (PrintWriter out = response.getWriter()) {
             if(session.getAttribute("user")!=null){
-                Usuario u = (Usuario)session.getAttribute("user"); 
-                boolean x = Guardar.InsertPunto(id, u.getNit(), descripcion, nota, lat, lng);
-                JSONObject json = new JSONObject();
-                json.put("retorno", x);
-                out.println(x);
+                for(int i=0; i < joChanges.size(); i++){
+                    JSONObject objeto = new JSONObject();
+                    objeto = (JSONObject) joChanges.get(i);
+                    if(!Guardar.InsertEquipoConductor(Integer.parseInt(objeto.get("id").toString()),
+                            (String)objeto.get("placa"), (String) objeto.get("conductor"))){
+                        out.print(false);
+                        break;
+                    }
+                }
+                out.print(true);
+            }else{
+                out.print(false);
             }
         }
     }
 
-
+   
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             processRequest(request, response);
         } catch (ParseException ex) {
-            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(asingEquipoConductor.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(asingEquipoConductor.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
-            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(asingEquipoConductor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-   
+
     @Override
     public String getServletInfo() {
         return "Short description";

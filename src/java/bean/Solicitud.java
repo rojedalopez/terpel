@@ -15,16 +15,61 @@ public class Solicitud {
     private String descarguemin;
     private String descarguemax;
     private String orden;
-    private int carga;
-    private String nombre_carga;
+    private int cargue;
+    private String nombre_cargue;
+    private int no_equipos;
+    private String des_flete;
+    private String kms;
     private String nit;
     private String empresa;
+    private String urlempresa;
     private String url;
     private String nota_detalle;
     private float flete;
     private String nota_pago;
     private float adelanto;
-    private String[] cargas = {"", "Gases", "Liquida", "Liquida Inflamable", "Reciduos Peligrosos", "Refrigerada", "Seca"};
+
+    public String getUrlempresa() {
+        return urlempresa;
+    }
+
+    public void setUrlempresa(String urlempresa) {
+        this.urlempresa = urlempresa;
+    }
+
+    
+    public int getNo_equipos() {
+        return no_equipos;
+    }
+
+    public void setNo_equipos(int no_equipos) {
+        this.no_equipos = no_equipos;
+    }
+
+    public String getDes_flete() {
+        return des_flete;
+    }
+
+    public void setDes_flete(String des_flete) {
+        this.des_flete = des_flete;
+    }
+
+    public String getKms() {
+        return kms;
+    }
+
+    public void setKms(String kms) {
+        this.kms = kms;
+    }
+
+    
+    public String getNombre_cargue() {
+        return nombre_cargue;
+    }
+
+    public void setNombre_cargue(String nombre_cargue) {
+        this.nombre_cargue = nombre_cargue;
+    }
     
 
     public Solicitud() {
@@ -94,12 +139,12 @@ public class Solicitud {
         this.orden = orden;
     }
 
-    public int getCarga() {
-        return carga;
+    public int getCargue() {
+        return cargue;
     }
 
-    public void setCarga(int carga) {
-        this.carga = carga;
+    public void setCargue(int cargue) {
+        this.cargue = cargue;
     }
 
     public String getNit() {
@@ -124,14 +169,6 @@ public class Solicitud {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public String getNombre_carga(int c) {
-        return cargas[c];
-    }
-
-    public void setNombre_carga(String nombre_carga) {
-        this.nombre_carga = nombre_carga;
     }
 
     public String getCarguemin() {
@@ -188,14 +225,6 @@ public class Solicitud {
 
     public void setNota_pago(String nota_pago) {
         this.nota_pago = nota_pago;
-    }
-
-    public String[] getCargas() {
-        return cargas;
-    }
-
-    public void setCargas(String[] cargas) {
-        this.cargas = cargas;
     }
 
     public float getAdelanto() {

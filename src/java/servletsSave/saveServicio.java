@@ -41,26 +41,37 @@ public class saveServicio extends HttpServlet {
         System.out.println(sb.toString());
         joSolicitud = (JSONObject) parser.parse(sb.toString());
         
-        JSONObject origen = (JSONObject) joSolicitud.get("addressOrigin");
+        JSONObject origen = (JSONObject) joSolicitud.get("inicio");
         float lat_origen = Float.parseFloat(origen.get("lat").toString());
         float lng_origen = Float.parseFloat(origen.get("lng").toString());
-        String norigen = (String) joSolicitud.get("nameOrigin");
-        JSONObject destino = (JSONObject) joSolicitud.get("addressDestination");
+        String norigen = (String) origen.get("desc");
+        String inicio = (String)origen.get("id").toString();
+        JSONObject destino = (JSONObject) joSolicitud.get("fin");
         float lat_destino = Float.parseFloat(destino.get("lat").toString());
         float lng_destino = Float.parseFloat(destino.get("lng").toString());
-        String ndestino = (String) joSolicitud.get("nameDestination");
+        String ndestino = (String) destino.get("desc");
+        String fin = (String)destino.get("id").toString();
+        
         int tipo_carga = Integer.parseInt(joSolicitud.get("carga").toString());
+        
         String carguemin = (String) joSolicitud.get("dcarguemin");
         String carguemax = (String) joSolicitud.get("dcarguemax");
         String descarguemax = (String) joSolicitud.get("ddescarguemax");
         String descarguemin = (String) joSolicitud.get("ddescarguemin");
+        
         int equipos = Integer.parseInt(joSolicitud.get("equipos").toString());
-        int flete = Integer.parseInt(joSolicitud.get("flete").toString());
+        int vlr_flete = Integer.parseInt(joSolicitud.get("vlr_flete").toString());
+        String flete = (String) joSolicitud.get("flete");
+        String unidad = (String) joSolicitud.get("unidad");
+        
         String orden = (String) joSolicitud.get("orden");
         String nota_detalle = (String) joSolicitud.get("nota_detalle");
-        String nota_pago = (String) joSolicitud.get("nota_pago");
+        
+        
         String kms = (String) joSolicitud.get("kms");
+        int kms_value = Integer.parseInt(joSolicitud.get("kms_value").toString());
         String time = (String) joSolicitud.get("time");
+        int time_value = Integer.parseInt(joSolicitud.get("time_value").toString());
         
         HttpSession session =  null;
  
@@ -70,9 +81,8 @@ public class saveServicio extends HttpServlet {
             /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
-                JSONObject x = Guardar.SaveServicio(norigen, lat_origen, lng_origen, ndestino, lat_destino, lng_destino, 
-                carguemin, carguemax, descarguemin, descarguemax, equipos, tipo_carga, orden, nota_detalle, u.getNit(),
-                flete, nota_pago, kms, time);
+                JSONObject x = Guardar.SaveServicio(inicio, fin, carguemin, carguemax, descarguemin, descarguemax, 
+                equipos, tipo_carga, orden, nota_detalle, u.getNit(), vlr_flete, flete, kms, kms_value, time, time_value, unidad);
                 System.out.println(x);
                 out.println(x.toJSONString());
             }

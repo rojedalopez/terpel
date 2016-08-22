@@ -1,5 +1,7 @@
 package datos;
  
+import bean.Servicio;
+import bean.Solicitud;
 import java.util.List;
 import java.util.Properties;
 import javax.activation.DataHandler;
@@ -14,10 +16,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
  
-/**
- *
- * @author SISTEMAS
- */
 public class Mails {
     public static void SendMail(String user, String token, String as, String textoBoton){
         String servidorSMTP = "smtp.gmail.com";
@@ -199,23 +197,26 @@ public class Mails {
     public static void main(String[] args) {
         SendMailOferta("rojedalopez@gmail.com", "prueba", "");
     }
+    
+    
     public static void SendMailOferta(String user, String as, String mensaje){
         String servidorSMTP = "smtp.gmail.com";
         String puerto = "587";
         String usuario = "logycus.noreply@gmail.com";
         String password = "l0gycus360";
         String asunto = as;
- 
+ System.out.println("0 ");
         Properties props = new Properties();
- 
+ System.out.println("0 ");
         props.put("mail.debug", "true");
         props.put("mail.smtp.auth", true);
         props.put("mail.smtp.starttls.enable", true);
+        //props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
         props.put("mail.smtp.host", servidorSMTP);
         props.put("mail.smtp.port", puerto);
- 
+ System.out.println("0 ");
         Session session = Session.getInstance(props, null);
- 
+ System.out.println("0 ");
         try {
  
          MimeMultipart alternative = new MimeMultipart("alternative");
@@ -324,9 +325,9 @@ public class Mails {
          imgPart.setHeader("Content-ID", "<logoimg>");
          alternative.addBodyPart(imgPart); */
          alternative.addBodyPart(html);
- 
+ System.out.println("0 ");
          //se recorre la lista de correos del contrato
- 
+ System.out.println("0 ");
  
          message.addRecipient(Message.RecipientType.CC, new InternetAddress(user));
          message.setSubject(asunto);
@@ -337,10 +338,344 @@ public class Mails {
          message.saveChanges();   
          tr.sendMessage(message, message.getAllRecipients());
          tr.close();
- 
+ System.out.println("0 ");
         } catch (MessagingException e) {
+            System.out.println("0 " + e.toString());
         }
     }
+    
+    public static void SendMailSolicitudTransportadoras(List<String> users, Solicitud solicitud){
+        String servidorSMTP = "smtp.gmail.com";
+        String puerto = "587";
+        String usuario = "logycus.noreply@gmail.com";
+        String password = "l0gycus360";
+        String asunto = "Nueva solicitud generada.";
+ System.out.println("0 ");
+        Properties props = new Properties();
+ 
+        props.put("mail.debug", "true");
+        props.put("mail.smtp.auth", true);
+        props.put("mail.smtp.starttls.enable", true);
+        props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        props.put("mail.smtp.host", servidorSMTP);
+        props.put("mail.smtp.port", puerto);
+ 
+        Session session = Session.getInstance(props, null);
+ 
+        try {
+ 
+         MimeMultipart alternative = new MimeMultipart("alternative");
+         MimeMessage message = new MimeMessage(session);
+         message.setFrom(new InternetAddress("Logycus Colombia <logycus.noreply@gmail.com>"));
+         MimeBodyPart html = new MimeBodyPart();
+ System.out.println("1 ");
+             html.setContent("<!DOCTYPE html>\n" +
+" <div style=\"width:100%;height:550;\">\n" +
+"   <FONT FACE=\"tahoma\">\n" +
+"     <div style=\"width:100%;height:20px;left:0;background-color:#000000;\">\n" +
+"     </div>    \n" +
+"     <div style=\"background-color:#F0F0F0;padding:10px;\">\n" +
+"       <h2 style=\"text-align:center;\">SOLICITUD DE SERVICIO</h2>\n" +
+"       <center><img width=\"200px\" src=\""+solicitud.getUrlempresa()+"\"/></center>"+
+"       <p style=\"padding:10px;\">\n" +
+"           La empresa <b>"+solicitud.getEmpresa()+"</b> ha ingresado al sistema una solicitud de transporte, cuya información aparece a continuación.<br>\n" +
+"           Si estas interesado en atender la solicitud, te invitamos a dirigirte al boton que aparece al final de la información.\n" +
+"       </p>\n" +
+"       <table style=\"width:100%; border: #BDBDBD solid 1px;\" rules=\"all\">\n" +
+"           <tr>\n" +
+"               <th colspan=\"2\" style=\"background-color: #E8E8E8;text-align: center;\">DATOS DE VIAJE</th>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"               <td style=\"background-color: #E8E8E8;\">NO. SOLICITUD</td>\n" +
+"               <td>"+solicitud.getId()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">ORIGEN</td>\n" +
+"             <td>"+solicitud.getOrigen()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">DESTINO</td>\n" +
+"             <td>"+solicitud.getDestino()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"               <td style=\"background-color: #E8E8E8;\">NO. DE EQUIPOS</td>\n" +
+"               <td>"+solicitud.getNo_equipos()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"               <td style=\"background-color: #E8E8E8;\">TIPO DE CARGUE</td>\n" +
+"               <td>"+solicitud.getNombre_cargue()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">RANGO ESTIMADO DE CARGUE</td>\n" +
+"             <td>"+solicitud.getCarguemin()+" - "+solicitud.getCarguemax()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">RANGO ESTIMADO DE DESCARGUE</td>\n" +
+"             <td>"+solicitud.getDescarguemin()+" - "+solicitud.getDescarguemax()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">VALOR DEL FLETE</td>\n" +
+"             <td>$"+solicitud.getDes_flete()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">KMS ESTIMADOS DE VIAJE</td>\n" +
+"             <td>"+solicitud.getKms()+"</td>\n" +
+"           </tr>\n" +
+"       </table>\n" +
+"       <div style='border-top: 1px solid #E0E0E0;padding:25px;'>\n" +
+"           <center><a style=\"background-color: black; color:white; padding: 7px;\" href=\"http://logycus360.com/forward?url_forward=/transporter/solicitudes.jsp\"><b>MAS INFORMACIÓN AQUI</b></a></center>\n" +
+"       </div>\n" +
+"   <div style='border-top: 1px solid #E0E0E0;padding:25px;'>\n" +
+"    <center>Por favor no responder a este email.</center>\n" +
+"    <center>Los correos electrónicos enviados a esta dirección no serán contestados.</center>\n" +
+"     <center>© 2016 Logycus360</center>\n" +
+"   </div>\n" +
+"     </div>\n" +
+"   </FONT>\n" +
+" </div>" , "text/html");
+ 
+         /*BodyPart imgPart = new MimeBodyPart();
+         String fileName = imagen;
+ 
+ 
+ 
+         DataSource ds = new FileDataSource(fileName);
+         imgPart.setDataHandler(new DataHandler(ds));
+         imgPart.setHeader("Content-ID", "<logoimg>");
+         alternative.addBodyPart(imgPart); */
+         alternative.addBodyPart(html);
+ 
+         //se recorre la lista de correos del contrato
+ System.out.println("2 ");
+         for(String user:users){
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(user));
+            System.out.println(user);
+         }
+         message.setSubject(asunto);
+         message.setContent(alternative);
+ System.out.println("3 ");
+         Transport tr = session.getTransport("smtp");
+         tr.connect(servidorSMTP, usuario, password);
+         message.saveChanges();   
+         tr.sendMessage(message, message.getAllRecipients());
+         tr.close();
+ 
+        } catch (MessagingException e) {
+            System.out.println("error en " + e);
+        }
+    }
+    
+    
+    public static void SendMailServiciosGeneradores(List<String> users, Servicio servicio){
+        String servidorSMTP = "smtp.gmail.com";
+        String puerto = "587";
+        String usuario = "logycus.noreply@gmail.com";
+        String password = "l0gycus360";
+        String asunto = "Asignación de vehiculo a solicitud.";
+ System.out.println("0 ");
+        Properties props = new Properties();
+ 
+        props.put("mail.debug", "true");
+        props.put("mail.smtp.auth", true);
+        props.put("mail.smtp.starttls.enable", true);
+        //
+        props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        props.put("mail.smtp.host", servidorSMTP);
+        props.put("mail.smtp.port", puerto);
+ 
+        Session session = Session.getInstance(props, null);
+ 
+        try {
+ 
+         MimeMultipart alternative = new MimeMultipart("alternative");
+         MimeMessage message = new MimeMessage(session);
+         message.setFrom(new InternetAddress("Logycus Colombia <logycus.noreply@gmail.com>"));
+         MimeBodyPart html = new MimeBodyPart();
+ System.out.println("1 ");
+             html.setContent("<!DOCTYPE html>\n" +
+" <div style=\"width:100%;height:550;\">\n" +
+"   <FONT FACE=\"tahoma\">\n" +
+"     <div style=\"width:100%;height:20px;left:0;background-color:#000000;\">\n" +
+"     </div>    \n" +
+"     <div style=\"background-color:#F0F0F0;padding:10px;\">\n" +
+"       <h2 style=\"text-align:center;\">ASIGNACIÓN DE VEHICULO</h2>\n" +
+"       <center><img width=\"200px\" src=\""+servicio.getUrl_transportadora()+"\"/></center>\n" +
+"       <p style=\"padding:10px;\">\n" +
+"           La empresa <b>"+servicio.getTransportadora()+"</b> ha asignado uno de sus vehiculos para cubrir la solicitud NO. "+servicio.getSolicitud()+".\n" +
+"       </p>\n" +
+"       <table style=\"width:100%; border: #BDBDBD solid 1px;\" rules=\"all\">\n" +
+"            <tr>\n" +
+"                <th colspan=\"2\" style=\"background-color: #E8E8E8;text-align: center;\">DATOS DE LA SOLICITUD</th>\n" +
+"            </tr>\n" +
+"            <tr>\n" +
+"                <td style=\"background-color: #E8E8E8;\">RUTA</td>\n" +
+"                <td>"+servicio.getDesc_inicio()+" - "+servicio.getDesc_fin()+"</td>\n" +
+"            </tr>\n" +
+"            <tr>\n" +
+"                <td style=\"background-color: #E8E8E8;\">RANGO DE CARGUE</td>\n" +
+"                <td>"+servicio.getMin_carg()+" - "+servicio.getMax_carg()+"</td>\n" +
+"            </tr>\n" +
+"            <tr>\n" +
+"                <td style=\"background-color: #E8E8E8;\">RANGO DE DESCARGUE</td>\n" +
+"                <td>"+servicio.getMin_desc()+" - "+servicio.getMax_desc()+"</td>\n" +
+"            </tr>\n" +                     
+"        </table>"+                     
+"       <table style=\"width:100%;margin-top: 15px; border: #BDBDBD solid 1px;\" rules=\"all\" >\n" +
+"           <tr>\n" +
+"               <th colspan=\"2\" style=\"background-color: #E8E8E8;text-align: center;\">DATOS DEL CONDUCTOR</th>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"               <td colspan=\"2\" style=\"background-color:#000000;padding: 4px;\">\n" +
+"                    <center><img width=\"150px\" src=\""+servicio.getUrl_conductor()+"\"/></center>\n" +
+"               </td> \n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"               <td style=\"background-color: #E8E8E8;\">NOMBRE</td>\n" +
+"               <td>"+servicio.getNombre_completo()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"               <td style=\"background-color: #E8E8E8;\">DOCUMENTO</td>\n" +
+"               <td>"+servicio.getDoc()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">NO. LICENCIA</td>\n" +
+"             <td>"+servicio.getLicencia()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">VIGENCIA LICENCIA</td>\n" +
+"             <td>"+servicio.getExp_lic() +" - "+ servicio.getVence_lic() +"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"               <td style=\"background-color: #E8E8E8;\">TELEFONO</td>\n" +
+"               <td>"+servicio.getTelefono()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"               <td style=\"background-color: #E8E8E8;\">DIRECCION</td>\n" +
+"               <td>"+servicio.getDireccion()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"               <th colspan=\"2\" style=\"background-color: #E8E8E8;text-align: center;\">DATOS DEL VEHICULO</th>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">TIPO EQUIPO</td>\n" +
+"               <td>"+servicio.getTipo_equipo()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">PLACA</td>\n" +
+"               <td>"+servicio.getPlaca()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">LIC. DE TRANSITO</td>\n" +
+"               <td>"+servicio.getLic_transito()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">MARCA</td>\n" +
+"               <td>"+servicio.getMarca()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">REFERENCIA</td>\n" +
+"               <td>"+servicio.getReferencia()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">MODELO</td>\n" +
+"               <td>"+servicio.getModelo()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">TIPO REMOLQUE</td>\n" +
+"               <td>"+servicio.getTipo_remolque()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">PLACA REMOLQUE</td>\n" +
+"               <td>"+servicio.getPlaca_rem()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">LIC. TRANSITO REMOLQUE</td>\n" +
+"               <td>"+servicio.getLic_transito_r()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">POLIZA DE SEGURO</td>\n" +
+"               <td>"+servicio.getPoliza()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">COMPAÑIA ASEGURADORA</td>\n" +
+"               <td>"+servicio.getComp()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">VIGENCIA POLIZA</td>\n" +
+"             <td>"+servicio.getExp_poliza()+" - "+ servicio.getVence_poliza()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">POLIZA DE SEGURO H.C.</td>\n" +
+"               <td>"+servicio.getPoliza_hc()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">COMPAÑIA ASEGURADORA</td>\n" +
+"               <td>"+servicio.getPoliza_hc()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">VIGENCIA POLIZA H.C.</td>\n" +
+"             <td>"+servicio.getExp_poliza_hc()+" - "+ servicio.getVence_poliza_hc()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">SOAT</td>\n" +
+"               <td>"+servicio.getSoat()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">VIGENCIA SOAT</td>\n" +
+"             <td>"+servicio.getExp_soat()+" - "+ servicio.getVence_soat()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">TECNOMECANICA</td>\n" +
+"               <td>"+servicio.getTecno()+"</td>\n" +
+"           </tr>\n" +
+"           <tr>\n" +
+"             <td style=\"background-color: #E8E8E8;\">VIGENCIA TECNOMECANICA</td>\n" +
+"             <td>"+servicio.getExp_tecno()+" - "+ servicio.getVence_tecno()+"</td>\n" +
+"           </tr>\n" +
+"       </table>\n" +
+"       <div style='border-top: 1px solid #E0E0E0;padding:25px;'>\n" +
+"           <center><a style=\"background-color: black; color:white; padding: 7px;\" href=\"http://logycus360.com/forward?url_forward=/empresas/solicitudes.jsp\"><b>MAS INFORMACIÓN AQUI</b></a></center>\n" +
+"       </div>\n" +
+"   <div style='border-top: 1px solid #E0E0E0;padding:25px;'>\n" +
+"    <center>Por favor no responder a este email.</center>\n" +
+"    <center>Los correos electrónicos enviados a esta dirección no serán contestados.</center>\n" +
+"     <center>© 2016 Logycus360</center>\n" +
+"   </div>\n" +
+"     </div>\n" +
+"   </FONT>\n" +
+" </div>" , "text/html");
+ 
+         /*BodyPart imgPart = new MimeBodyPart();
+         String fileName = imagen;
+ 
+ 
+ 
+         DataSource ds = new FileDataSource(fileName);
+         imgPart.setDataHandler(new DataHandler(ds));
+         imgPart.setHeader("Content-ID", "<logoimg>");
+         alternative.addBodyPart(imgPart); */
+         alternative.addBodyPart(html);
+ 
+         //se recorre la lista de correos del contrato
+ System.out.println("2 ");
+         for(String user:users){
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(user));
+            System.out.println(user);
+         }
+         message.setSubject(asunto);
+         message.setContent(alternative);
+ System.out.println("3 ");
+         Transport tr = session.getTransport("smtp");
+         tr.connect(servidorSMTP, usuario, password);
+         message.saveChanges();   
+         tr.sendMessage(message, message.getAllRecipients());
+         tr.close();
+ 
+        } catch (MessagingException e) {
+            System.out.println("error en " + e);
+        }
+    }
+    
     
     public static void SendCompraEmpleado(String user, String as, String mensaje, String archivo, String ruta, String hojavida){
         String servidorSMTP = "smtp.gmail.com";

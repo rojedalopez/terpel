@@ -103,96 +103,22 @@ if(session.getAttribute("user") == null){
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope"></i> <b class="caret"></b></a>
-                    <ul class="dropdown-menu message-dropdown">
-                        <li class="message-preview">
-                            <a href="#">
-                                <div class="media">
-                                    <span class="pull-left">
-                                        <img class="media-object" src="http://placehold.it/50x50" alt="">
-                                    </span>
-                                    <div class="media-body">
-                                        <h5 class="media-heading"><strong>John Smith</strong>
-                                        </h5>
-                                        <p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur...</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="message-preview">
-                            <a href="#">
-                                <div class="media">
-                                    <span class="pull-left">
-                                        <img class="media-object" src="http://placehold.it/50x50" alt="">
-                                    </span>
-                                    <div class="media-body">
-                                        <h5 class="media-heading"><strong>John Smith</strong>
-                                        </h5>
-                                        <p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur...</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="message-preview">
-                            <a href="#">
-                                <div class="media">
-                                    <span class="pull-left">
-                                        <img class="media-object" src="http://placehold.it/50x50" alt="">
-                                    </span>
-                                    <div class="media-body">
-                                        <h5 class="media-heading"><strong>John Smith</strong>
-                                        </h5>
-                                        <p class="small text-muted"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur...</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="message-footer">
-                            <a href="#">Read All New Messages</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="caret"></b></a>
-                    <ul class="dropdown-menu alert-dropdown">
-                        <li>
-                            <a href="#">Alert Name <span class="label label-default">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-primary">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-success">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-info">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-warning">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-danger">Alert Badge</span></a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a href="#">View All</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> John Smith <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr}<b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="servicios.jsp"><i class="fa fa-fw fa-plus"></i> Servicios</a>
+                            <a href="generar.jsp"><i class="fa fa-fw fa-plus"></i> Generar Solicitud</a>
                         </li>
                         <li>
-                            <a href="camiones.jsp"><i class="fa fa-fw fa-truck"></i> En ruta</a>
+                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Activas</a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
+                            <a href="servicios_table.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Activos</a>
+                        </li>
+                        <li>
+                            <a href="enturne_table.jsp"><i class="fa fa-fw fa-ticket"></i> Enturnar Veh.</a>
+                        </li>
+                        <li>
+                            <a href="puntos.jsp"><i class="fa fa-fw fa-map-marker"></i> Puntos</a>
                         </li>
                         <li class="divider"></li>
                         <li>
@@ -208,7 +134,8 @@ if(session.getAttribute("user") == null){
                 <form role="form" class="nav navbar-nav side-nav form-group-sm" style="padding: 5px; color: gray;">
                     <div class="col-sm-12">
                         <div class="list-group">
-                            <a class="list-group-item" ng-repeat="vehiculo in ctrl.vehiculos" style="cursor: pointer;">
+                            <input type="text" class="form-control" placeholder="Buscar..." ng-model="filterValue"><br/>
+                            <a class="list-group-item" ng-repeat="vehiculo in ctrl.vehiculos | filter:filterValue" style="cursor: pointer;">
                                 <h4 class="list-group-item-heading">{{vehiculo.placa}}</h4>
                                 <p class="list-group-item-text">
                                         Conductor: {{vehiculo.nombre}}<br/>
@@ -222,7 +149,7 @@ if(session.getAttribute("user") == null){
                                         Referencia: {{vehiculo.referencia}}<br/>
                                         Ult Actualización: {{vehiculo.ult_reporte}}<br/></p>
                                         <button ng-click="ctrl.showOnMap(vehiculo)"> Ver en mapa </button>
-                                        <button ng-click="ctrl.asignarServ(vehiculo)"> Asignar Servicio </button>
+                                        <button ng-click="ctrl.asignarServMap(vehiculo)"> Asignar Servicio </button>
                             </a>
                         </div>
                     </div>  
@@ -263,11 +190,17 @@ if(session.getAttribute("user") == null){
                                     </div>
                                     <div style="margin: 7px;">
                                         <button type="button" class="btn btn-default form-control" ng-model="ctrl.mapa.equipos" 
-                                                max-length-html="Seleccionados" ng-change="ctrl.cambiarSeletsMult()" data-multiple="1" 
+                                                max-length-html="Seleccionados" data-multiple="1" 
                                                 max-length="1" placeholder="--- Tipo Equipos ---" all-none-buttons="true"
-                                                bs-options="TipoEquipo.ID as TipoEquipo.Value for TipoEquipo in ctrl.TiposEquipo" bs-select>
+                                                bs-options="TipoEquipo.ID as TipoEquipo.Value for TipoEquipo in ctrl.TipoEquipos" bs-select>
                                             Action <span class="caret"></span>
                                         </button>
+                                    </div>
+                                    <div style="margin: 7px;">
+                                        <select class="form-control" ng-model="ctrl.mapa.cargue" 
+                                        ng-options="Tipo.ID as Tipo.Value for Tipo in ctrl.Cargas" >
+                                            <option value="">--- Producto ---</option>
+                                        </select>
                                     </div>
                                 </custom-control>
                                 <directions

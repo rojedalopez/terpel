@@ -20,9 +20,10 @@ public class ticket_proceso extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         int equipo_conductor = Integer.parseInt(request.getParameter("equipo_conductor"));
         String operacion = (String)request.getParameter("operacion");
+        int tipo_serv = Integer.parseInt(request.getParameter("tipo_serv"));
         
         try (PrintWriter out = response.getWriter()) {
-            String retorno = Guardar.InsertTicketProceso(equipo_conductor, operacion);
+            String retorno = Guardar.InsertTicketProceso(equipo_conductor, operacion, tipo_serv);
             System.out.println(retorno);
             JSONObject json = new JSONObject();
             if(!retorno.equals("-1") && !retorno.equals("0")){

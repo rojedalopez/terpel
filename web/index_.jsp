@@ -1,11 +1,15 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="bean.Usuario"%>
 <% 
 response.setHeader("Pragma", "No-chache"); 
 response.setHeader("Expires", "0"); 
 response.setHeader("Cache-Control", "no-cache"); 
 response.setHeader("Cache", "no-cache"); 
 if(session.getAttribute("user") != null){
-   response.sendRedirect("/empresa/servicios.jsp");
+    Usuario u = (Usuario)session.getAttribute("user");
+    if(u.getRol()==2||u.getRol()==3){
+        response.sendRedirect("/empresa/servicios.jsp");
+    }
 }
 %>
 <!DOCTYPE html>
@@ -62,7 +66,6 @@ if(session.getAttribute("user") != null){
     <script src="js/bootstrap-datetimepicker.min.js"></script>
     <script src="js/angular-eonasdan-datetimepicker.min.js"></script>
     <script src="js/dist/angular-datatables.min.js"></script>
-    <script src="js/angular-material.min.js"></script>
     
     <script type="text/javascript" src="js/date.js"></script>
     <script type="text/javascript" src="js/angular/dirPagination.js"></script>
@@ -79,59 +82,47 @@ if(session.getAttribute("user") != null){
     
 </head>
 
-<body class="body-Login-back" ng-app="myApp" >
-    <div ng-controller="SignUpController as ctrl">
+<body >
+    <div >
     <div class="container">
        
         <div class="row">
             <div class="col-md-4 col-md-offset-4 text-center logo-margin ">
                 <label style="font-size: 48px; color: white;">Logycus360</label>
                 </div>
-            <div class="col-md-4 col-md-offset-4">
+            <div class="col-md-8 col-md-offset-2">
                 <div class="login-panel panel panel-default">                  
                     <div class="panel-heading">
-                        <h3 class="panel-title">Formulario de ingreso</h3>
+                        <h3 class="panel-title">Selecciona tu modo de ingreso</h3>
                     </div>
                     <div class="panel-body" >
                         
-                        <form role="form" angular-validator-submit="ctrl.sendInfo()" name="informacion_login" 
-                            angular-validator novalidate>
-                            <fieldset>
-                                <div class="form-group">
-                                    <input class="form-control" placeholder="E-mail" name="nick" ng-model="ctrl.usuario.nick"
-                                    type="email" value="<%out.print((request.getParameter("email")!=null)?request.getParameter("email"):"");%>" 
-                                    autofocus clase='text_valid'
-                                    invalid-message = "'Debe ingresar un email correcto'"
-                                    required-message="'El campo no puede estar vacio'" 
-                                    required>
-                                    </div>
-                                    <div class="form-group">
-                                        <input class="form-control" placeholder="Contraseña" 
-                                        name="pass" type="password" clase='text_valid' ng-model="ctrl.usuario.pass"
-                                        required-message="'El campo no puede estar vacio'" 
-                                        required>
-                                    </div>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input name="remember" type="checkbox" value="Remember Me">Recordar mi contraseña
-                                        </label>
-                                    </div>
-                                    <!-- Change this to a button or input when using this as a form -->
-                                    <button type="submit" class="btn btn-lg btn-primary btn-block" style="margin-top: 3%;">Iniciar sesion</button>
-
-                                    <div class="form-horizontal" style="text-align: left; margin-top: 3%;">
-                                        ¿Aún no tienes una cuenta?, <a href="#" data-toggle="modal" data-target="#Modal_choise_options">Registrate aqui</a>
-                                    </div>
-                                    <div  style="text-align: center;">
-                                        <a href="#" class="alert-link" data-toggle="modal" data-target="#Modal_forgotpass"><i class="fa fa-exclamation-triangle"></i> ¿Olvidaste tu contraseña?</a>                
-                                    </div>
-                            </fieldset>
-                        </form>
+                        <div class="col-lg-6" style="cursor: pointer;" onclick="location.href='conductor/';">
+                            <div class="panel panel-primary text-center no-boder">
+                                <div class="panel-body green">
+                                    <img src="css/images/conductor_icon.png" />
+                                    <h3>Conductor</h3>
+                                </div>
+                                <div class="panel-footer">
+                                    <span class="panel-eyecandy-title">Ingresa como conductor
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6" style="cursor: pointer;" onclick="location.href='empresa/';">
+                            <div class="panel panel-primary text-center no-boder">
+                                <div class="panel-body green">
+                                    <img src="css/images/empresa_icon.png" />
+                                    <h3>Empresa</h3>
+                                </div>
+                                <div class="panel-footer">
+                                    <span class="panel-eyecandy-title">Ingresa como empresa
+                                    </span>
+                                </div>
+                            </div> 
+                        </div>
                     </div>                                
                 </div>
-                <div id='contenedor' class="alert">
-
-                </div>  
                 
                 
             </div>

@@ -120,6 +120,70 @@
         <servlet-name>list_cargues</servlet-name>
         <servlet-class>servletsList.list_cargues</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>getServicio</servlet-name>
+        <servlet-class>servletsMobile.getServicio</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_equipoconductor</servlet-name>
+        <servlet-class>servletsList.list_equipoconductor</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_equipos</servlet-name>
+        <servlet-class>servletsList.list_equipos</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_conductores</servlet-name>
+        <servlet-class>servletsList.list_conductores</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>asingEquipoConductor</servlet-name>
+        <servlet-class>servletsSave.asingEquipoConductor</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>saveConductor</servlet-name>
+        <servlet-class>servletsSave.saveConductor</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>saveVehiculo</servlet-name>
+        <servlet-class>servletsSave.saveVehiculo</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_act_vehiculos</servlet-name>
+        <servlet-class>servletsList.list_act_vehiculos</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_fletes</servlet-name>
+        <servlet-class>servletsList.list_fletes</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_solicitudes_transportador</servlet-name>
+        <servlet-class>servletsList.list_solicitudes_transportador</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_vehiculos_asignar</servlet-name>
+        <servlet-class>servletsList.list_vehiculos_asignar</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>forward</servlet-name>
+        <servlet-class>servletsSession.forward</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_servicios_act</servlet-name>
+        <servlet-class>servletsList.list_servicios_act</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>prueba_mail</servlet-name>
+        <servlet-class>servletsSave.prueba_mail</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>dispEquipoConductor</servlet-name>
+        <servlet-class>servletsSave.dispEquipoConductor</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_vehiculos_disp</servlet-name>
+        <servlet-class>servletsList.list_vehiculos_disp</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>saveServicio</servlet-name>
         <url-pattern>/saveServicio</url-pattern>
@@ -239,6 +303,70 @@
     <servlet-mapping>
         <servlet-name>list_cargues</servlet-name>
         <url-pattern>/list_cargues</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>getServicio</servlet-name>
+        <url-pattern>/getServicio</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_equipoconductor</servlet-name>
+        <url-pattern>/list_equipoconductor</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_equipos</servlet-name>
+        <url-pattern>/list_equipos</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_conductores</servlet-name>
+        <url-pattern>/list_conductores</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>asingEquipoConductor</servlet-name>
+        <url-pattern>/asingEquipoConductor</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>saveConductor</servlet-name>
+        <url-pattern>/saveConductor</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>saveVehiculo</servlet-name>
+        <url-pattern>/saveVehiculo</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_act_vehiculos</servlet-name>
+        <url-pattern>/list_act_vehiculos</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_fletes</servlet-name>
+        <url-pattern>/list_fletes</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_solicitudes_transportador</servlet-name>
+        <url-pattern>/list_solicitudes_transportador</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_vehiculos_asignar</servlet-name>
+        <url-pattern>/list_vehiculos_asignar</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>forward</servlet-name>
+        <url-pattern>/forward</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_servicios_act</servlet-name>
+        <url-pattern>/list_servicios_act</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>prueba_mail</servlet-name>
+        <url-pattern>/prueba_mail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>dispEquipoConductor</servlet-name>
+        <url-pattern>/dispEquipoConductor</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_vehiculos_disp</servlet-name>
+        <url-pattern>/list_vehiculos_disp</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

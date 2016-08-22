@@ -37,7 +37,7 @@ if(session.getAttribute("user") == null){
     <link href="../font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <style>
         .google-maps {
-            height: 300px;
+            height: 600px;
         }
         .google-maps ng-map{
             height: 100%;
@@ -46,10 +46,10 @@ if(session.getAttribute("user") == null){
             font-size:10px;
             font-style: italic;
         }
-
-        .dropdown-menu {
-            width:100%;
-          }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
     </style>
     <script src="../js/jquery.js"></script>
     <script src="https://maps.google.com/maps/api/js?libraries=placeses,visualization,drawing,geometry,places&key=AIzaSyCqUEyO3rTumxb0G-oRsyBnZLn4O9VKtiM"></script>
@@ -84,7 +84,7 @@ if(session.getAttribute("user") == null){
 
 <body ng-app="myApp" class="ng-cloak" >
     
-    <div id="wrapper" style="height: 600px;" ng-controller="SolicitudController as ctrl">
+    <div id="wrapper" style="height: 600px;" ng-controller="ServActivosController as ctrl">
 
         <!-- Navigation -->
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -101,22 +101,16 @@ if(session.getAttribute("user") == null){
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr}<b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr} <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="generar.jsp"><i class="fa fa-fw fa-plus"></i> Generar Solicitud</a>
+                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-automobile"></i> Solicitudes</a>
                         </li>
                         <li>
-                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Activas</a>
+                            <a href="servicios.jsp"><i class="fa fa-fw fa-truck"></i> Servicios en ruta</a>
                         </li>
                         <li>
-                            <a href="servicios_table.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Activos</a>
-                        </li>
-                        <li>
-                            <a href="enturne_table.jsp"><i class="fa fa-fw fa-ticket"></i> Enturnar Veh.</a>
-                        </li>
-                        <li>
-                            <a href="puntos.jsp"><i class="fa fa-fw fa-map-marker"></i> Puntos</a>
+                            <a href="vehiculos"><i class="fa fa-fw fa-plus"></i> Vehiculos</a>
                         </li>
                         <li class="divider"></li>
                         <li>
@@ -178,19 +172,11 @@ if(session.getAttribute("user") == null){
                                         </div>
                                         <div class="form-group">
                                             <label>Tipo de cargue:</label>
-                                            <select class="form-control" ng-model="ctrl.servicio.carga" ng-change="ctrl.cambiarCargue(ctrl.servicio.carga)"
+                                            <select class="form-control" ng-model="ctrl.servicio.carga" 
                                             ng-options="Tipo.id as Tipo.desc for Tipo in ctrl.cargues" ng-disabled="ctrl.enviado"
                                             name="carga" clase="text_valid" required-message="'Debe seleccionar una opcion'" required>
                                                 <option value="">--- Seleccione Tipo ---</option>
                                             </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Tipo Remolque:</label>
-                                            <button type="button" class="btn btn-default form-control" ng-disabled="(ctrl.Remolques.length==0)?true:false" ng-model="ctrl.mapa.remolques" 
-                                                    max-length-html="Seleccionados" ng-change="ctrl.cambiarSeletsMult()" data-multiple="1" max-length="1" placeholder="--- Tipo Remolque ---" all-none-buttons="true"
-                                                    bs-options="Remolque.ID as Remolque.Value for Remolque in ctrl.Remolques" bs-select>
-                                                Action <span class="caret"></span>
-                                            </button>
                                         </div>
                                         <div class="form-group">
                                             <label>N° equipos:</label>
@@ -200,59 +186,6 @@ if(session.getAttribute("user") == null){
                                             invalid-message = "'Debe ingresar un numero valido'"
                                             required-message="'El campo no puede estar vacio'" 
                                             required/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse2" style="text-decoration: none; color: #808080;">
-                                      <h4 class="panel-title">
-                                            Fecha
-                                      </h4>
-                                    </a>
-                                </div>
-                                <div id="collapse2" class="panel-collapse collapse">
-                                    <div class="panel-body">
-                                        <div class="form-group">
-                                            <label>Fecha min de cargue:</label>
-                                            <div class="input-group input-group-sm date" 
-                                                datetimepicker ng-model="ctrl.dateMinCargue" options="ctrl.options" ng-disabled="ctrl.enviado">
-                                                  <input type="text" class="form-control" ng-disabled="ctrl.enviado"/>
-                                                  <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-calendar"></span>
-                                                  </span>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Fecha max de cargue:</label>
-                                            <div class="input-group input-group-sm date" ng-change="ctrl.colocarFecha()"
-                                                datetimepicker ng-model="ctrl.dateMaxCargue" options="ctrl.options" ng-disabled="ctrl.enviado">
-                                                <input type="text" class="form-control" ng-disabled="ctrl.enviado"/>
-                                                  <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-calendar"></span>
-                                                  </span>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Fecha min de descargue:</label>
-                                            <div class="input-group input-group-sm date" 
-                                                datetimepicker ng-model="ctrl.dateMinDescargue" options="ctrl.options" ng-disabled="ctrl.enviado">
-                                                  <input type="text" class="form-control" ng-disabled="ctrl.enviado"/>
-                                                  <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-calendar"></span>
-                                                  </span>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Fecha max de descargue:</label>
-                                            <div class="input-group input-group-sm date" 
-                                                datetimepicker ng-model="ctrl.dateMaxDescargue" options="ctrl.options" ng-disabled="ctrl.enviado">
-                                                  <input type="text" class="form-control" ng-disabled="ctrl.enviado"/>
-                                                  <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-calendar"></span>
-                                                  </span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -299,167 +232,168 @@ if(session.getAttribute("user") == null){
                 <div class="row">
                     <div class="col-lg-12" >
                         <div class="google-maps">
-                            <ng-map height="100%" center="10.97978516762394,-74.80676651000977"  zoom="10">
-                                <directions
-                                draggable="false"
-                                travel-mode="DRIVING"
-                                origin="{{ctrl.placeO}}"
-                                destination="{{ctrl.placeD}}" suppressMarkers='true'>
-                                <marker id='{{vehiculo.placa}}' position="{{vehiculo.position}}" ng-repeat="vehiculo in ctrl.vehiculos"
-                                on-click="ctrl.showDetail(vehiculo)" icon="{{vehiculo.icono}}" reload></marker>
+                            <ng-map height="100%" center="10.97978516762394,-74.80676651000977"  zoom="10"
+                            map-type-control="true" map-type-control-options="{style:'HORIZONTAL_BAR', position:'BOTTOM_CENTER'}">
+                                <custom-control id="home" position="TOP_RIGHT" index="1">
+                                    <div style="margin: 7px 7px 0 7px; ">
+                                        <table class="table table-bordered compact">
+                                            <thead>
+                                            <tr>
+                                                <td colspan="2" style="background-color: #E8E8E8;">
+                                                    <center>
+                                                        RESUMEN DE RUTA
+                                                    </center>
+                                                </td>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td style="background-color: #E8E8E8;">Equipos en ruta:</td>
+                                                    <td style="background-color: #F5F5F5;">{{ctrl.servicios.length}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="background-color: #E8E8E8;">Capacidad cargada:</td>
+                                                    <td style="background-color: #F5F5F5;">{{ctrl.cap_cargada}} GAL</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </custom-control>
+                                <marker id='{{servicio.servicio}}' position="{{servicio.lat_actual}}, {{servicio.lng_actual}}" ng-repeat="servicio in ctrl.servicios"
+                                on-click="ctrl.showDetail(servicio)" icon="../css/images/ic_truckicon_disp.png"></marker>
                                 <info-window id="foo-iw">
-                                      <div ng-non-bindable="">
-                                         <table style="width:100%;height: 100%;padding: 5px;">
+                                    <div ng-non-bindable="" class="table compact nowrap table-striped" style="overflow-x: hidden;">
+                                        <table style="width:100%;height: 100%;padding: 5px;">
+                                            <tr>
+                                                <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DEL SERVICIO</th>
+                                            </tr>
+                                            
+                                            <tr>
+                                              <td style="background-color: #E8E8E8;">VIGENCIA LICENCIA</td>
+                                              <td>{{ctrl.servicio.exp_lic}} - {{ctrl.servicio.vence_lic}}</td>
+                                            </tr>
+                                            <tr>
+                                              <td style="background-color: #E8E8E8;">VIGENCIA LICENCIA</td>
+                                              <td>{{ctrl.servicio.exp_lic}} - {{ctrl.servicio.vence_lic}}</td>
+                                            </tr>
                                             <tr>
                                                 <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DEL CONDUCTOR</th>
                                             </tr>
                                             <tr>
                                                 <td colspan="2" style="background-color:#000000;padding: 4px;">
-                                                     <center><img width="150px" src="{{ctrl.vehiculo.img_conductor}}"/></center>
+                                                     <center><img width="150px" src="{{ctrl.servicio.url_conductor}}"/></center>
                                                 </td> 
                                             </tr>
                                             <tr>
                                                 <td style="background-color: #E8E8E8;">NOMBRE</td>
-                                                <td>{{ctrl.vehiculo.nombre}}</td>
+                                                <td>{{ctrl.servicio.nombre_completo}}</td>
                                             </tr>
                                             <tr>
                                                 <td style="background-color: #E8E8E8;">DOCUMENTO</td>
-                                                <td>{{ctrl.vehiculo.doc}}</td>
+                                                <td>{{ctrl.servicio.doc}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">NO. LICENCIA</td>
-                                              <td>{{ctrl.vehiculo.lic}}</td>
+                                              <td>{{ctrl.servicio.licencia}}</td>
                                             </tr>
                                             <tr>
-                                              <td style="background-color: #E8E8E8;">VENCIMIENTO DE LICENCIA</td>
-                                              <td>{{ctrl.vehiculo.vence_lic}}</td>
+                                              <td style="background-color: #E8E8E8;">VIGENCIA LICENCIA</td>
+                                              <td>{{ctrl.servicio.exp_lic}} - {{ctrl.servicio.vence_lic}}</td>
                                             </tr>
                                             <tr>
                                                 <td style="background-color: #E8E8E8;">TELEFONO</td>
-                                                <td>{{ctrl.vehiculo.telefono}}</td>
+                                                <td>{{ctrl.servicio.telefono}}</td>
                                             </tr>
                                             <tr>
                                                 <td style="background-color: #E8E8E8;">DIRECCION</td>
-                                                <td>{{ctrl.vehiculo.direccion}}</td>
+                                                <td>{{ctrl.servicio.direccion}}</td>
                                             </tr>
                                             <tr>
                                                 <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DEL VEHICULO</th>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">TIPO EQUIPO</td>
-                                              <td>{{ctrl.vehiculo.tipo_equipo}}</td>
+                                              <td>{{ctrl.servicio.tipo_equipo}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">PLACA</td>
-                                              <td>{{ctrl.vehiculo.placa}}</td>
+                                              <td>{{ctrl.servicio.placa}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">LIC. DE TRANSITO</td>
-                                              <td>{{ctrl.vehiculo.lic_transito}}</td>
+                                              <td>{{ctrl.servicio.lic_transito}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">MARCA</td>
-                                              <td>{{ctrl.vehiculo.marca}}</td>
+                                              <td>{{ctrl.servicio.marca}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">REFERENCIA</td>
-                                              <td>{{ctrl.vehiculo.referencia}}</td>
+                                              <td>{{ctrl.servicio.referencia}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">MODELO</td>
-                                              <td>{{ctrl.vehiculo.modelo}}</td>
+                                              <td>{{ctrl.servicio.modelo}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">PLACA REMOLQUE</td>
-                                              <td>{{ctrl.vehiculo.placa_rem}}</td>
+                                              <td>{{ctrl.servicio.placa_rem}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">TIPO REMOLQUE</td>
-                                              <td>{{ctrl.vehiculo.tipo_remolque}}</td>
+                                              <td>{{ctrl.servicio.tipo_remolque}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">LIC. TRANSITO REMOLQUE</td>
-                                              <td>{{ctrl.vehiculo.lic_transito_r}}</td>
+                                              <td>{{ctrl.servicio.lic_transito_r}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">POLIZA DE SEGURO</td>
-                                              <td>{{ctrl.vehiculo.poliza}}</td>
+                                              <td>{{ctrl.servicio.poliza}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">COMPAÑIA ASEGURADORA</td>
-                                              <td>{{ctrl.vehiculo.comp}}</td>
+                                              <td>{{ctrl.servicio.comp}}</td>
                                             </tr>
                                             <tr>
-                                              <td style="background-color: #E8E8E8;">VENCIMIENTO DE POLIZA</td>
-                                              <td>{{ctrl.vehiculo.vence_poliza}}</td>
+                                              <td style="background-color: #E8E8E8;">VIGENCIA POLIZA</td>
+                                              <td>{{ctrl.servicio.exp_poliza}} - {{ctrl.servicio.vence_poliza}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">POLIZA DE SEGURO H.C.</td>
-                                              <td>{{ctrl.vehiculo.poliza_hc}}</td>
+                                              <td>{{ctrl.servicio.poliza_hc}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">COMPAÑIA ASEGURADORA</td>
-                                              <td>{{ctrl.vehiculo.comp_hc}}</td>
+                                              <td>{{ctrl.servicio.comp_hc}}</td>
                                             </tr>
                                             <tr>
-                                              <td style="background-color: #E8E8E8;">VENCIMIENTO DE POLIZA H.C.</td>
-                                              <td>{{ctrl.vehiculo.vence_poliza_hc}}</td>
+                                              <td style="background-color: #E8E8E8;">VIGENCIA POLIZA H.C.</td>
+                                              <td>{{ctrl.servicio.exp_poliza_hc}} - {{ctrl.servicio.vence_poliza_hc}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">SOAT</td>
-                                              <td>{{ctrl.vehiculo.soat}}</td>
+                                              <td>{{ctrl.servicio.soat}}</td>
                                             </tr>
                                             <tr>
-                                              <td style="background-color: #E8E8E8;">VENCIMIENTO DE SOAT</td>
-                                              <td>{{ctrl.vehiculo.vence_soat}}</td>
+                                              <td style="background-color: #E8E8E8;">VIGENCIA SOAT</td>
+                                              <td>{{ctrl.servicio.exp_soat}} - {{ctrl.servicio.vence_soat}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">TECNOMECANICA</td>
-                                              <td>{{ctrl.vehiculo.tecno}}</td>
+                                              <td>{{ctrl.servicio.tecno}}</td>
                                             </tr>
                                             <tr>
-                                              <td style="background-color: #E8E8E8;">VENCIMIENTO DE TECNOMECANICA</td>
-                                              <td>{{ctrl.vehiculo.vence_tecno}}</td>
+                                              <td style="background-color: #E8E8E8;">VIGENCIA TECNOMECANICA</td>
+                                              <td>{{ctrl.servicio.exp_tecno}} - {{ctrl.servicio.vence_tecno}}</td>
                                             </tr>
                                         </table>
                                     </div>
                                 </info-window>
+                                <shape id="circle" name="circle" stroke-color="#01DF3A" stroke-opacity="0.5" 
+                                center="{{ctrl.shape.center}}" radius="{{ctrl.shape.radius}}" stroke-weight="1"></shape>
                             </ng-map>
                         </div>
-                    </div>
-                </div>
-                <div class="row" style="margin-top: 15px;">
-                    <div class="col-lg-12" >
-                        <table id="vehiculos" datatable="ng" dt-options="ctrl.dtOptions" class="table table-striped table-bordered dt-responsive compact" cellspacing="0" width="100%">
-                            <thead>
-                                <tr>
-                                    <td>Placa</td>
-                                    <td>Trailer</td>
-                                    <td>T. Trailer</td>
-                                    <td>Capacidad</td>
-                                    <td>Marca</td>
-                                    <td>Modelo</td>
-                                    <td>Referencia</td>
-                                    <td>Conductor</td>
-                                    <td>Telefono</td>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="vehiculo in ctrl.vehiculos">
-                                    <td><span ng-bind="vehiculo.placa"></span></td>
-                                    <td><span ng-bind="vehiculo.placa_rem"></span></td>
-                                    <td><span ng-bind="vehiculo.tipo_remolque"></span></td>
-                                    <td><span ng-bind="vehiculo.capacidad"></span> <span ng-bind="vehiculo.unidad"></span></td>
-                                    <td><span ng-bind="vehiculo.marca"></span></td>
-                                    <td><span ng-bind="vehiculo.modelo"></span></td>
-                                    <td><span ng-bind="vehiculo.referencia"></span></td>
-                                    <td><span ng-bind="vehiculo.nombre"></span></td>
-                                    <td><span ng-bind="vehiculo.telefono"></span></td>
-                                    <td><span style="cursor: pointer;" ng-click="ctrl.showMap(vehiculo)"><i class="fa-globe fa fa-2x fa-align-center"></i></span></td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>

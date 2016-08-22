@@ -1,6 +1,7 @@
 
 package datos.json;
 
+import bean.Servicio;
 import static datos.Aplicacion.conexion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +14,7 @@ import org.json.simple.JSONObject;
 
 public class Listas {
     static SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    static SimpleDateFormat formateadorDate = new SimpleDateFormat("yyyy/MM/dd");
   
     public static JSONObject listaVehiculos(float lat, float lng, int tipo) throws SQLException{
         JSONArray lista=new JSONArray();        
@@ -69,6 +71,223 @@ public class Listas {
             }
         return retorno;
     }
+    
+    
+    public static JSONArray listaVehiculos() throws SQLException{
+        JSONArray lista=new JSONArray();        
+        JSONObject retorno= new JSONObject();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT ec.plca_equipo, lat_equipoconductor, long_equipoconductor, ult_actualizacion, desc_remolque, " +
+                "desc_tipocarga, desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, plac_trailer_equipo, " +
+                "CONCAT(nomb_conductor, ' ', apll_conductor), tel_conductor, img_conductor, ec.id_equipoconductor, " +
+                "imei_conductor , regs_imei_conductor, regs_imei_entur_conductor, cap_equipo, und_equipo " +
+                "FROM tblEquipoConductor AS ec INNER JOIN tblEquipo AS eq ON ec.plca_equipo = eq.plca_equipo " +
+                "INNER JOIN tblConductor AS co ON co.cod_conductor = ec.cod_conductor " +
+                "INNER JOIN tblRemolque AS tr ON tr.id_remolque = eq.id_remolque " +
+                "INNER JOIN tblTipoCarga AS tc ON tc.id_tipocarga = eq.id_tipocarga " +
+                "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = eq.id_tipoequipo " +
+                "WHERE disp_equipoconductor = 1 AND pila_equipoconductor = 1 ";
+                instruccion += " AND ult_actualizacion > DATE_ADD(NOW(),INTERVAL -12 HOUR)";        
+                
+                st=conn.prepareStatement(instruccion);
+                System.out.println(instruccion);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    JSONArray posicion= new JSONArray();
+                    objeto.put("placa", datos.getString(1));
+                    posicion.add(datos.getFloat(2));
+                    posicion.add(datos.getFloat(3));
+                    objeto.put("position", posicion);
+                    objeto.put("ult_reporte", formateador.format(formateador.parse(datos.getString(4))));
+                    objeto.put("remolque", datos.getString(5));                    
+                    objeto.put("tipocarga", datos.getString(6));                    
+                    objeto.put("tipoequipo", datos.getString(7));
+                    objeto.put("marca", datos.getString(8));
+                    objeto.put("modelo", datos.getString(9));
+                    objeto.put("referencia", datos.getString(10));
+                    objeto.put("trailer", datos.getString(11));
+                    objeto.put("nombre", datos.getString(12));
+                    objeto.put("telefono", datos.getString(13));
+                    objeto.put("imagen", datos.getString(14));
+                    objeto.put("id", datos.getString(15));                    
+                    objeto.put("imei", datos.getString(16));                    
+                    objeto.put("reg_logycus", datos.getString(17));                    
+                    objeto.put("reg_enturne", datos.getString(18));                    
+                    objeto.put("capacidad", datos.getString(19)); 
+                    objeto.put("unidad", datos.getString(20));  
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaVehiculosAsignar(String empresa, int rango, float lat, float lng) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        JSONObject retorno= new JSONObject();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT ec.plca_equipo, lat_equipoconductor, long_equipoconductor, ult_actualizacion, desc_remolque, " +
+                "desc_tipocarga, desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, plac_trailer_equipo, " +
+                "CONCAT(nomb_conductor, ' ', apll_conductor), tel_conductor, img_conductor, ec.id_equipoconductor, " +
+                "imei_conductor , regs_imei_conductor, regs_imei_entur_conductor, cap_equipo, und_equipo, lat_equipoconductor, long_equipoconductor, velo_equipoconductor " +
+                "FROM tblEquipoConductor AS ec INNER JOIN tblEquipo AS eq ON ec.plca_equipo = eq.plca_equipo " +
+                "INNER JOIN tblConductor AS co ON co.cod_conductor = ec.cod_conductor " +
+                "INNER JOIN tblRemolque AS tr ON tr.id_remolque = eq.id_remolque " +
+                "INNER JOIN tblTipoCarga AS tc ON tc.id_tipocarga = eq.id_tipocarga " +
+                "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = eq.id_tipoequipo " +
+                "WHERE disp_equipoconductor = 1 AND pila_equipoconductor = 1 AND eq.nit_empresa = '"+empresa+"' ";
+                instruccion += " AND ult_actualizacion > DATE_ADD(NOW(),INTERVAL -12 HOUR) AND " +
+                "(acos(sin(radians("+lat+")) * sin(radians(lat_equipoconductor)) + " +
+                "cos(radians("+lat+")) * cos(radians(lat_equipoconductor)) * " +
+                "cos(radians("+lng+") - radians(long_equipoconductor))) * 6378)<"+rango+";";        
+                
+                st=conn.prepareStatement(instruccion);
+                System.out.println(instruccion);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    JSONArray posicion= new JSONArray();
+                    objeto.put("placa", datos.getString(1));
+                    posicion.add(datos.getFloat(2));
+                    posicion.add(datos.getFloat(3));
+                    objeto.put("position", posicion);
+                    objeto.put("ult_reporte", formateador.format(formateador.parse(datos.getString(4))));
+                    objeto.put("remolque", datos.getString(5));                    
+                    objeto.put("tipocarga", datos.getString(6));                    
+                    objeto.put("tipoequipo", datos.getString(7));
+                    objeto.put("marca", datos.getString(8));
+                    objeto.put("modelo", datos.getString(9));
+                    objeto.put("referencia", datos.getString(10));
+                    objeto.put("trailer", datos.getString(11));
+                    objeto.put("nombre", datos.getString(12));
+                    objeto.put("telefono", datos.getString(13));
+                    objeto.put("imagen", datos.getString(14));
+                    objeto.put("id", datos.getString(15));                    
+                    objeto.put("imei", datos.getString(16));                    
+                    objeto.put("reg_logycus", datos.getString(17));                    
+                    objeto.put("reg_enturne", datos.getString(18));                    
+                    objeto.put("capacidad", datos.getString(19)); 
+                    objeto.put("unidad", datos.getString(20));  
+                    objeto.put("latitud", datos.getFloat(21));
+                    objeto.put("longitud", datos.getFloat(22));
+                    objeto.put("velocidad", datos.getFloat(23));
+                    
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaEnturneActivos(String empresa) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        JSONObject retorno= new JSONObject();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT id_servicioenturne, ec.plca_equipo, lat_equipoconductor, long_equipoconductor, ult_actualizacion, " +
+                "desc_remolque, desc_tipocarga, desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, plac_trailer_equipo, " +
+                " CONCAT(nomb_conductor, ' ', apll_conductor), tel_conductor, img_conductor, pila_equipoconductor, " +
+                "cap_carg_servicioenturne, und_equipo, fech_m_carg_servicioenturne, fech_m_desc_servicioenturne, " +
+                "guia_servicioenturne, desc_estados, CONCAT(p_i.desc_punto,' - ', p_f.desc_punto) " +
+                "FROM tblServicioEnturne AS se INNER JOIN tblEquipoConductor AS ec ON ec.id_equipoconductor = se.id_equipoconductor " +
+                "INNER JOIN tblEquipo AS eq ON eq.plca_equipo = ec.plca_equipo " +
+                "INNER JOIN tblConductor AS co ON co.cod_conductor = ec.cod_conductor  " +
+                "INNER JOIN tblRemolque AS tr ON tr.id_remolque = eq.id_remolque  " +
+                "INNER JOIN tblTipoCarga AS tc ON tc.id_tipocarga = eq.id_tipocarga  " +
+                "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = eq.id_tipoequipo " +
+                "INNER JOIN tblEstados AS es ON es.id_estados = se.id_estados " +
+                "INNER JOIN tblPunto AS p_i ON p_i.id_punto = se.id_punto_inicio " +
+                "INNER JOIN tblPunto AS p_f ON p_f.id_punto = se.id_punto_fin " +
+                "WHERE se.id_estados < 11 AND se.nit_empresa = ?;";        
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    JSONArray posicion= new JSONArray();
+                    objeto.put("id", datos.getString(1));
+                    objeto.put("placa", datos.getString(2));
+                    posicion.add(datos.getFloat(3));
+                    posicion.add(datos.getFloat(4));
+                    objeto.put("position", posicion);
+                    objeto.put("ult_reporte", formateador.format(formateador.parse(datos.getString(5))));
+                    objeto.put("remolque", datos.getString(6));                    
+                    objeto.put("tipocarga", datos.getString(7));                    
+                    objeto.put("tipoequipo", datos.getString(8));
+                    objeto.put("marca", datos.getString(9));
+                    objeto.put("modelo", datos.getString(10));
+                    objeto.put("referencia", datos.getString(11));
+                    objeto.put("trailer", datos.getString(12));
+                    objeto.put("nombre", datos.getString(13));
+                    objeto.put("telefono", datos.getString(14));
+                    objeto.put("imagen", datos.getString(15));
+                    objeto.put("pila", datos.getBoolean(16));                    
+                    objeto.put("capacidad", datos.getString(17)); 
+                    objeto.put("unidad", datos.getString(18));  
+                    objeto.put("fecha_cargue", formateador.format(formateador.parse(datos.getString(19))));
+                    objeto.put("fecha_descargue", formateador.format(formateador.parse(datos.getString(20))));
+                    objeto.put("guia", datos.getString(21));  
+                    objeto.put("estado", datos.getString(22));  
+                    objeto.put("ruta", datos.getString(23));  
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
     
     public static JSONObject listaVehiculosBusquedas(float lat, float lng, int tipo, float zona, String empresa, 
             boolean todo, String solicitud) throws SQLException{
@@ -257,6 +476,131 @@ public class Listas {
         return lista;
     }
     
+    public static JSONArray listaVehiculosDispLogycus(float lat, float lng, String remolques, 
+        String solicitud, int horas, String empresa) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        int zona = (horas>=0)?350:35*horas;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT cond.cod_conductor, equ.plca_equipo, lic_trans_equipo, lat_equipoconductor, long_equipoconductor, ult_pos_equipoconductor,\n" +
+                "ult_actualizacion, regs_imei_conductor, tr.desc_remolque, tc.desc_tipocarga,\n" +
+                "te.desc_tipoequipo, marca_equipo, modelo_equipo, refer_equipo, plac_trailer_equipo, lic_trans_r_equipo, poliza_equipo, comp_poliza_equipo,\n" +
+                "fech_venc_poliz_equipo, soat_equipo, fech_venc_soat_equipo, tecno_equipo, fech_venc_tecno_equipo, \n" +
+                " poliza_hc_equipo, comp_poliza_hc_equipo,vence_poliza_hc_equipo, CONCAT(CAST(cap_equipo AS CHAR), ' ',und_equipo), tipo_doc_conductor, doc_conductor, num_lic_conductor, fech_venc_lic_conductor,\n" +
+                "CONCAT(nomb_conductor, ' ', apll_conductor), tel_conductor, dire_conductor, img_conductor, razn_soci_empresa, url_img_empresa, CASE WHEN soli.id_servicio IS NULL THEN '../css/images/ic_truckicon.png' ELSE '../css/images/ic_truckicon_ocup.png' END \n" +
+                "FROM tblEquipoConductor AS eqco INNER JOIN tblEquipo AS equ ON eqco.plca_equipo = equ.plca_equipo\n" +
+                "INNER JOIN tblConductor AS cond ON cond.cod_conductor = eqco.cod_conductor\n" +
+                "INNER JOIN tblEmpresa AS trans ON  trans.nit_empresa = equ.nit_empresa\n" +
+                "INNER JOIN tblRemolque AS tr ON tr.id_remolque = equ.id_remolque \n" +
+                "INNER JOIN tblTipoCarga AS tc ON tc.id_tipocarga = equ.id_tipocarga \n" +
+                "INNER JOIN tblTipoEquipo AS te ON te.id_tipoequipo = equ.id_tipoequipo\n" +
+                "LEFT JOIN tblAsocio AS aso ON aso.nit_empresa = '"+ empresa +"' AND aso.nit_transportadora = equ.nit_empresa\n" +
+                "LEFT JOIN (SELECT id_servicio, serv.id_equipoconductor\n" +
+                "FROM tblSolicitud AS sol INNER JOIN tblServicio AS serv ON sol.id_solicitud = serv.id_solicitud\n" +
+                "WHERE sol.id_solicitud = '"+solicitud+"' ) AS soli ON soli.id_equipoconductor = eqco.id_equipoconductor " +
+                "WHERE fech_venc_poliz_equipo > NOW() AND fech_venc_soat_equipo > NOW() AND fech_venc_tecno_equipo > NOW() AND \n" +
+                "vence_poliza_hc_equipo > NOW() AND fech_venc_lic_conductor > NOW() AND disp_equipoconductor = 1  AND pila_equipoconductor = 1 ";
+                instruccion += " AND ult_actualizacion > DATE_ADD(NOW(),INTERVAL -12 HOUR)";
+                if(lat>0 || lng>0){
+                    instruccion += " AND (acos(sin(radians("+lat+")) * sin(radians(lat_equipoconductor)) + " +
+                    "cos(radians("+lat+")) * cos(radians(lat_equipoconductor)) * " +
+                    "cos(radians("+lng+") - radians(long_equipoconductor))) * 6378)<"+zona;	
+                }
+                if(!remolques.equals("")){
+                    instruccion += " AND (";
+                        String[] r = remolques.split(",");
+                        for(int i=0; i < r.length; i++){
+                            if(r.length-1 == i){
+                                instruccion += " eq.id_remolque = "+r[i];
+                            }else{
+                                instruccion += " eq.id_remolque = "+r[i] + " OR "; 
+                            }
+                        }
+                    instruccion += ")";
+                }
+                instruccion += " ORDER BY soli.id_servicio DESC";
+                
+                System.out.println(instruccion);
+                
+                st=conn.prepareStatement(instruccion);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto = new JSONObject();
+                    JSONArray posicion = new JSONArray();
+                    objeto.put("codigo", datos.getString(1));
+                    objeto.put("placa", datos.getString(2));
+                    objeto.put("lic_transito", datos.getString(3));
+                    posicion.add(datos.getFloat(4));
+                    posicion.add(datos.getFloat(5));
+                    objeto.put("position", posicion);
+                    objeto.put("ult_pos", datos.getString(6));
+                    if(datos.getString(7) != null){
+                        objeto.put("ult_act", formateador.format(datos.getDate(7)));
+                    }
+                    objeto.put("reg_logycus", datos.getString(8));
+                    objeto.put("tipo_remolque", datos.getString(9));
+                    objeto.put("tipo_carga", datos.getString(10));
+                    objeto.put("tipo_equipo", datos.getString(11));
+                    objeto.put("modelo", datos.getString(12));
+                    objeto.put("marca", datos.getString(13));
+                    objeto.put("referencia", datos.getString(14));
+                    objeto.put("placa_rem", datos.getString(15));
+                    objeto.put("lic_transito_r", datos.getString(16));
+                    objeto.put("poliza", datos.getString(17));
+                    objeto.put("comp_pol", datos.getString(18));
+                    if(datos.getString(19) != null){
+                        objeto.put("vence_pol", formateadorDate.format(datos.getDate(19)));
+                    }
+                    objeto.put("soat", datos.getString(20));
+                    if(datos.getString(21) != null){
+                        objeto.put("vence_soat", formateadorDate.format(datos.getDate(21)));
+                    }
+                    objeto.put("tecno", datos.getString(22));
+                    if(datos.getString(23) != null){
+                        objeto.put("vence_tecno", formateadorDate.format(datos.getDate(23)));
+                    }
+                    objeto.put("poliza_hc", datos.getString(24));
+                    objeto.put("comp_pol_hc", datos.getString(25));
+                    if(datos.getString(26) != null){
+                        objeto.put("vence_pol_hc", formateadorDate.format(datos.getDate(26)));
+                    }
+                    objeto.put("capacidad", datos.getString(27));        
+                    objeto.put("tipo_doc", datos.getString(28));
+                    objeto.put("doc", datos.getString(29));
+                    objeto.put("lic", datos.getString(30));
+                    if(datos.getString(31) != null){
+                        objeto.put("vence_lic", formateadorDate.format(datos.getDate(31)));
+                    }
+                    objeto.put("nombre", datos.getString(32));
+                    objeto.put("telefono", datos.getString(33));
+                    objeto.put("direccion", datos.getString(34));
+                    objeto.put("img_cond", datos.getString(35));
+                    objeto.put("empresa", datos.getString(36));
+                    objeto.put("img_empresa", datos.getString(37));
+                    objeto.put("icono", datos.getString(38));
+                    lista.add(objeto);
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
     
     public static JSONArray listaServiciosBySolicitud(String id) throws SQLException{
         JSONArray lista=new JSONArray();        
@@ -266,7 +610,7 @@ public class Listas {
         
             try{
                 conn=conexion();
-                String instruccion="SELECT * FROM logycus360.SolicitudesAll WHERE id_solicitud = ?;";	        
+                String instruccion="SELECT * FROM logycus360.SelectServicioBySolicitud WHERE id_solicitud = ?;";	        
                 
                 st=conn.prepareStatement(instruccion);
                 st.setString(1, id);
@@ -282,34 +626,48 @@ public class Listas {
                     objeto.put("referencia", datos.getString(5));
                     objeto.put("modelo", datos.getString(6));
                     objeto.put("trailer", datos.getString(7));
-                    objeto.put("poliza", datos.getString(8));
-                    objeto.put("compania", datos.getString(9));
-                    objeto.put("exp_poliza", datos.getString(10));
-                    objeto.put("vence_poliza", datos.getString(11));
-                    objeto.put("soat", datos.getString(12));
-                    objeto.put("exp_soat",datos.getString(13));
-                    objeto.put("vence_soat",datos.getString(14));
-                    objeto.put("tecno",datos.getString(15));
-                    objeto.put("exp_tecno",datos.getString(16));
-                    objeto.put("vence_tecno",datos.getString(17));
+                    objeto.put("lic_transito", datos.getString(8));
+                    objeto.put("lic_transito_r", datos.getString(9));
+                    objeto.put("poliza", datos.getString(10));
+                    objeto.put("compania", datos.getString(11));
+                    objeto.put("exp_poliza", datos.getString(12));
+                    objeto.put("vence_poliza", datos.getString(13));
+                    objeto.put("poliza_hc", datos.getString(14));
+                    objeto.put("compania_hc", datos.getString(15));
+                    objeto.put("exp_poliza_hc", datos.getString(16));
+                    objeto.put("vence_poliza_hc", datos.getString(17));
+                    objeto.put("soat", datos.getString(18));
+                    objeto.put("exp_soat",datos.getString(19));
+                    objeto.put("vence_soat",datos.getString(20));
+                    objeto.put("tecno",datos.getString(21));
+                    objeto.put("exp_tecno",datos.getString(22));
+                    objeto.put("vence_tecno",datos.getString(23));
                     // datos de conductor
-                    objeto.put("nombre",datos.getString(18));
-                    objeto.put("tipo_doc",datos.getString(19));
-                    objeto.put("doc",datos.getString(20));
-                    objeto.put("num_lic",datos.getString(21));
-                    objeto.put("exp_lic",datos.getString(22));
-                    objeto.put("vence_lic",datos.getString(23));
-                    objeto.put("telefono",datos.getString(24));
-                    objeto.put("direccion",datos.getString(25));
-                    objeto.put("imagen",datos.getString(26));
-                    objeto.put("tipo_carga",datos.getInt(27));
-                    objeto.put("ntipo_carga",datos.getString(28));
-                    objeto.put("tipo_remolque",datos.getInt(29));
-                    objeto.put("ntipo_remolque",datos.getString(30));
-                    objeto.put("tipo_equipo",datos.getInt(31));
-                    objeto.put("ntipo_equipo",datos.getString(32));
-                    objeto.put("turno_cargue",datos.getInt(33));
-                    objeto.put("turno_descargue",datos.getInt(34));
+                    objeto.put("nombre",datos.getString(24));
+                    objeto.put("apellido",datos.getString(25));
+                    objeto.put("nombre_comp",datos.getString(26));
+                    objeto.put("tipo_doc",datos.getString(27));
+                    objeto.put("doc",datos.getString(28));
+                    objeto.put("num_lic",datos.getString(29));
+                    objeto.put("exp_lic",datos.getString(30));
+                    objeto.put("vence_lic",datos.getString(31));
+                    objeto.put("telefono",datos.getString(32));
+                    objeto.put("direccion",datos.getString(33));
+                    objeto.put("imagen",datos.getString(34));
+                    
+                    objeto.put("tipo_carga",datos.getInt(35));
+                    objeto.put("ntipo_carga",datos.getString(36));
+                    objeto.put("tipo_remolque",datos.getInt(37));
+                    objeto.put("ntipo_remolque",datos.getString(38));
+                    objeto.put("tipo_equipo",datos.getInt(39));
+                    objeto.put("ntipo_equipo",datos.getString(40));
+                    objeto.put("tipo_cargue",datos.getInt(41));
+                    objeto.put("ntipo_cargue",datos.getString(42));
+                    
+                    objeto.put("turno_cargue",datos.getInt(43));
+                    objeto.put("turno_descargue",datos.getInt(44));
+                    objeto.put("ticket_cargue",datos.getInt(45));
+                    objeto.put("ticket_descargue",datos.getInt(46));
                     objeto.put("fotos",listaFotosByServicio(datos.getString(1)));
                     lista.add(objeto);
                 }
@@ -330,6 +688,7 @@ public class Listas {
            System.out.println();
         return lista;
     }
+    
     
     public static JSONArray listaFotosByServicio(String id) throws SQLException{
         JSONArray lista=new JSONArray();        
@@ -383,10 +742,14 @@ public class Listas {
             try{
                 conn=conexion();
                 int desde = ((pageno-1)*porpage);
-                String instruccion="SELECT  id_solicitud, s.id_estados, e.desc_estados, orden_solicitud, fech_carg_solicitud, fech_desc_solicitud, orig_solicitud, dest_solicitud ";
-                instruccion+=      "FROM tblSolicitud AS s INNER JOIN tblEstados AS e ON s.id_estados = e.id_estados WHERE nit_empresa = ? " ;
+                String instruccion="SELECT  id_solicitud, s.id_estados, e.desc_estados, orden_solicitud, fech_carg_solicitud, fech_desc_solicitud, p_i.desc_punto, p_f.desc_punto, car.desc_tipocargue, s.id_tipocargue " +
+                "FROM tblSolicitud AS s INNER JOIN tblEstados AS e ON s.id_estados = e.id_estados " +
+                "INNER JOIN tblPunto AS p_i ON p_i.id_punto = s.id_punto_inicio " +
+                "INNER JOIN tblPunto AS p_f ON p_f.id_punto = s.id_punto_fin " +
+                "INNER JOIN tblTipoCargue AS car ON car.id_tipocargue = s.id_tipocargue " +
+                "WHERE s.nit_empresa = ? ";
                 if(!q.isEmpty()){
-                    instruccion += " AND (orig_solicitud like '%"+q+"%' OR dest_solicitud like '%"+q+"%') ";
+                    instruccion += " AND (p_i.desc_punto like '%"+q+"%' OR p_f.desc_punto like '%"+q+"%') ";
                 }
                 
                 if(!cargue.isEmpty()){
@@ -398,7 +761,7 @@ public class Listas {
                 }
                 
                 if(carga!=-1){
-                    instruccion += " AND id_tipocarga = " + carga;
+                    instruccion += " AND id_tipocargue = " + carga;
                 }
                 
                 if(estado!=-1){
@@ -424,6 +787,8 @@ public class Listas {
                     objeto.put("descargue",formateador.format(formateador.parse(datos.getString(6))));
                     objeto.put("origen", datos.getString(7));
                     objeto.put("destino", datos.getString(8));
+                    objeto.put("n_cargue", datos.getString(9));
+                    objeto.put("carga", datos.getInt(10));
                     objeto.put("vehiculos", listaServiciosBySolicitud(datos.getString(1)));
                     lista.add(objeto);
                 }
@@ -522,6 +887,64 @@ public class Listas {
         return lista;
     }
     
+     public static JSONArray listaSolicitudesTransportador(String nit) throws SQLException{
+        JSONArray lista=new JSONArray();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT  id_solicitud, s.id_estados, e.desc_estados, orden_solicitud, fech_carg_solicitud, "
+                + "fech_desc_solicitud, p_i.desc_punto, p_f.desc_punto, p_i.lat_punto, p_i.lng_punto, p_f.lat_punto, p_f.lng_punto, ROUND( (UNIX_TIMESTAMP(fech_max_carg_solicitud) - UNIX_TIMESTAMP(NOW())) / 3600) * 35 " +
+                "FROM tblSolicitud AS s INNER JOIN tblEstados AS e ON s.id_estados = e.id_estados " +
+                "INNER JOIN tblPunto AS p_i ON p_i.id_punto = s.id_punto_inicio " +
+                "INNER JOIN tblPunto AS p_f ON p_f.id_punto = s.id_punto_fin " +
+                "INNER JOIN tblAsocio AS aso ON aso.nit_empresa = s.nit_empresa " +
+                "WHERE nit_transportadora = ?; " ;
+                    
+                System.out.println(instruccion);
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, nit);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("id", datos.getString(1));
+                    objeto.put("estado", datos.getInt(2));
+                    objeto.put("nestado", datos.getString(3));
+                    objeto.put("orden",datos.getString(4));
+                    objeto.put("cargue",formateador.format(formateador.parse(datos.getString(5))));
+                    objeto.put("descargue",formateador.format(formateador.parse(datos.getString(6))));
+                    objeto.put("origen", datos.getString(7));
+                    objeto.put("destino", datos.getString(8));
+                    objeto.put("lat_origen", datos.getFloat(9));
+                    objeto.put("lng_origen", datos.getFloat(10));
+                    objeto.put("lat_destino", datos.getFloat(11));
+                    objeto.put("lng_destino", datos.getFloat(12));
+                    objeto.put("rango", datos.getString(13));
+                    //objeto.put("vehiculos", listaServiciosBySolicitud(datos.getString(1)));
+                    lista.add(objeto);
+                }
+                
+                return lista;
+
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+     
     public static int totalFiltrados(String nit, String q, String cargue, String descargue, int carga, int estado) throws SQLException{
         PreparedStatement st = null;
         Connection conn=null;
@@ -839,7 +1262,7 @@ public class Listas {
                     objeto.put("nota", datos.getString(3));
                     objeto.put("lat",datos.getFloat(4));
                     objeto.put("lng",datos.getFloat(5));
-                    objeto.put("zonas", listaZonasPuntos(datos.getInt(1)));
+                    objeto.put("zonas", listaZonasPuntos(datos.getString(1)));
                     lista.add(objeto);
                 }
                 
@@ -888,11 +1311,12 @@ public class Listas {
                 datos=(ResultSet) st.executeQuery();
                 while (datos.next()) {
                     JSONObject objeto= new JSONObject();
-                    objeto.put("id", datos.getInt(1));
+                    objeto.put("id", datos.getString(1));
                     objeto.put("desc", datos.getString(2));
                     objeto.put("nota", datos.getString(3));
                     objeto.put("lat",datos.getFloat(4));
                     objeto.put("lng",datos.getFloat(5));
+                    objeto.put("zonas",listaZonasPuntos(datos.getString(1)));
                     lista.add(objeto);
                 }
                 
@@ -917,6 +1341,19 @@ public class Listas {
     
     public static JSONArray listaCarguesEmpresas(String empresa) throws SQLException{
         JSONArray lista=new JSONArray();
+        JSONArray remolques = new JSONArray();
+        JSONArray remolquesJ = new JSONArray();
+        JSONObject r1 = new JSONObject();
+        r1.put("ID",8); r1.put("Value","Tanque acero inoxidable");
+        JSONObject r2 = new JSONObject();
+        r2.put("ID",9); r2.put("Value","Tanque aluminio");
+        JSONObject r3 = new JSONObject();
+        r3.put("ID",10); r3.put("Value","Tanque lamina");
+        remolques.add(r1);
+        remolques.add(r2);
+        remolques.add(r3);
+        remolquesJ.add(r1);
+        remolquesJ.add(r2);
         PreparedStatement st = null;
         Connection conn=null;
         ResultSet datos=null;
@@ -935,6 +1372,11 @@ public class Listas {
                     JSONObject objeto= new JSONObject();
                     objeto.put("id", datos.getInt(1));
                     objeto.put("desc", datos.getString(2));
+                    if(datos.getInt(1)!=4){
+                        objeto.put("remolques", remolques);
+                    }else{
+                        objeto.put("remolques", remolquesJ);
+                    }
                     lista.add(objeto);
                 }
                 
@@ -1007,11 +1449,11 @@ public class Listas {
                     objeto.put("fecha_enturnado", datos.getString(6));
                     objeto.put("nzona", datos.getString(7));
                     objeto.put("nbahia", datos.getString(8));
-                    objeto.put("npunto", datos.getString(24));
+                    objeto.put("npunto", datos.getString(23));
                     objeto.put("zona", datos.getString(20));
-                    objeto.put("bahia", datos.getString(21));
-                    objeto.put("turno", datos.getString(22));
-                    objeto.put("punto", datos.getString(23));
+                    objeto.put("bahia", datos.getInt(21));
+                    objeto.put("turno", datos.getInt(22));
+                    objeto.put("punto", datos.getString(24));
                     objeto.put("placa", datos.getString(9));
                     objeto.put("remolque", datos.getString(10));
                     objeto.put("tipo_equipo", datos.getString(11));
@@ -1099,7 +1541,7 @@ public class Listas {
         return lista.toJSONString();
     }
     
-    public static JSONArray listaZonasPuntos(int punto) throws SQLException{
+    public static JSONArray listaZonasPuntos(String punto) throws SQLException{
         JSONArray lista=new JSONArray();
         PreparedStatement st = null;
         Connection conn=null;
@@ -1113,12 +1555,12 @@ public class Listas {
                 
                 
                 st=conn.prepareStatement(instruccion);
-                st.setInt(1, punto);
+                st.setString(1, punto);
                 datos=(ResultSet) st.executeQuery();
                 while (datos.next()) {
                     JSONObject objeto= new JSONObject();
                     objeto.put("id", datos.getInt(1));
-                    objeto.put("id_punto", datos.getInt(2));
+                    objeto.put("id_punto", datos.getString(2));
                     objeto.put("desc", datos.getString(3));
                     objeto.put("bahias", listaBahiasZona(datos.getInt(1)));
                     lista.add(objeto);
@@ -1175,6 +1617,477 @@ public class Listas {
             }catch (Exception e){
                     System.out.println("error Exception en ObtenerUsuario");
                     System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaVehiculosByPropietario(String propietario) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        JSONObject retorno= new JSONObject();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT plca_equipo, eq.id_tipocarga, tc.desc_tipocarga, eq.id_tipoequipo, "+
+                "te.desc_tipoequipo, eq.id_remolque, re.desc_remolque, " +
+                "marca_equipo, modelo_equipo, refer_equipo, plac_trailer_equipo, poliza_equipo, " +
+                "comp_poliza_equipo, fech_exp_poliz_equipo, fech_venc_poliz_equipo, soat_equipo, " +
+                "fech_exp_soat_equipo, fech_venc_soat_equipo,  tecno_equipo, fech_exp_tecno_equipo, " +
+                "fech_venc_tecno_equipo, cap_equipo, und_equipo " +
+                "FROM tblEquipo AS eq INNER JOIN tblTipoCarga AS tc ON eq.id_tipocarga = tc.id_tipocarga " +
+                "INNER JOIN tblTipoEquipo AS te ON eq.id_tipoequipo = te.id_tipoequipo " +
+                "INNER JOIN tblRemolque AS re ON eq.id_remolque = re.id_remolque " +
+                "WHERE nit_empresa = ?;";        
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, propietario);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("placa", datos.getString(1));
+                    objeto.put("n_tipocarga", datos.getInt(2)); 
+                    objeto.put("tipocarga", datos.getString(3));                    
+                    objeto.put("n_tipoequipo", datos.getInt(4));
+                    objeto.put("tipoequipo", datos.getString(5));
+                    objeto.put("n_remolque", datos.getInt(6)); 
+                    objeto.put("remolque", datos.getString(7));                    
+                    objeto.put("marca", datos.getString(8));
+                    objeto.put("modelo", datos.getString(9));
+                    objeto.put("referencia", datos.getString(10));
+                    objeto.put("trailer", datos.getString(11));
+                    objeto.put("poliza", datos.getString(12));
+                    objeto.put("compania", datos.getString(13));
+                    objeto.put("exp_poliza", datos.getString(14));
+                    objeto.put("vence_poliza", datos.getString(15));
+                    objeto.put("soat", datos.getString(16));
+                    objeto.put("exp_soat", datos.getString(17));
+                    objeto.put("vence_soat", datos.getString(18));
+                    objeto.put("tecno", datos.getString(19));
+                    objeto.put("exp_tecno", datos.getString(20));
+                    objeto.put("vence_tecno", datos.getString(21));
+                    objeto.put("capacidad", datos.getString(22));     
+                    objeto.put("unidad", datos.getString(23));     
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaConductoresByPropietario(String propietario) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT cod_conductor, tipo_doc_conductor, doc_conductor, num_lic_conductor, fech_exp_lic_conductor, " +
+                "fech_venc_lic_conductor, nomb_conductor, apll_conductor, tel_conductor, " +
+                "dire_conductor, mail_conductor, img_conductor " +
+                "FROM tblConductor WHERE nit_empresa = ?;";        
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, propietario);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("codigo", datos.getString(1));
+                    objeto.put("tipo_doc", datos.getString(2));                    
+                    objeto.put("doc", datos.getString(3));
+                    objeto.put("lic", datos.getString(4));                    
+                    objeto.put("exp_lic", datos.getString(5));
+                    objeto.put("venc_lic", datos.getString(6));
+                    objeto.put("nombre", datos.getString(7));
+                    objeto.put("apellido", datos.getString(8));
+                    objeto.put("n_completo", datos.getString(7) + " " + datos.getString(8));
+                    objeto.put("telefono", datos.getString(9));
+                    objeto.put("direccion", datos.getString(10));
+                    objeto.put("mail", datos.getString(11));
+                    objeto.put("imagen", datos.getString(12));             
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaEquiposConductoresByPropietario(String propietario, boolean activo) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        JSONObject retorno= new JSONObject();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT IFNULL(ec.id_equipoconductor, -1), eq.plca_equipo, ec.cod_conductor, ec.fech_equipoconductor, acti_equipoconductor, " +
+                "CASE WHEN se.activ_servicio = 1 OR sen.activ_servicioenturne = 1 THEN 1 ELSE 0 END AS en_servicio, ec.regs_imei_conductor, " +
+                "ec.pila_equipoconductor, ec.disp_equipoconductor " +
+                "FROM tblEquipo AS eq LEFT JOIN tblEquipoConductor AS ec ON eq.plca_equipo = ec.plca_equipo " +
+                "LEFT JOIN (SELECT id_servicio, id_equipoconductor, activ_servicio " +
+                "FROM tblServicio WHERE activ_servicio = 1) AS se ON se.id_equipoconductor = ec.id_equipoconductor " +
+                "LEFT JOIN (SELECT id_servicioenturne, id_equipoconductor, activ_servicioenturne " +
+                "FROM tblServicioEnturne WHERE activ_servicioenturne = 1) AS sen ON sen.id_equipoconductor = ec.id_equipoconductor " +
+                "WHERE eq.nit_empresa = ? ";   
+                
+                if(activo){
+                    instruccion += "AND acti_equipoconductor = 1";
+                }
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, propietario);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("id", datos.getInt(1));
+                    objeto.put("placa", datos.getString(2));                    
+                    objeto.put("conductor", datos.getString(3));
+                    objeto.put("fecha_desde", datos.getString(4));                    
+                    objeto.put("activo", datos.getBoolean(5));
+                    objeto.put("en_servicio", datos.getString(6));
+                    objeto.put("imei", datos.getString(7));
+                    objeto.put("pila", datos.getString(8));
+                    objeto.put("disponible", datos.getBoolean(9));
+                    objeto.put("editar", false);
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaFletes(String empresa) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        JSONObject retorno= new JSONObject();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="select id_punto_inicio, id_punto_fin, vlr_flete, desc_flete, und_flete from tblFlete where nit_empresa = ?; ";   
+
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, empresa);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("inicio", datos.getString(1));
+                    objeto.put("fin", datos.getString(2));                    
+                    objeto.put("valor", datos.getFloat(3));
+                    objeto.put("descripcion", datos.getString(4));                    
+                    objeto.put("unidad", datos.getString(5));
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray ServiciosActivosByGeneradora(String id) throws SQLException{
+        JSONArray lista= new JSONArray();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT * FROM logycus360.SelectServicioBySolicitud WHERE nit_empresa = ? AND id_estados < 11;";	        
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, id);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto = new JSONObject();
+                    objeto.put("servicio", datos.getString(1));
+                    objeto.put("solicitud", datos.getString(2));
+                    objeto.put("placa", datos.getString(3));
+                    objeto.put("marca", datos.getString(4));
+                    objeto.put("referencia", datos.getString(5));
+                    objeto.put("modelo", datos.getString(6));
+                    objeto.put("placa_rem", datos.getString(7));
+                    objeto.put("lic_transito", datos.getString(8));
+                    objeto.put("lic_transito_r", datos.getString(9));
+                    objeto.put("poliza", datos.getString(10));
+                    objeto.put("comp", datos.getString(11));
+                    if(datos.getString(12) != null){
+                        objeto.put("exp_poliza", formateadorDate.format(datos.getDate(12)));
+                    }
+                    if(datos.getString(13) != null){
+                        objeto.put("vence_poliza", formateadorDate.format(datos.getDate(13)));
+                    }
+                    objeto.put("poliza_hc", datos.getString(14));
+                    objeto.put("comp_hc", datos.getString(15));
+                    if(datos.getString(16) != null){
+                        objeto.put("exp_poliza_hc", formateadorDate.format(datos.getDate(16)));
+                    }
+                    if(datos.getString(17) != null){
+                        objeto.put("vence_poliza_hc", formateadorDate.format(datos.getDate(17)));
+                    }
+                    objeto.put("soat", datos.getString(18));
+                    if(datos.getString(19) != null){
+                        objeto.put("exp_soat", formateadorDate.format(datos.getDate(19)));
+                    }
+                    if(datos.getString(20) != null){
+                        objeto.put("vence_soat", formateadorDate.format(datos.getDate(20)));
+                    }
+                    objeto.put("tecno", datos.getString(21));
+                    if(datos.getString(22) != null){
+                        objeto.put("exp_tecno", formateadorDate.format(datos.getDate(22)));
+                    }
+                    if(datos.getString(23) != null){
+                        objeto.put("vence_tecno", formateadorDate.format(datos.getDate(23)));
+                    }
+                    
+                    objeto.put("url_conductor", datos.getString(24));
+                    objeto.put("nombre", datos.getString(25));
+                    objeto.put("apellido", datos.getString(26));
+                    objeto.put("nombre_completo", datos.getString(27));
+                    objeto.put("tipo_doc", datos.getString(28));
+                    objeto.put("doc", datos.getString(29));
+                    objeto.put("licencia", datos.getString(30));
+                    if(datos.getString(31) != null){
+                        objeto.put("exp_lic", formateadorDate.format(datos.getDate(31)));
+                    }
+                    if(datos.getString(32) != null){
+                        objeto.put("vence_lic", formateadorDate.format(datos.getDate(32)));
+                    }
+                    objeto.put("telefono", datos.getString(33));
+                    objeto.put("direccion", datos.getString(34));
+                    objeto.put("tipo_carga", datos.getString(35));
+                    objeto.put("tipo_remolque", datos.getString(37));
+                    objeto.put("tipo_equipo", datos.getString(39));
+                    objeto.put("tipo_cargue", datos.getString(41));
+                    objeto.put("turno_cargue", datos.getInt(43));
+                    objeto.put("turno_descague", datos.getInt(44));
+                    objeto.put("ticket_cargue", datos.getString(45));
+                    objeto.put("ticket_descargue", datos.getString(46));
+                    objeto.put("reg_logycus", datos.getString(48));
+                    objeto.put("reg_enturnex", datos.getString(49));
+                    objeto.put("nit_generador", datos.getString(50));
+                    objeto.put("generador", datos.getString(51));
+                    objeto.put("nit_transportadora", datos.getString(52));
+                    objeto.put("transportadora", datos.getString(53));
+                    objeto.put("url_generador", datos.getString(54));
+                    objeto.put("url_transportadora", datos.getString(55));
+                    objeto.put("id_inicio", datos.getString(56));
+                    objeto.put("desc_inicio", datos.getString(57));
+                    objeto.put("lat_inicio", datos.getFloat(58));
+                    objeto.put("lng_inicio", datos.getFloat(59));
+                    objeto.put("id_fin", datos.getString(60));
+                    objeto.put("desc_fin", datos.getString(61));
+                    objeto.put("lat_fin", datos.getFloat(62));
+                    objeto.put("lng_fin", datos.getFloat(63));
+                    objeto.put("lat_actual", datos.getFloat(64));
+                    objeto.put("lng_actual", datos.getFloat(65));
+                    objeto.put("vel_actual", datos.getFloat(66));
+                    objeto.put("pos_actual", datos.getString(67));
+                    if(datos.getString(32) != null){
+                        objeto.put("ult_actual", formateador.format(datos.getDate(68)));
+                    }
+                    objeto.put("cap_carg", datos.getInt(69));
+                    lista.add(objeto);
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario - ");
+                    System.out.println(e.toString());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario - ");
+                    System.out.println(e.toString());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+
+    
+    public static JSONArray ServiciosActivosByTransportadora(String id) throws SQLException{
+        JSONArray lista= new JSONArray();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT * FROM logycus360.SelectServicioBySolicitud WHERE nit_transportadora = ? AND id_estados < 11;";	        
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, id);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto = new JSONObject();
+                    objeto.put("servicio", datos.getString(1));
+                    objeto.put("solicitud", datos.getString(2));
+                    objeto.put("placa", datos.getString(3));
+                    objeto.put("marca", datos.getString(4));
+                    objeto.put("referencia", datos.getString(5));
+                    objeto.put("modelo", datos.getString(6));
+                    objeto.put("placa_rem", datos.getString(7));
+                    objeto.put("lic_transito", datos.getString(8));
+                    objeto.put("lic_transito_r", datos.getString(9));
+                    objeto.put("poliza", datos.getString(10));
+                    objeto.put("comp", datos.getString(11));
+                    if(datos.getString(12) != null){
+                        objeto.put("exp_poliza", formateadorDate.format(datos.getDate(12)));
+                    }
+                    if(datos.getString(13) != null){
+                        objeto.put("vence_poliza", formateadorDate.format(datos.getDate(13)));
+                    }
+                    objeto.put("poliza_hc", datos.getString(14));
+                    objeto.put("comp_hc", datos.getString(15));
+                    if(datos.getString(16) != null){
+                        objeto.put("exp_poliza_hc", formateadorDate.format(datos.getDate(16)));
+                    }
+                    if(datos.getString(17) != null){
+                        objeto.put("vence_poliza_hc", formateadorDate.format(datos.getDate(17)));
+                    }
+                    objeto.put("soat", datos.getString(18));
+                    if(datos.getString(19) != null){
+                        objeto.put("exp_soat", formateadorDate.format(datos.getDate(19)));
+                    }
+                    if(datos.getString(20) != null){
+                        objeto.put("vence_soat", formateadorDate.format(datos.getDate(20)));
+                    }
+                    objeto.put("tecno", datos.getString(21));
+                    if(datos.getString(22) != null){
+                        objeto.put("exp_tecno", formateadorDate.format(datos.getDate(22)));
+                    }
+                    if(datos.getString(23) != null){
+                        objeto.put("vence_tecno", formateadorDate.format(datos.getDate(23)));
+                    }
+                    
+                    objeto.put("url_conductor", datos.getString(24));
+                    objeto.put("nombre", datos.getString(25));
+                    objeto.put("apellido", datos.getString(26));
+                    objeto.put("nombre_completo", datos.getString(27));
+                    objeto.put("tipo_doc", datos.getString(28));
+                    objeto.put("doc", datos.getString(29));
+                    objeto.put("licencia", datos.getString(30));
+                    if(datos.getString(31) != null){
+                        objeto.put("exp_lic", formateadorDate.format(datos.getDate(31)));
+                    }
+                    if(datos.getString(32) != null){
+                        objeto.put("vence_lic", formateadorDate.format(datos.getDate(32)));
+                    }
+                    objeto.put("telefono", datos.getString(33));
+                    objeto.put("direccion", datos.getString(34));
+                    objeto.put("tipo_carga", datos.getString(35));
+                    objeto.put("tipo_remolque", datos.getString(37));
+                    objeto.put("tipo_equipo", datos.getString(39));
+                    objeto.put("tipo_cargue", datos.getString(41));
+                    objeto.put("turno_cargue", datos.getInt(43));
+                    objeto.put("turno_descague", datos.getInt(44));
+                    objeto.put("ticket_cargue", datos.getString(45));
+                    objeto.put("ticket_descargue", datos.getString(46));
+                    objeto.put("reg_logycus", datos.getString(48));
+                    objeto.put("reg_enturnex", datos.getString(49));
+                    objeto.put("nit_generador", datos.getString(50));
+                    objeto.put("generador", datos.getString(51));
+                    objeto.put("nit_transportadora", datos.getString(52));
+                    objeto.put("transportadora", datos.getString(53));
+                    objeto.put("url_generador", datos.getString(54));
+                    objeto.put("url_transportadora", datos.getString(55));
+                    objeto.put("id_inicio", datos.getString(56));
+                    objeto.put("desc_inicio", datos.getString(57));
+                    objeto.put("lat_inicio", datos.getFloat(58));
+                    objeto.put("lng_inicio", datos.getFloat(59));
+                    objeto.put("id_fin", datos.getString(60));
+                    objeto.put("desc_fin", datos.getString(61));
+                    objeto.put("lat_fin", datos.getFloat(62));
+                    objeto.put("lng_fin", datos.getFloat(63));
+                    objeto.put("lat_actual", datos.getFloat(64));
+                    objeto.put("lng_actual", datos.getFloat(65));
+                    objeto.put("vel_actual", datos.getFloat(66));
+                    objeto.put("pos_actual", datos.getString(67));
+                    if(datos.getString(68) != null){
+                        objeto.put("ult_actual", formateador.format(datos.getDate(68)));
+                    }
+                    objeto.put("cap_carg", datos.getInt(69));
+                    if(datos.getString(70) != null){
+                        objeto.put("min_carg", formateador.format(datos.getDate(70)));
+                    }
+                    if(datos.getString(71) != null){
+                        objeto.put("max_carg", formateador.format(datos.getDate(71)));
+                    }
+                    if(datos.getString(72) != null){
+                        objeto.put("min_desc", formateador.format(datos.getDate(72)));
+                    }
+                    if(datos.getString(73) != null){
+                        objeto.put("max_desc", formateador.format(datos.getDate(73)));
+                    }
+                    objeto.put("operacion", datos.getInt(74));    
+                    lista.add(objeto);
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario - ");
+                    System.out.println(e.toString());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario - ");
+                    System.out.println(e.toString());
             }finally{
                 if(conn!=null){
                     if(!conn.isClosed()){

@@ -51,6 +51,10 @@ public class saveBahia extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
+                System.out.println(id);
+                System.out.println(id_zona);
+                System.out.println(descripcion);
+                System.out.println(nota);
                 boolean x = Guardar.InsertBahia(id, id_zona, descripcion, nota);
                 JSONObject json = new JSONObject();
                 json.put("retorno", x);

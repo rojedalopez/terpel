@@ -20,6 +20,7 @@ public class Usuario {
     private String fecha;
     private String token;
     private int rol;
+    private int tipo;
     private String nit;
     private String razon_social;
     private String telefono;
@@ -131,6 +132,14 @@ public class Usuario {
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
+    }
+
+    public int getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(int tipo) {
+        this.tipo = tipo;
     }
     
     

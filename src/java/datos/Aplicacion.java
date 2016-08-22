@@ -45,11 +45,11 @@ public class Aplicacion {
                     String instruccion = "";
                     if(tipo==1){
                         instruccion= "SELECT salt_conductor, pass_conductor, cod_conductor, '', mail_conductor, nomb_conductor,  apll_conductor, " +
-                                        "'', tel_conductor, img_conductor, '', 0, tipo_doc_conductor, doc_conductor, tipo_lic_conductor, num_lic_conductor " +
+                                        "'', tel_conductor, img_conductor, '', 0, tipo_doc_conductor, doc_conductor, tipo_lic_conductor, num_lic_conductor, 0 " +
                                         "FROM logycus360.tblConductor WHERE mail_conductor = ? AND acti_conductor = 1;";
                     }else{
                         instruccion="SELECT salt_usuario, pass_usuario, cod_usuario, e.nit_empresa, mail_usuario, nomb_usuario, apll_usuario, " +
-                                    "razn_soci_empresa, tel_empresa, url_img_usuario, url_img_empresa, id_rol " +
+                                    "razn_soci_empresa, tel_empresa, url_img_usuario, url_img_empresa, id_rol, tipo_empresa " +
                                     "FROM tblUsuario AS u INNER JOIN tblEmpresa AS e ON e.nit_empresa = u.nit_empresa " +
                                     "WHERE mail_usuario = ? AND acti_empresa = 1;";
                     }
@@ -60,8 +60,6 @@ public class Aplicacion {
                         //valido las credenciales
                         String hash = datos.getString(1);
                         String pasw = datos.getString(2);
-                        System.out.println(pasw);
-                        System.out.println(Metodos.sha512(pass, hash));
                         if(pasw.equals(Metodos.sha512(pass, hash))){
                             //obtengo el Usuario
                             u = new Usuario();
@@ -75,6 +73,7 @@ public class Aplicacion {
                             u.setUrl_imagen(datos.getString(10));
                             u.setUrl_empresa(datos.getString(11));
                             u.setRol(datos.getInt(12));
+                            u.setTipo(datos.getInt(13));
                             u.setMensaje("true");
                             return u;
                         }else{
@@ -115,8 +114,8 @@ public class Aplicacion {
                 try{
                     conn=conexion();
                     String instruccion="SELECT c.cod_conductor, tipo_doc_conductor, doc_conductor, " +
-                    "num_lic_conductor, nomb_conductor, apll_conductor, tel_conductor, mail_conductor, salt_conductor, pass_conductor, img_conductor, id_equipoconductor, plca_equipo, pila_equipoconductor " +
-                    "FROM tblConductor AS c LEFT JOIN tblEquipoConductor AS e ON c.cod_conductor = e.cod_conductor AND acti_equipoconductor = 1 WHERE mail_conductor = ? AND acti_conductor = 1;";
+                    "num_lic_conductor, nomb_conductor, apll_conductor, tel_conductor, mail_conductor, salt_conductor, pass_conductor, img_conductor, id_equipoconductor, e.plca_equipo, pila_equipoconductor, cap_equipo, und_equipo " +
+                    "FROM tblConductor AS c LEFT JOIN tblEquipoConductor AS e ON c.cod_conductor = e.cod_conductor AND acti_equipoconductor = 1 LEFT JOIN tblEquipo AS eq ON eq.plca_equipo = e.plca_equipo WHERE mail_conductor = ? AND acti_conductor = 1;";
                     insertar=conn.prepareStatement(instruccion);
                     insertar.setString(1, correo);
                     datos=insertar.executeQuery();
@@ -139,6 +138,8 @@ public class Aplicacion {
                             u.put("equipo_conductor",datos.getInt(12));
                             u.put("placa",datos.getString(13));
                             u.put("pila",datos.getBoolean(14));
+                            u.put("capacidad",datos.getInt(15));
+                            u.put("unidad",datos.getString(16));
                             u.put("mensaje","true");
                             
                             return u;

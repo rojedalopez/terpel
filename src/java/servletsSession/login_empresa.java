@@ -3,6 +3,7 @@ package servletsSession;
 
 import bean.Usuario;
 import datos.Aplicacion;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -13,6 +14,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import servletsMobile.login;
 
 public class login_empresa extends HttpServlet {
@@ -28,13 +32,32 @@ public class login_empresa extends HttpServlet {
             throws ServletException, IOException {
         try {
             response.setContentType("text/html;charset=UTF-8");
-        String usuario = request.getParameter("nick");
-        String contrasena = request.getParameter("pass");
-        HttpSession session =  null;
+        StringBuilder sb = new StringBuilder();
+        
+        try
+        {
+          BufferedReader reader = request.getReader();
+          String line = null;
+          while ((line = reader.readLine()) != null)
+          {
+            sb.append(line);
+          }
+        } catch (Exception e) {}
  
+        JSONParser parser = new JSONParser();
+        JSONObject joUsuario = null;
+        joUsuario = (JSONObject) parser.parse(sb.toString());
+        
+        String nick = (String) joUsuario.get("nick");
+        String pass = (String) joUsuario.get("pass");
+        
+        HttpSession session =  null;
+
         session = request.getSession(true);
 
-        Usuario u = Aplicacion.obtenerUsuario(usuario, contrasena, 2);
+        Usuario u = Aplicacion.obtenerUsuario(nick, pass, 2);
+        
+        JSONObject json = new JSONObject();
         
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
@@ -51,24 +74,31 @@ public class login_empresa extends HttpServlet {
                         url = session.getAttribute("url_forward")+"";
                     }
                     
-
-                    session.setAttribute("usr", u.getNombre());
+                    json.put("mensaje", "OK");
+                    session.setAttribute("usr", u.getNombre() + " " + u.getApellido());
                     if(u.getRol()==3){
-                        response.sendRedirect((url_forward)?url:"/empresa/enturne.jsp");
+                        if(u.getTipo()==1){
+                            json.put("url", (url_forward)?url:"/empresa/generar.jsp");
+                        }else{
+                            json.put("url", (url_forward)?url:"/transporter/vehiculos.jsp");
+                        }
                     }else{
-                        response.sendRedirect((url_forward)?url:"/empresa/servicios.jsp");
+                        json.put("url", (url_forward)?url:"/empresa/servicios.jsp");
                     }
                     
                  }else{
-                    System.out.println("error en: " +u.getMensaje());
-                    response.sendRedirect("?mensaje=Error en la autenticacion.");
+                    json.put("mensaje", "badinfo");
                 }
             }else{
-                response.sendRedirect("../?mensaje=No existe usuario.");                
+                json.put("mensaje", "nouser");
             }
+            
+            out.print(json.toJSONString());
         }
         } catch (SQLException ex) {
             Logger.getLogger(login.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParseException ex) {
+            Logger.getLogger(login_empresa.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
