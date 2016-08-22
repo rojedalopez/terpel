@@ -42,6 +42,7 @@ public class list_vehiculos_disp extends HttpServlet {
         System.out.println(sb.toString());
         
         String hora = (String) joEmploye.get("hora");
+        String solicitud = (String) joEmploye.get("solicitud");
         JSONArray remol = (JSONArray) joEmploye.get("remolques");
         String remolques = "";
         for(int i = 0; i < remol.size(); i++){
@@ -83,7 +84,7 @@ public class list_vehiculos_disp extends HttpServlet {
                 System.out.println(session.getAttribute("user"));
                 if(session.getAttribute("user")!=null){
                     Usuario u = (Usuario)session.getAttribute("user"); 
-                    String x = Listas.listaVehiculosDispLogycus(lat, lng, remolques, "", horas, u.getNit()).toJSONString();
+                    String x = Listas.listaVehiculosDispLogycus(lat, lng, remolques, solicitud , horas, u.getNit()).toJSONString();
 
                     out.println(x);
                 }else{

@@ -9,7 +9,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
             vm.dateMaxCargue=null;
             vm.dateMaxDescargue=null;
             vm.mapa = {lng_punto:"", lat_punto:"", solicitud:"", remolques:[], hora:""};
-            vm.options = {format: "YYYY/MM/DD hh:mm A", allowInputToggle:true, showClose:true};
+            vm.options = {format: "YYYY/MM/DD HH:mm", allowInputToggle:true, showClose:true};
             vm.shape = {center:[], radius:50000};
             vm.vehiculo = {placa:"", position:[], ult_reporte:"", remolque:"", tipocarga:"", tipoequipo:"", marca:"",
             modelo:"", referencia:"", trailer:"", nombre:"", telefono:"", imagen:"", solicitud:"", servicio:"", 
@@ -157,6 +157,7 @@ angular.module('MyApp.Servicios', []).controller('SolicitudController', ['NgMap'
                         vm.enviado = true;
                         vm.alerta.content = "Se ha generado correctamente la solicitud <b>#"+d.id_solicitud+"</b>.";
                         vm.alerta.type = "success";
+                        vm.mapa.solicitud = d.id_solicitud;
                         vm.ReloadVehiculos();
                    }else{
                         vm.alerta.content = "Se ha generado un error ejecutando la operación.";
@@ -1791,6 +1792,25 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         },function(errResponse){
            console.error('Error en getDataRegistradas');
        });
+    };
+    
+    vm.verConductor = function(conductor){
+      vm.conductor = angular.copy(conductor);  
+      
+      sendConductor.modal("show");
+    };
+    
+    vm.verVehiculo = function(equipo){
+        vm.equipo = angular.copy(equipo);
+        vm.equipo.exp_poliza = new Date(vm.equipo.exp_poliza);
+        vm.equipo.vence_poliza = new Date(vm.equipo.vence_poliza);
+        vm.equipo.exp_poliza_hc = new Date(vm.equipo.exp_poliza_hc);
+        vm.equipo.vence_poliza_hc = new Date(vm.equipo.vence_poliza_hc);
+        vm.equipo.exp_soat = new Date(vm.equipo.exp_soat);
+        vm.equipo.vence_soat =  new Date(vm.equipo.vence_soat);
+        vm.equipo.exp_tecno = new Date(vm.equipo.exp_tecno);
+        vm.equipo.vence_tecno = new Date(vm.equipo.vence_tecno);
+        sendVehiculo.modal("show");
     };
     
     vm.getDataConductores = function(){ // This would fetch the data on page change.

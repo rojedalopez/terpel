@@ -1,7 +1,6 @@
 
 package datos.json;
 
-import bean.Servicio;
 import static datos.Aplicacion.conexion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -57,10 +56,10 @@ public class Listas {
                 retorno.put("lista",lista);
                 retorno.put("TOs", TOs);
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaVehiculos");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaVehiculos");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -125,10 +124,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaVehiculos");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaVehiculos");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -199,10 +198,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaVehiculosAsignar");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaVehiculosAsignar");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -273,10 +272,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaEnturneActivos");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaEnturneActivos");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -362,10 +361,10 @@ public class Listas {
                 
                 retorno.put("lista",lista);
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaVehiculosBusquedas");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaVehiculosBusquedas");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -461,10 +460,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaVehiculosDispEnturne");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaVehiculosDispEnturne");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -503,7 +502,7 @@ public class Listas {
                 "FROM tblSolicitud AS sol INNER JOIN tblServicio AS serv ON sol.id_solicitud = serv.id_solicitud\n" +
                 "WHERE sol.id_solicitud = '"+solicitud+"' ) AS soli ON soli.id_equipoconductor = eqco.id_equipoconductor " +
                 "WHERE fech_venc_poliz_equipo > NOW() AND fech_venc_soat_equipo > NOW() AND fech_venc_tecno_equipo > NOW() AND \n" +
-                "vence_poliza_hc_equipo > NOW() AND fech_venc_lic_conductor > NOW() AND disp_equipoconductor = 1  AND pila_equipoconductor = 1 ";
+                "vence_poliza_hc_equipo > NOW() AND fech_venc_lic_conductor > NOW() AND (disp_equipoconductor = 1 OR soli.id_equipoconductor = eqco.id_equipoconductor) AND pila_equipoconductor = 1 ";
                 instruccion += " AND ult_actualizacion > DATE_ADD(NOW(),INTERVAL -12 HOUR)";
                 if(lat>0 || lng>0){
                     instruccion += " AND (acos(sin(radians("+lat+")) * sin(radians(lat_equipoconductor)) + " +
@@ -515,9 +514,9 @@ public class Listas {
                         String[] r = remolques.split(",");
                         for(int i=0; i < r.length; i++){
                             if(r.length-1 == i){
-                                instruccion += " eq.id_remolque = "+r[i];
+                                instruccion += " equ.id_remolque = "+r[i];
                             }else{
-                                instruccion += " eq.id_remolque = "+r[i] + " OR "; 
+                                instruccion += " equ.id_remolque = "+r[i] + " OR "; 
                             }
                         }
                     instruccion += ")";
@@ -586,10 +585,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaVehiculosDispLogycus");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaVehiculosDispLogycus");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -620,63 +619,113 @@ public class Listas {
                     // datos de servicio y solicitud
                     objeto.put("servicio", datos.getString(1));
                     objeto.put("solicitud", datos.getString(2));
-                    // datos de equipo
                     objeto.put("placa", datos.getString(3));
                     objeto.put("marca", datos.getString(4));
                     objeto.put("referencia", datos.getString(5));
                     objeto.put("modelo", datos.getString(6));
-                    objeto.put("trailer", datos.getString(7));
+                    objeto.put("placa_rem", datos.getString(7));
                     objeto.put("lic_transito", datos.getString(8));
                     objeto.put("lic_transito_r", datos.getString(9));
                     objeto.put("poliza", datos.getString(10));
-                    objeto.put("compania", datos.getString(11));
-                    objeto.put("exp_poliza", datos.getString(12));
-                    objeto.put("vence_poliza", datos.getString(13));
+                    objeto.put("comp", datos.getString(11));
+                    if(datos.getString(12) != null){
+                        objeto.put("exp_poliza", formateadorDate.format(datos.getDate(12)));
+                    }
+                    if(datos.getString(13) != null){
+                        objeto.put("vence_poliza", formateadorDate.format(datos.getDate(13)));
+                    }
                     objeto.put("poliza_hc", datos.getString(14));
-                    objeto.put("compania_hc", datos.getString(15));
-                    objeto.put("exp_poliza_hc", datos.getString(16));
-                    objeto.put("vence_poliza_hc", datos.getString(17));
+                    objeto.put("comp_hc", datos.getString(15));
+                    if(datos.getString(16) != null){
+                        objeto.put("exp_poliza_hc", formateadorDate.format(datos.getDate(16)));
+                    }
+                    if(datos.getString(17) != null){
+                        objeto.put("vence_poliza_hc", formateadorDate.format(datos.getDate(17)));
+                    }
                     objeto.put("soat", datos.getString(18));
-                    objeto.put("exp_soat",datos.getString(19));
-                    objeto.put("vence_soat",datos.getString(20));
-                    objeto.put("tecno",datos.getString(21));
-                    objeto.put("exp_tecno",datos.getString(22));
-                    objeto.put("vence_tecno",datos.getString(23));
-                    // datos de conductor
-                    objeto.put("nombre",datos.getString(24));
-                    objeto.put("apellido",datos.getString(25));
-                    objeto.put("nombre_comp",datos.getString(26));
-                    objeto.put("tipo_doc",datos.getString(27));
-                    objeto.put("doc",datos.getString(28));
-                    objeto.put("num_lic",datos.getString(29));
-                    objeto.put("exp_lic",datos.getString(30));
-                    objeto.put("vence_lic",datos.getString(31));
-                    objeto.put("telefono",datos.getString(32));
-                    objeto.put("direccion",datos.getString(33));
-                    objeto.put("imagen",datos.getString(34));
+                    if(datos.getString(19) != null){
+                        objeto.put("exp_soat", formateadorDate.format(datos.getDate(19)));
+                    }
+                    if(datos.getString(20) != null){
+                        objeto.put("vence_soat", formateadorDate.format(datos.getDate(20)));
+                    }
+                    objeto.put("tecno", datos.getString(21));
+                    if(datos.getString(22) != null){
+                        objeto.put("exp_tecno", formateadorDate.format(datos.getDate(22)));
+                    }
+                    if(datos.getString(23) != null){
+                        objeto.put("vence_tecno", formateadorDate.format(datos.getDate(23)));
+                    }
                     
-                    objeto.put("tipo_carga",datos.getInt(35));
-                    objeto.put("ntipo_carga",datos.getString(36));
-                    objeto.put("tipo_remolque",datos.getInt(37));
-                    objeto.put("ntipo_remolque",datos.getString(38));
-                    objeto.put("tipo_equipo",datos.getInt(39));
-                    objeto.put("ntipo_equipo",datos.getString(40));
-                    objeto.put("tipo_cargue",datos.getInt(41));
-                    objeto.put("ntipo_cargue",datos.getString(42));
-                    
-                    objeto.put("turno_cargue",datos.getInt(43));
-                    objeto.put("turno_descargue",datos.getInt(44));
-                    objeto.put("ticket_cargue",datos.getInt(45));
-                    objeto.put("ticket_descargue",datos.getInt(46));
+                    objeto.put("url_conductor", datos.getString(24));
+                    objeto.put("nombre", datos.getString(25));
+                    objeto.put("apellido", datos.getString(26));
+                    objeto.put("nombre_completo", datos.getString(27));
+                    objeto.put("tipo_doc", datos.getString(28));
+                    objeto.put("doc", datos.getString(29));
+                    objeto.put("licencia", datos.getString(30));
+                    if(datos.getString(31) != null){
+                        objeto.put("exp_lic", formateadorDate.format(datos.getDate(31)));
+                    }
+                    if(datos.getString(32) != null){
+                        objeto.put("vence_lic", formateadorDate.format(datos.getDate(32)));
+                    }
+                    objeto.put("telefono", datos.getString(33));
+                    objeto.put("direccion", datos.getString(34));
+                    objeto.put("tipo_carga", datos.getString(35));
+                    objeto.put("tipo_remolque", datos.getString(37));
+                    objeto.put("tipo_equipo", datos.getString(39));
+                    objeto.put("tipo_cargue", datos.getString(41));
+                    objeto.put("turno_cargue", datos.getInt(43));
+                    objeto.put("turno_descague", datos.getInt(44));
+                    objeto.put("ticket_cargue", datos.getString(45));
+                    objeto.put("ticket_descargue", datos.getString(46));
+                    objeto.put("reg_logycus", datos.getString(48));
+                    objeto.put("reg_enturnex", datos.getString(49));
+                    objeto.put("nit_generador", datos.getString(50));
+                    objeto.put("generador", datos.getString(51));
+                    objeto.put("nit_transportadora", datos.getString(52));
+                    objeto.put("transportadora", datos.getString(53));
+                    objeto.put("url_generador", datos.getString(54));
+                    objeto.put("url_transportadora", datos.getString(55));
+                    objeto.put("id_inicio", datos.getString(56));
+                    objeto.put("desc_inicio", datos.getString(57));
+                    objeto.put("lat_inicio", datos.getFloat(58));
+                    objeto.put("lng_inicio", datos.getFloat(59));
+                    objeto.put("id_fin", datos.getString(60));
+                    objeto.put("desc_fin", datos.getString(61));
+                    objeto.put("lat_fin", datos.getFloat(62));
+                    objeto.put("lng_fin", datos.getFloat(63));
+                    objeto.put("lat_actual", datos.getFloat(64));
+                    objeto.put("lng_actual", datos.getFloat(65));
+                    objeto.put("vel_actual", datos.getFloat(66));
+                    objeto.put("pos_actual", datos.getString(67));
+                    if(datos.getString(68) != null){
+                        objeto.put("ult_actual", formateador.format(datos.getDate(68)));
+                    }
+                    objeto.put("cap_carg", datos.getInt(69));
+                    if(datos.getString(70) != null){
+                        objeto.put("min_carg", formateador.format(datos.getDate(70)));
+                    }
+                    if(datos.getString(71) != null){
+                        objeto.put("max_carg", formateador.format(datos.getDate(71)));
+                    }
+                    if(datos.getString(72) != null){
+                        objeto.put("min_desc", formateador.format(datos.getDate(72)));
+                    }
+                    if(datos.getString(73) != null){
+                        objeto.put("max_desc", formateador.format(datos.getDate(73)));
+                    }
+                    objeto.put("operacion", datos.getInt(74));  
                     objeto.put("fotos",listaFotosByServicio(datos.getString(1)));
                     lista.add(objeto);
                 }
                 System.out.println(lista.toJSONString());
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaServiciosBySolicitud");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaServiciosBySolicitud");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -716,10 +765,10 @@ public class Listas {
                 }
                 System.out.println(lista.toJSONString());
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaFotosByServicio");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaFotosByServicio");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -800,10 +849,10 @@ public class Listas {
                 return retorno;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaSolicitudes");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaSolicitudes");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -872,10 +921,10 @@ public class Listas {
                 return lista;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaVehiculosByEmpresa");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaVehiculosByEmpresa");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -930,10 +979,10 @@ public class Listas {
                 return lista;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaSolicitudesTransportador");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaSolicitudesTransportador");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -984,10 +1033,10 @@ public class Listas {
                 
                 
             }catch (SQLException e) {
-                    System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println("error SQLException en totalFiltrados");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en totalFiltrados");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1027,10 +1076,10 @@ public class Listas {
                 return lista;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaEmpresasEnturne");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaEmpresasEnturne");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1070,10 +1119,10 @@ public class Listas {
                 return lista;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaProcesosEmpresasEnturne");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaProcesosEmpresasEnturne");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1108,10 +1157,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en totalEnturneEmpresas");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en totalEnturneEmpresas");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1178,10 +1227,10 @@ public class Listas {
                 return retorno;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaEnturneEmpresas");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaEnturneEmpresas");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1218,10 +1267,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en totalPuntosEmpresas");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en totalPuntosEmpresas");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1273,10 +1322,10 @@ public class Listas {
                 return retorno;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaPuntosEmpresas");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaPuntosEmpresas");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1322,10 +1371,10 @@ public class Listas {
                 
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaAllPuntosEmpresas");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaAllPuntosEmpresas");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1382,10 +1431,10 @@ public class Listas {
                 
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaCarguesEmpresas");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaCarguesEmpresas");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1475,10 +1524,10 @@ public class Listas {
                 return retorno;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaEnturneEmpresasPorEstados");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaEnturneEmpresasPorEstados");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1526,10 +1575,10 @@ public class Listas {
                 }
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaPuntos");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaPuntos");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1569,10 +1618,10 @@ public class Listas {
                 return lista;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaZonasPuntos");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaZonasPuntos");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1612,10 +1661,10 @@ public class Listas {
                 return lista;
 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaBahiasZona");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaBahiasZona");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1679,10 +1728,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaVehiculosByPropietario");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaVehiculosByPropietario");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1729,10 +1778,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaConductoresByPropietario");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaConductoresByPropietario");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1786,10 +1835,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaEquiposConductoresByPropietario");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaEquiposConductoresByPropietario");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1827,10 +1876,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario");
+            System.out.println("error SQLException en listaFletes");
                     System.out.println(e.getMessage());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println("error Exception en listaFletes");
                     System.out.println(e.getMessage());
             }finally{
                 if(conn!=null){
@@ -1948,10 +1997,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario - ");
+            System.out.println("error SQLException en ServiciosActivosByGeneradora");
                     System.out.println(e.toString());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario - ");
+                    System.out.println("error Exception en ServiciosActivosByGeneradora");
                     System.out.println(e.toString());
             }finally{
                 if(conn!=null){
@@ -2083,10 +2132,10 @@ public class Listas {
                 }
                 
             }catch (SQLException e) {
-            System.out.println("error SQLException en ObtenerUsuario - ");
+            System.out.println("error SQLException en ServiciosActivosByTransportadora");
                     System.out.println(e.toString());
             }catch (Exception e){
-                    System.out.println("error Exception en ObtenerUsuario - ");
+                    System.out.println("error Exception en ServiciosActivosByTransportadora");
                     System.out.println(e.toString());
             }finally{
                 if(conn!=null){

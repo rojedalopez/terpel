@@ -227,7 +227,7 @@ else{
                                                             <td>{{equipo.referencia}}</td>
                                                             <td>{{equipo.remolque}}</td>
                                                             <td>{{equipo.trailer}}</td>
-                                                            <td><button class="btn btn-xs btn-info" ng-click="ctrl.reasignarTickets(ticket)">Detalles</button></td>
+                                                            <td><button class="btn btn-xs btn-info" ng-click="ctrl.verVehiculo(equipo)">Detalles</button></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -258,7 +258,7 @@ else{
                                                             <td>{{conductor.apellido}}</td>
                                                             <td>{{conductor.telefono}}</td>
                                                             <td>{{conductor.direccion}}</td>
-                                                            <td><button class="btn btn-xs btn-info" ng-click="ctrl.asignarTickets(ticket)">Detalles</button></td>
+                                                            <td><button class="btn btn-xs btn-info" ng-click="ctrl.verConductor(conductor)">Detalles</button></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -277,62 +277,6 @@ else{
             <!-- /.container-fluid -->
 
         </div>
-        
-        <div id="Asignacion" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-
-              <!-- Modal content-->
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal">&times;</button>
-                  <h4 class="modal-title">Posicion del vehiculo {{ctrl.ticket.ticket}}</h4>
-                </div>
-                <div class="modal-body">
-                    <form role="form" angular-validator-submit="ctrl.sendAsignacion()" name="solicitud" 
-                  angular-validator novalidate>
-                <div class="form-group">
-                    <div class="form-group">
-                        <label>Zona para operación:</label>
-                        <select class="form-control" ng-model="ctrl.ticket.zona" 
-                        ng-options="zona.id as zona.desc for zona in ctrl.zonas" ng-change="ctrl.selectZonas(ctrl.ticket.zona)"
-                        name="carga" clase="text_valid" required-message="'Debe seleccionar una opcion'" required>
-                            <option value="">--- Seleccione Zona ---</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Bahia de operación:</label>
-                        <select class="form-control" ng-model="ctrl.ticket.bahia" 
-                        ng-options="bahia.id as bahia.desc for bahia in ctrl.bahias" 
-                        name="carga" clase="text_valid" required-message="'Debe seleccionar una opcion'" required>
-                            <option value="">--- Seleccione Bahia ---</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Fecha asignada:</label>
-                        <div class="input-group input-group-sm date" 
-                             datetimepicker ng-model="ctrl.fecha_enturnado" options="ctrl.options" ng-disabled="ctrl.reasignar">
-                              <input type="text" class="form-control" ng-disabled="ctrl.reasignar"/>
-                              <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                              </span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Nota</label>
-                        <div class='input-group date'>
-                            <textarea rows="3" cols="80" class="form-control" ng-model="ctrl.ticket.nota" ></textarea>
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <button type="submit" class="btn btn-success">Enviar Asignacion</button>
-                        <button type="button" class="btn btn-default">Limpiar</button>
-                    </div>
-                </div>
-            </form>
-                </div>
-            </div>
-          </div>
-            </div>
         
         <div class="modal fade" id="sendVehiculo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
           <div class="modal-dialog  modal-lg" role="document">
@@ -365,7 +309,7 @@ else{
                                                 <label class="col-md-3 control-label">Tipo de carga</label>
                                                 <div class="col-md-9 col-xs-12">
                                                     <div class="input-group">
-                                                        <select class="form-control select" ng-model="ctrl.equipo.n_tipocarga"
+                                                        <select class="form-control" ng-model="ctrl.equipo.n_tipocarga"
                                                                 ng-options="tipo.ID as tipo.Value for tipo in ctrl.TipoCarga" ng-change="ctrl.cambiarTipo(ctrl.equipo.n_tipocarga)">
                                                             <option value="">--- Seleccionar tipo carga ---</option>
                                                         </select>

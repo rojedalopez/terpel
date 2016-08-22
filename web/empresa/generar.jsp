@@ -104,9 +104,6 @@ if(session.getAttribute("user") == null){
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr}<b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="generar.jsp"><i class="fa fa-fw fa-plus"></i> Generar Solicitud</a>
-                        </li>
-                        <li>
                             <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Activas</a>
                         </li>
                         <li>
