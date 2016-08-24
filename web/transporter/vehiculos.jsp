@@ -5,7 +5,15 @@ response.setHeader("Pragma", "No-chache");
 response.setHeader("Expires", "0"); 
 response.setHeader("Cache-Control", "no-cache"); 
 response.setHeader("Cache", "no-cache"); 
-if(session.getAttribute("user") == null){
+if(session.getAttribute("user") != null){
+    Usuario u = (Usuario)session.getAttribute("user");
+    if(u.getRol()==2||u.getRol()==3){
+        if(u.getTipo()==1){
+            response.sendRedirect("/empresa/servicios.jsp");
+        }
+
+    }
+}else{
    //redirijo al login
     response.sendRedirect("../?mensaje=Acabo su sesion.");
 }/*
@@ -73,7 +81,7 @@ else{
     <script type="text/javascript" src="../js/angular/angular-validator.js"></script>
     <script type="text/javascript" src="../js/app.js"></script>
     <script type="text/javascript" src="../js/angular/ng-map.min.js"></script>
-    <script type="text/javascript" src="../js/angular/servicios.js"></script>
+    <script type="text/javascript" src="../js/angular/controles.js"></script>
     <script type="text/javascript" src="../js/angular/camiones.js"></script>
     
     <!-- Morris Charts JavaScript -->
@@ -122,13 +130,13 @@ else{
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr} <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-automobile"></i> Solicitudes</a>
+                            <a href="#"><i class="fa fa-fw fa-calendar"></i> Calendario Cont.</a>
                         </li>
                         <li>
                             <a href="servicios.jsp"><i class="fa fa-fw fa-truck"></i> Servicios en ruta</a>
                         </li>
                         <li>
-                            <a href="vehiculos"><i class="fa fa-fw fa-plus"></i> Vehiculos</a>
+                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes</a>
                         </li>
                         <li class="divider"></li>
                         <li>
@@ -148,7 +156,7 @@ else{
                     <div class="col-lg-12">
                         <ol class="breadcrumb">
                             <li class="active">
-                                <i class="fa fa-dashboard"></i> Sistema de enturnamiento
+                                <i class="fa fa-dashboard"></i> Inventario de vehiculos, conductores y asociaciones
                             </li>
                         </ol>
                     </div>

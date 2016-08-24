@@ -1,10 +1,19 @@
+<%@page import="bean.Usuario"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <% 
 response.setHeader("Pragma", "No-chache"); 
 response.setHeader("Expires", "0"); 
 response.setHeader("Cache-Control", "no-cache"); 
 response.setHeader("Cache", "no-cache"); 
-if(session.getAttribute("user") == null){
+if(session.getAttribute("user") != null){
+    Usuario u = (Usuario)session.getAttribute("user");
+    if(u.getRol()==2||u.getRol()==3){
+        if(u.getTipo()==2){
+            response.sendRedirect("/transporter/servicios.jsp");
+        }
+
+    }
+}else{
    //redirijo al login
    response.sendRedirect("../?mensaje=Acabo su sesion.");
 }
@@ -57,7 +66,7 @@ if(session.getAttribute("user") == null){
     <script type="text/javascript" src="../js/angular/angular-validator.js"></script>
     <script type="text/javascript" src="../js/app.js"></script>
     <script type="text/javascript" src="../js/angular/ng-map.min.js"></script>
-    <script type="text/javascript" src="../js/angular/servicios.js"></script>
+    <script type="text/javascript" src="../js/angular/controles.js"></script>
     <script type="text/javascript" src="../js/angular/camiones.js"></script>
     
     <!-- Morris Charts JavaScript -->
@@ -90,19 +99,16 @@ if(session.getAttribute("user") == null){
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr}<b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="generar.jsp"><i class="fa fa-fw fa-plus"></i> Generar Solicitud</a>
+                            <a href="spot.jsp"><i class="fa fa-fw fa-truck"></i> Generar Spot</a>
                         </li>
                         <li>
                             <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Activas</a>
                         </li>
                         <li>
-                            <a href="servicios_table.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Activos</a>
+                            <a href="servicios.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Activos</a>
                         </li>
                         <li>
-                            <a href="enturne_table.jsp"><i class="fa fa-fw fa-ticket"></i> Enturnar Veh.</a>
-                        </li>
-                        <li>
-                            <a href="puntos.jsp"><i class="fa fa-fw fa-map-marker"></i> Puntos</a>
+                            <a href="programada.jsp"><i class="fa fa-fw fa-calendar"></i> Calendario Cont.</a>
                         </li>
                         <li class="divider"></li>
                         <li>

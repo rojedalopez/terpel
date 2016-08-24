@@ -55,17 +55,17 @@ public class list_vehiculos_disp extends HttpServlet {
         float lat = 0;
         float lng = 0;
         
-        if(joEmploye.get("tipocarga")!=null){
-            if(joEmploye.get("tipocarga").toString().equals("")){
+        if(joEmploye.get("lat_punto")!=null){
+            if(joEmploye.get("lat_punto").toString().equals("")){
                 lat = 0;
             }else{
-                lat = Float.parseFloat(joEmploye.get("lng_punto").toString());
+                lat = Float.parseFloat(joEmploye.get("lat_punto").toString());
             }
         }
         
        
-        if(joEmploye.get("tipocarga")!=null){
-            if(joEmploye.get("tipocarga").toString().equals("")){
+        if(joEmploye.get("lng_punto")!=null){
+            if(joEmploye.get("lng_punto").toString().equals("")){
                 lng = 0;
             }else{
                 lng = Float.parseFloat(joEmploye.get("lng_punto").toString());

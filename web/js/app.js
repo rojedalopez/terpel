@@ -51,6 +51,14 @@ angular.module('myApp',[
                 console.error('Error guardando bahia ' +errResponse);
                 return $q.reject(errResponse);
             });
+	},
+        saveCCostos: function(ccosto){
+            return $http.post('../saveCCosto', ccosto).then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error guardando ccosto ' +errResponse);
+                return $q.reject(errResponse);
+            });
 	},SaveServicioEnturne: function(servicio){
             return $http.post('../saveServicioEnturne', servicio).then(function(response){
                 return response.data;
@@ -66,7 +74,7 @@ angular.module('myApp',[
                 return $q.reject(errResponse);
             });
 	},SaveEquiposConductorDisp: function(equiposconductores){
-            return $http.post('..dispEquipoConductor', equiposconductores).then(function(response){
+            return $http.post('../dispEquipoConductor', equiposconductores).then(function(response){
                 return response.data;
             },function(errResponse){
                 console.error('Error guardando bahia ' +errResponse);
@@ -74,6 +82,13 @@ angular.module('myApp',[
             });
 	},SaveTakeSolicitud: function(datos){
             return $http.post('../takeSolicitud', datos).then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error guardando bahia ' +errResponse);
+                return $q.reject(errResponse);
+            });
+	},SaveSolicitudProgramada: function(newsol){
+            return $http.post('../saveSolProgramada', newsol).then(function(response){
                 return response.data;
             },function(errResponse){
                 console.error('Error guardando bahia ' +errResponse);
@@ -91,6 +106,14 @@ angular.module('myApp',[
 	},
         listPuntos: function(busqueda) {
             return $http.post('../list_puntos', busqueda).then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error while fetching expenses');
+                return $q.reject(errResponse);
+            });
+        },
+        listCCostos: function() {
+            return $http.post('../list_centrocosto').then(function(response){
                 return response.data;
             },function(errResponse){
                 console.error('Error while fetching expenses');
@@ -175,15 +198,22 @@ angular.module('myApp',[
                 console.error('Error while fetching expenses');
                 return $q.reject(errResponse);
             });
-	},listaServiciosActivos: function() {
-            return $http.post('../list_servicios_act').then(function(response){
+	},listaServiciosActivos: function(mapa) {
+            return $http.post('../list_servicios_act', mapa).then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error while fetching expenses');
+                return $q.reject(errResponse);
+            });
+	},listaGeneracionVehiculo: function(mapa) {
+            return $http.post('../list_vehiculos_disp', mapa).then(function(response){
                 return response.data;
             },function(errResponse){
                 console.error('Error while fetching expenses');
                 return $q.reject(errResponse);
             });
 	},loginEmpresa: function(usuario) {
-            return $http.post('login_empresa', usuario).then(function(response){
+            return $http.post('../login_empresa', usuario).then(function(response){
                 return response.data;
             },function(errResponse){
                 console.error('Error while fetching expenses');
@@ -291,6 +321,44 @@ angular.module('myApp',[
             if (window.sessionStorage) {
                     //Local Storage to add Data  
                 sessionStorage.setItem("cargues", angular.toJson(array));  
+            }
+        },
+        updateCCostos: function (CCostosArr) {  
+            if (window.sessionStorage && CCostosArr) {  
+                //Local Storage to add Data  
+                sessionStorage.setItem("ccostos", angular.toJson(CCostosArr));  
+            }  
+            listaRetorno = CCostosArr;  
+
+        },  
+        getCCostos: function () {  
+            //Get data from Local Storage  
+            listaRetorno = angular.fromJson(sessionStorage.getItem("ccostos"));  
+            return listaRetorno ? listaRetorno : [];  
+        },
+        iniciarCCostos: function (array) {
+            if (window.sessionStorage) {
+                    //Local Storage to add Data  
+                sessionStorage.setItem("ccostos", angular.toJson(array));  
+            }
+        },
+        updateCalendario: function (CalendarioArr) {  
+            if (window.sessionStorage && CalendarioArr) {  
+                //Local Storage to add Data  
+                sessionStorage.setItem("calendario", angular.toJson(CalendarioArr));  
+            }  
+            listaRetorno = CalendarioArr;  
+
+        },  
+        getCalendario: function () {  
+            //Get data from Local Storage  
+            listaRetorno = angular.fromJson(sessionStorage.getItem("calendario"));  
+            return listaRetorno ? listaRetorno : [];  
+        },
+        iniciarCalendario: function (array) {
+            if (window.sessionStorage) {
+                    //Local Storage to add Data  
+                sessionStorage.setItem("calendario", angular.toJson(array));  
             }
         }
     };  

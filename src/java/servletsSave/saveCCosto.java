@@ -1,7 +1,8 @@
-package servletsList;
+
+package servletsSave;
 
 import bean.Usuario;
-import datos.json.Listas;
+import datos.save.Guardar;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,18 +14,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class list_vehiculos_asignar extends HttpServlet {
+public class saveCCosto extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, ParseException {
+            throws ServletException, IOException, ParseException, ClassNotFoundException, SQLException {
         response.setContentType("text/html;charset=UTF-8");
         StringBuilder sb = new StringBuilder();
-  
+        
         try
         {
           BufferedReader reader = request.getReader();
@@ -33,38 +33,32 @@ public class list_vehiculos_asignar extends HttpServlet {
           {
             sb.append(line);
           }
-        } catch (Exception e) { System.out.println(e.toString()); }
+        } catch (Exception e) {}
  
         JSONParser parser = new JSONParser();
-        JSONObject joEmploye = null;
-         
-        joEmploye = (JSONObject) parser.parse(sb.toString());
+        JSONObject joSolicitud = null;
         System.out.println(sb.toString());
+        joSolicitud = (JSONObject) parser.parse(sb.toString());
         
-        float lat = Float.parseFloat(joEmploye.get("lat_origen").toString());
-        float lng = Float.parseFloat(joEmploye.get("lng_origen").toString());
-        int rango = Integer.parseInt(joEmploye.get("rango").toString());
-        String sol = (String)joEmploye.get("id");
         
+        String id = (String)joSolicitud.get("id");
+        String descripcion = (String) joSolicitud.get("desc");
         
         HttpSession session =  null;
  
         session = request.getSession(false);
         
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
-                Usuario u = (Usuario) session.getAttribute("user");
-                JSONArray lista = Listas.listaVehiculosAsignar(u.getNit(), rango, lat, lng, sol);
-                String x = lista.toJSONString();
+                Usuario u = (Usuario)session.getAttribute("user"); 
+                boolean x = Guardar.InsertCCosto(id, descripcion, u.getNit());
+                JSONObject json = new JSONObject();
+                json.put("retorno", x);
                 out.println(x);
-            }else{
-                response.sendRedirect("../");
             }
-        }catch(Exception e){
-            System.out.println("Entro aqui en el error! " + e.toString());
         }
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -72,7 +66,11 @@ public class list_vehiculos_asignar extends HttpServlet {
         try {
             processRequest(request, response);
         } catch (ParseException ex) {
-            Logger.getLogger(list_vehiculos.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

@@ -78,9 +78,9 @@ public class login_empresa extends HttpServlet {
                     session.setAttribute("usr", u.getNombre() + " " + u.getApellido());
                     if(u.getRol()==3){
                         if(u.getTipo()==1){
-                            json.put("url", (url_forward)?url:"/empresa/generar.jsp");
+                            json.put("url", (url_forward)?url:"/empresa/servicios.jsp");
                         }else{
-                            json.put("url", (url_forward)?url:"/transporter/vehiculos.jsp");
+                            json.put("url", (url_forward)?url:"/transporter/servicios.jsp");
                         }
                     }else{
                         json.put("url", (url_forward)?url:"/empresa/servicios.jsp");

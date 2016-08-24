@@ -184,6 +184,18 @@
         <servlet-name>list_vehiculos_disp</servlet-name>
         <servlet-class>servletsList.list_vehiculos_disp</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>saveCCosto</servlet-name>
+        <servlet-class>servletsSave.saveCCosto</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_centrocosto</servlet-name>
+        <servlet-class>servletsList.list_centrocosto</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>saveSolProgramada</servlet-name>
+        <servlet-class>servletsSave.saveSolProgramada</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>saveServicio</servlet-name>
         <url-pattern>/saveServicio</url-pattern>
@@ -367,6 +379,18 @@
     <servlet-mapping>
         <servlet-name>list_vehiculos_disp</servlet-name>
         <url-pattern>/list_vehiculos_disp</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>saveCCosto</servlet-name>
+        <url-pattern>/saveCCosto</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_centrocosto</servlet-name>
+        <url-pattern>/list_centrocosto</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>saveSolProgramada</servlet-name>
+        <url-pattern>/saveSolProgramada</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

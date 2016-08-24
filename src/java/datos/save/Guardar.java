@@ -20,7 +20,7 @@ public class Guardar {
     
     public static JSONObject SaveServicio(String origen, String destino, String fecha_cargue_min, String fecha_cargue_max, String fecha_descargue_min, String fecha_descargue_max, 
             int no_equipos, int tipo_equipos, String orden, String nota_detalle, String empresa, float flete, 
-            String txt_flete, String kms, float vlr_kms, String time, float vlr_time, String unidad) throws ClassNotFoundException, SQLException{
+            String txt_flete, String kms, float vlr_kms, String time, float vlr_time, String unidad, String remolques, String ccosto) throws ClassNotFoundException, SQLException{
             boolean b=false;
             Solicitud sol = new Solicitud();
             Connection conn=null;
@@ -28,7 +28,7 @@ public class Guardar {
             JSONObject retorno = new JSONObject();
         
             conn=Aplicacion.conexion();
-            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_solicitude(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)};")) {
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_solicitude(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)};")) {
                 cs.setString(1, origen);
                 cs.setString(2, destino);
                 cs.setString(3, fecha_cargue_min);
@@ -47,11 +47,13 @@ public class Guardar {
                 cs.setString(16, time);
                 cs.setFloat(17, vlr_time);
                 cs.setString(18, unidad);
+                cs.setString(19, remolques);
+                cs.setString(20, ccosto);
                 
-                cs.registerOutParameter(19, Types.VARCHAR);
+                cs.registerOutParameter(21, Types.VARCHAR);
                 cs.executeQuery();
 
-                String num_solicitud = cs.getString(19);
+                String num_solicitud = cs.getString(21);
                 sol.setId(num_solicitud);
                 
                 if(!num_solicitud.equals("0")){
@@ -83,6 +85,59 @@ public class Guardar {
 
     }
     
+    public static JSONObject SaveSolProgramada(int anio, int mes, int dia, String fecha_cargue_min, String fecha_cargue_max, String fecha_descargue_min, String fecha_descargue_max, 
+            int no_equipos, int tipo_cargue, String ccosto, String origen, String destino) throws ClassNotFoundException, SQLException{
+            boolean b=false;
+            Solicitud sol = new Solicitud();
+            Connection conn=null;
+            PreparedStatement insertar=null;
+            JSONObject retorno = new JSONObject();
+        
+            conn=Aplicacion.conexion();
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_solicitud_dia(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)};")) {
+                cs.setString(1, origen);
+                cs.setString(2, destino);
+                cs.setString(3, fecha_cargue_min);
+                cs.setString(4, fecha_cargue_max);
+                cs.setString(5, fecha_descargue_min);
+                cs.setString(6, fecha_descargue_max);
+                cs.setInt(7, no_equipos);
+                cs.setInt(8, tipo_cargue);
+                cs.setString(9, ccosto);
+                cs.setInt(10, mes);
+                cs.setInt(11, anio);
+                cs.setInt(12, dia);
+                
+                cs.registerOutParameter(13, Types.INTEGER);
+                cs.executeQuery();
+
+                int num_solicitud = cs.getInt(13);
+                
+                if(num_solicitud!=0){
+                    retorno.put("id", num_solicitud);
+                    retorno.put("mensaje", "OK");
+                    return retorno;
+                }else{
+                    retorno.put("mensaje", "Error");
+                    return retorno;
+                }
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en SaveServicio");
+                System.out.println(e.toString());
+            }catch (Exception e){
+                System.out.println("error Exception en SaveServicio");
+                System.out.println(e.toString());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            
+            retorno.put("mensaje", "Error");
+            return retorno;
+
+    }
     
     public static JSONObject SaveServicioEnturne(String origen, String n_origen, float lat_origen, float lng_origen, String destino, String n_destino,
             float lat_destino, float lng_destino, String fecha_cargue, String fecha_descargue, int equipo_conductor, 
@@ -550,7 +605,7 @@ public class Guardar {
         
         
         conn=conexion();
-            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.disp_equipo_conductor(?, ?, ?, ?)}")) {
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.disp_equipo_conductor(?, ?, ?)}")) {
                 cs.setInt(1, id);
                 cs.setInt(2, (disponible)?1:0);
                 cs.registerOutParameter(3, Types.INTEGER);
@@ -610,6 +665,45 @@ public class Guardar {
                 System.out.println(e.toString());
             }catch (Exception e){
                 System.out.println("error Exception en InsertPunto");
+                System.out.println(e.toString());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return false;
+
+    }
+     
+    public static boolean InsertCCosto(String id, String desc, String empresa)  throws ClassNotFoundException, SQLException{
+        boolean b=false;
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        
+        
+        conn=conexion();
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_centrocosto(?, ?, ?, ?)}")) {
+                cs.setString(1, id);
+                cs.setString(2, desc);
+                cs.setString(3, empresa);
+                
+                cs.registerOutParameter(4, Types.INTEGER);
+                cs.executeQuery();
+                
+                int retorno = cs.getInt(4);
+                
+                if(retorno==1){
+                    return true;
+                }else{
+                    return false;
+                }
+                
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en InsertZona");
+                System.out.println(e.toString());
+            }catch (Exception e){
+                System.out.println("error Exception en InsertZona");
                 System.out.println(e.toString());
             }finally{
                 if(!conn.isClosed()){

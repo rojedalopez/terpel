@@ -19,9 +19,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 
-public class saveServicio extends HttpServlet {
+public class saveSolProgramada extends HttpServlet {
 
-   
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, ParseException, ClassNotFoundException, SQLException {
         response.setContentType("text/html;charset=UTF-8");
@@ -47,43 +46,29 @@ public class saveServicio extends HttpServlet {
         float lng_origen = Float.parseFloat(origen.get("lng").toString());
         String norigen = (String) origen.get("desc");
         String inicio = (String)origen.get("id").toString();
+        
         JSONObject destino = (JSONObject) joSolicitud.get("fin");
         float lat_destino = Float.parseFloat(destino.get("lat").toString());
         float lng_destino = Float.parseFloat(destino.get("lng").toString());
         String ndestino = (String) destino.get("desc");
         String fin = (String)destino.get("id").toString();
         
-        int tipo_carga = Integer.parseInt(joSolicitud.get("carga").toString());
-        
-        String carguemin = (String) joSolicitud.get("dcarguemin");
-        String carguemax = (String) joSolicitud.get("dcarguemax");
-        String descarguemax = (String) joSolicitud.get("ddescarguemax");
-        String descarguemin = (String) joSolicitud.get("ddescarguemin");
+        JSONObject obj_carga = (JSONObject) joSolicitud.get("carga");
+        int tipo_carga = Integer.parseInt(obj_carga.get("id").toString());
+                
+       
+        String carguemin = (String) joSolicitud.get("min_carg");
+        String carguemax = (String) joSolicitud.get("max_carg");
+        String descarguemax = (String) joSolicitud.get("min_desc");
+        String descarguemin = (String) joSolicitud.get("max_desc");
         
         int equipos = Integer.parseInt(joSolicitud.get("equipos").toString());
-        int vlr_flete = 0;
         
-        
-        String flete = (String) joSolicitud.get("flete");
-        String unidad = "GAL";
-        
-        String orden = (String) joSolicitud.get("orden");
-        String nota_detalle = (String) joSolicitud.get("nota_detalle");
-        
-        
-        String kms = (String) joSolicitud.get("kms");
+        int mes = Integer.parseInt(joSolicitud.get("mes").toString());
+        int dia = Integer.parseInt(joSolicitud.get("dia").toString());
+        int anio = Integer.parseInt(joSolicitud.get("anio").toString());
         String ccosto = (String) joSolicitud.get("ccosto");
-        int kms_value = Integer.parseInt(joSolicitud.get("kms_value").toString());
-        String time = (String) joSolicitud.get("time");
-        int time_value = Integer.parseInt(joSolicitud.get("time_value").toString());
-        JSONArray remol = (JSONArray) joSolicitud.get("remolques");
-        String remolques = "";
-        for(int i = 0; i < remol.size(); i++){
-            remolques += remol.get(i)+",";
-        }
-        if(!remolques.equals("")){
-            remolques = remolques.substring(0, remolques.length()-1);
-        }
+        
         
         HttpSession session =  null;
  
@@ -93,22 +78,25 @@ public class saveServicio extends HttpServlet {
             /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
-                JSONObject x = Guardar.SaveServicio(inicio, fin, carguemin, carguemax, descarguemin, descarguemax, 
-                equipos, tipo_carga, orden, nota_detalle, u.getNit(), vlr_flete, flete, kms, kms_value, time, time_value, unidad, remolques, ccosto);
+                JSONObject x = Guardar.SaveSolProgramada(anio, mes, dia, carguemin, carguemax, descarguemin, descarguemax,  
+                equipos, tipo_carga, ccosto, inicio, fin);
                 System.out.println(x);
                 out.println(x.toJSONString());
             }
         }
     }
 
-  
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (ParseException | ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(saveServicio.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParseException ex) {
+            Logger.getLogger(saveSolProgramada.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(saveSolProgramada.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(saveSolProgramada.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

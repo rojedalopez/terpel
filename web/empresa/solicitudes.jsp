@@ -1,10 +1,19 @@
+<%@page import="bean.Usuario"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <% 
 response.setHeader("Pragma", "No-chache"); 
 response.setHeader("Expires", "0"); 
 response.setHeader("Cache-Control", "no-cache"); 
 response.setHeader("Cache", "no-cache"); 
-if(session.getAttribute("user") == null){
+if(session.getAttribute("user") != null){
+    Usuario u = (Usuario)session.getAttribute("user");
+    if(u.getRol()==2||u.getRol()==3){
+        if(u.getTipo()==2){
+            response.sendRedirect("/transporter/servicios.jsp");
+        }
+
+    }
+}else{
    //redirijo al login
    response.sendRedirect("../?mensaje=Acabo su sesion.");
 }
@@ -96,7 +105,7 @@ if(session.getAttribute("user") == null){
     <script type="text/javascript" src="../js/angular/angular-validator.js"></script>
     <script type="text/javascript" src="../js/app.js"></script>
     <script type="text/javascript" src="../js/angular/ng-map.min.js"></script>
-    <script type="text/javascript" src="../js/angular/servicios.js"></script>
+    <script type="text/javascript" src="../js/angular/controles.js"></script>
     <script type="text/javascript" src="../js/angular/camiones.js"></script>
     
     <!-- Morris Charts JavaScript -->
@@ -145,16 +154,13 @@ if(session.getAttribute("user") == null){
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr}<b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="generar.jsp"><i class="fa fa-fw fa-plus"></i> Generar Solicitud</a>
+                            <a href="spot.jsp"><i class="fa fa-fw fa-truck"></i> Generar Spot</a>
                         </li>
                         <li>
-                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Activas</a>
+                            <a href="servicios.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Activos</a>
                         </li>
                         <li>
-                            <a href="servicios_table.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Activos</a>
-                        </li>
-                        <li>
-                            <a href="enturne_table.jsp"><i class="fa fa-fw fa-ticket"></i> Enturnar Veh.</a>
+                            <a href="programada.jsp"><i class="fa fa-fw fa-calendar"></i> Calendario Cont.</a>
                         </li>
                         <li>
                             <a href="puntos.jsp"><i class="fa fa-fw fa-map-marker"></i> Puntos</a>
@@ -171,9 +177,6 @@ if(session.getAttribute("user") == null){
         <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <form role="form" class="nav navbar-nav side-nav form-group-sm" style="padding: 5px; color: gray;">
-                    <div class="form-group" style="color: white; text-align: center;">
-                        <a href="generar.jsp"><u>Generador de carga</u></a>
-                    </div>
                             <div class="panel-group" id="accordion">
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
