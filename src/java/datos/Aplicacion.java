@@ -45,11 +45,11 @@ public class Aplicacion {
                     String instruccion = "";
                     if(tipo==1){
                         instruccion= "SELECT salt_conductor, pass_conductor, cod_conductor, '', mail_conductor, nomb_conductor,  apll_conductor, " +
-                                        "'', tel_conductor, img_conductor, '', 0, tipo_doc_conductor, doc_conductor, tipo_lic_conductor, num_lic_conductor, 0 " +
+                                        "'', tel_conductor, img_conductor, '', 0, tipo_doc_conductor, doc_conductor, tipo_lic_conductor, num_lic_conductor, 0, '' " +
                                         "FROM logycus360.tblConductor WHERE mail_conductor = ? AND acti_conductor = 1;";
                     }else{
                         instruccion="SELECT salt_usuario, pass_usuario, cod_usuario, e.nit_empresa, mail_usuario, nomb_usuario, apll_usuario, " +
-                                    "razn_soci_empresa, tel_empresa, url_img_usuario, url_img_empresa, id_rol, tipo_empresa " +
+                                    "razn_soci_empresa, tel_empresa, url_img_usuario, url_img_empresa, id_rol, tipo_empresa, id_punto_usuario " +
                                     "FROM tblUsuario AS u INNER JOIN tblEmpresa AS e ON e.nit_empresa = u.nit_empresa " +
                                     "WHERE mail_usuario = ? AND acti_empresa = 1;";
                     }
@@ -74,6 +74,7 @@ public class Aplicacion {
                             u.setUrl_empresa(datos.getString(11));
                             u.setRol(datos.getInt(12));
                             u.setTipo(datos.getInt(13));
+                            u.setPunto(datos.getString(14));
                             u.setMensaje("true");
                             return u;
                         }else{

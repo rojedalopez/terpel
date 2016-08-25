@@ -82,6 +82,8 @@ public class login_empresa extends HttpServlet {
                         }else{
                             json.put("url", (url_forward)?url:"/transporter/servicios.jsp");
                         }
+                    }else if (u.getRol()==4){
+                        json.put("url", (url_forward)?url:"/empresa/turnos.jsp");
                     }else{
                         json.put("url", (url_forward)?url:"/empresa/servicios.jsp");
                     }

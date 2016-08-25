@@ -134,7 +134,7 @@ if(session.getAttribute("user") != null){
 
 <body ng-app="myApp" class="ng-cloak" >
     
-    <div id="wrapper" style="height: 600px;" ng-controller="SolicitudesActivasController as ctrl">
+    <div id="wrapper" style="height: 600px;" ng-controller="SolHistoricoController as ctrl">
 
         <!-- Navigation -->
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -187,16 +187,16 @@ if(session.getAttribute("user") != null){
                                 <div id="collapse1">
                                     <div class="form-group" style="padding: 10px;">
                                             <div class="form-group">
-                                                <label>Estado de solicitud:</label>
+                                                <label>Puntos:</label>
                                                 <div class='input-group date'>
                                                     <span class="input-group-addon">
-                                                        <span class="fa fa-truck"></span>
+                                                        <span class="glyphicon glyphicon-map-marker"></span>
                                                     </span>
-                                                    <select class="form-control" ng-model="ctrl.busqueda.estado" 
-                                                    ng-options="Estado.ID as Estado.Value for Estado in ctrl.EstadoSolicitud">
-                                                        <option value="">--- Seleccione Estado ---</option>
-                                                    </select>
-                                                </div>
+                                                    <input type="text"
+                                                    ng-model="ctrl.busqueda.q"
+                                                    class="form-control"
+                                                    placeholder="Ingrese Origen o Destino"/>
+                                                </div>                        
                                             </div>
                                             <div class="form-group">
                                                 <label>Tipo de cargue</label>
@@ -209,18 +209,6 @@ if(session.getAttribute("user") != null){
                                                         <option value="">--- Seleccione Tipo ---</option>
                                                     </select>
                                                 </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Puntos:</label>
-                                                <div class='input-group date'>
-                                                    <span class="input-group-addon">
-                                                        <span class="glyphicon glyphicon-map-marker"></span>
-                                                    </span>
-                                                    <input type="text"
-                                                    ng-model="ctrl.busqueda.q"
-                                                    class="form-control"
-                                                    placeholder="Ingrese Origen o Destino"/>
-                                                </div>                        
                                             </div>
                                             <div class="form-group">
                                                 <label>Fecha de inicio:</label>
@@ -274,7 +262,7 @@ if(session.getAttribute("user") != null){
                 <div class="row" >
                     <div class="col-lg-12">
                         <h1 class="page-header">
-                            SOLICITUDES ACTIVAS
+                            SOLICITUDES HISTORICAS
                         </h1>
                     </div>
 
@@ -283,7 +271,6 @@ if(session.getAttribute("user") != null){
                                 <thead>
                                     <tr>
                                         <th>No.</th>
-                                        <th>Estado</th>
                                         <th>Orden de servicio</th>
                                         <th>Cargue</th>
                                         <th>Fecha Cargue</th>
@@ -296,7 +283,6 @@ if(session.getAttribute("user") != null){
                                 <tbody>
                                     <tr dir-paginate="servicio in ctrl.servicios|itemsPerPage:ctrl.itemsPerPage" total-items="ctrl.total_count">
                                         <td>{{servicio.id}}</td>
-                                        <td>{{servicio.nestado}}</td>
                                         <td>{{servicio.orden}}</td>
                                         <td>{{servicio.n_cargue}}</td>
                                         <td>{{ctrl.formatDate(servicio.cargue) | date:"yyyy/MM/dd hh:mma"}}</td>

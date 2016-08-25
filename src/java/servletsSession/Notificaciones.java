@@ -19,7 +19,7 @@ public class Notificaciones {
         try{
             sessionList.add(session);
             //asynchronous communication
-            session.getBasicRemote().sendText("Hello!");
+            session.getBasicRemote().sendText("OK");
         }catch(IOException e){}
     }
     
@@ -33,7 +33,7 @@ public class Notificaciones {
         try{
             for(Session session : sessionList){
                 //asynchronous communication
-                session.getBasicRemote().sendText(msg + session);
+                session.getBasicRemote().sendText("Next");
             }
         }catch(IOException e){}
     }

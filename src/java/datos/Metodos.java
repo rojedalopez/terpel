@@ -147,6 +147,36 @@ public class Metodos {
         return desde;
     }
 
+    public static String calcular(int minutos){
+  
+        long[] vector = new long[4];
+
+        final long MILLSECS_PER_DAY = 24 * 60; //Milisegundos al día
+        final long MILLSECS_PER_HOUR = 60; //Milisegundos a la hora
+        final long MILLSECS_PER_MINUTE = 1; //Milisegundos a la hora
+        
+
+        long dias = minutos / MILLSECS_PER_DAY;
+        long horas = (minutos % MILLSECS_PER_DAY) / MILLSECS_PER_HOUR;
+        long min = (minutos % MILLSECS_PER_HOUR) / MILLSECS_PER_MINUTE;
+
+        vector[2] = min;
+        vector[1] = horas;
+        vector[0] = dias;
+        
+        String desde = "";
+        String[] medidas = {" dia(s)", " hora(s)", " minuto(s)"};
+        for(int i=0; i<vector.length; i++){
+            if(vector[i]!=0){
+                    desde += vector[i] + "" + medidas[i];
+                    break;
+            }
+        }
+
+        return desde;
+    }
+    
+    
     public static int calcularHoras(String fecha_){
 
         Date fecha = null;
@@ -311,7 +341,7 @@ public class Metodos {
     }
 
     public static void main(String[] args) throws SQLException {
-        Solicitud sol = new Solicitud();
+        /*Solicitud sol = new Solicitud();
         sol.setId("00000001");
         sol.setOrigen("CASA");
         sol.setLat_origen((float)10.3443);
@@ -324,6 +354,7 @@ public class Metodos {
         sol.setOrden("SOL-09876");
         sol.setNota_detalle("Prueba");
             
-        EnvioNotificacionEnturne(sol, "83540c69033865e50b2d17", "123456789", "Bimbo.com", "http://www.brandemia.org/wp-content/uploads/2012/12/nuevo_logo_terpel.jpg");
+        EnvioNotificacionEnturne(sol, "83540c69033865e50b2d17", "123456789", "Bimbo.com", "http://www.brandemia.org/wp-content/uploads/2012/12/nuevo_logo_terpel.jpg");*/
+        System.out.println(calcular(1));
     }
 }

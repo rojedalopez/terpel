@@ -24,6 +24,15 @@ public class Usuario {
     private String nit;
     private String razon_social;
     private String telefono;
+    private String punto;
+
+    public String getPunto() {
+        return punto;
+    }
+
+    public void setPunto(String punto) {
+        this.punto = punto;
+    }
     
     
     public Usuario() {

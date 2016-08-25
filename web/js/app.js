@@ -87,7 +87,22 @@ angular.module('myApp',[
                 console.error('Error guardando bahia ' +errResponse);
                 return $q.reject(errResponse);
             });
-	},SaveSolicitudProgramada: function(newsol){
+	},SaveCambioTicket: function(datos){
+            return $http.post('../saveEstadoTicket', datos).then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error guardando bahia ' +errResponse);
+                return $q.reject(errResponse);
+            });
+	},SaveNextTicket: function(){
+            return $http.post('../saveNextTicket').then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error guardando bahia ' +errResponse);
+                return $q.reject(errResponse);
+            });
+	}
+        ,SaveSolicitudProgramada: function(newsol){
             return $http.post('../saveSolProgramada', newsol).then(function(response){
                 return response.data;
             },function(errResponse){
@@ -104,8 +119,23 @@ angular.module('myApp',[
 		return $q.reject(errResponse);
             });
 	},
+        listProgramadas:function(busqueda) {
+            return $http.post('../list_programadas', busqueda).then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error while fetching expenses');
+                return $q.reject(errResponse);
+            });
+        },
         listPuntos: function(busqueda) {
             return $http.post('../list_puntos', busqueda).then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error while fetching expenses');
+                return $q.reject(errResponse);
+            });
+        },listTickets: function() {
+            return $http.post('../list_tickets', {punto:"1P22",bahias:2}).then(function(response){
                 return response.data;
             },function(errResponse){
                 console.error('Error while fetching expenses');
@@ -359,6 +389,26 @@ angular.module('myApp',[
             if (window.sessionStorage) {
                     //Local Storage to add Data  
                 sessionStorage.setItem("calendario", angular.toJson(array));  
+            }
+        }
+        ,
+        updateNotificaciones: function (NotificacionesArr) {  
+            if (window.sessionStorage && NotificacionesArr) {  
+                //Local Storage to add Data  
+                sessionStorage.setItem("notificaciones", angular.toJson(NotificacionesArr));  
+            }  
+            listaRetorno = NotificacionesArr;  
+
+        },  
+        getNotificaciones: function () {  
+            //Get data from Local Storage  
+            listaRetorno = angular.fromJson(sessionStorage.getItem("notificaciones"));  
+            return listaRetorno ? listaRetorno : [];  
+        },
+        iniciarNotificaciones: function (array) {
+            if (window.sessionStorage) {
+                    //Local Storage to add Data  
+                sessionStorage.setItem("notificaciones", angular.toJson(array));  
             }
         }
     };  

@@ -54,12 +54,10 @@ public class Guardar {
                 cs.executeQuery();
 
                 String num_solicitud = cs.getString(21);
+                
                 sol.setId(num_solicitud);
                 
                 if(!num_solicitud.equals("0")){
-                    Solicitud solicitud = datos.get.Objetos.DatosSolicitud(num_solicitud);
-                    List<String> correos = datos.get.Listas.listaMailsDespachadores(empresa);
-                    Mails.SendMailSolicitudTransportadoras(correos, solicitud);
                     retorno.put("id_solicitud", num_solicitud);
                     retorno.put("mensaje", "OK");
                     return retorno;
@@ -85,7 +83,7 @@ public class Guardar {
 
     }
     
-    public static JSONObject SaveSolProgramada(int anio, int mes, int dia, String fecha_cargue_min, String fecha_cargue_max, String fecha_descargue_min, String fecha_descargue_max, 
+    public static JSONObject SaveSolProgramada(int id, int anio, int mes, int dia, String fecha_cargue_min, String fecha_cargue_max, String fecha_descargue_min, String fecha_descargue_max, 
             int no_equipos, int tipo_cargue, String ccosto, String origen, String destino) throws ClassNotFoundException, SQLException{
             boolean b=false;
             Solicitud sol = new Solicitud();
@@ -94,24 +92,25 @@ public class Guardar {
             JSONObject retorno = new JSONObject();
         
             conn=Aplicacion.conexion();
-            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_solicitud_dia(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)};")) {
-                cs.setString(1, origen);
-                cs.setString(2, destino);
-                cs.setString(3, fecha_cargue_min);
-                cs.setString(4, fecha_cargue_max);
-                cs.setString(5, fecha_descargue_min);
-                cs.setString(6, fecha_descargue_max);
-                cs.setInt(7, no_equipos);
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.new_solicitud_dia(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)};")) {
+                cs.setInt(1, id);
+                cs.setInt(2, mes);
+                cs.setInt(3, anio);
+                cs.setInt(4, dia);
+                cs.setString(5, origen);
+                cs.setString(6, destino);
+                cs.setString(7, ccosto);
                 cs.setInt(8, tipo_cargue);
-                cs.setString(9, ccosto);
-                cs.setInt(10, mes);
-                cs.setInt(11, anio);
-                cs.setInt(12, dia);
+                cs.setInt(9, no_equipos);
+                cs.setString(10, fecha_cargue_min);
+                cs.setString(11, fecha_cargue_max);
+                cs.setString(12, fecha_descargue_min);
+                cs.setString(13, fecha_descargue_max);
                 
-                cs.registerOutParameter(13, Types.INTEGER);
+                cs.registerOutParameter(14, Types.INTEGER);
                 cs.executeQuery();
 
-                int num_solicitud = cs.getInt(13);
+                int num_solicitud = cs.getInt(14);
                 
                 if(num_solicitud!=0){
                     retorno.put("id", num_solicitud);
@@ -925,23 +924,11 @@ public class Guardar {
                 //SendMailServiciosGeneradores
                 
                 if(!retorno.equals("0") && !retorno.equals("1")){
-                    if(tipo==1){
-                            Servicio servicio = datos.get.Objetos.DatosServicio(retorno);
-                            List<String> lista = datos.get.Listas.listaMailsDespachadoresEmpresa(servicio.getGenerador());
-                            datos.Mails.SendMailServiciosGeneradores(lista, servicio);
-                    }else{
-                            System.err.println(retorno);
-                            Servicio servicio = datos.get.Objetos.DatosServicio(retorno);
-                            System.err.println("paso obtencion de servicio");
-                            List<String> lista = datos.get.Listas.listaMailsDespachadoresEmpresa(servicio.getNit_generador());
-                            System.err.println("paso lista de despachadores");
-                            datos.Mails.SendMailServiciosGeneradores(lista, servicio);
-                            System.err.println("paso lista envio el mail");
-                            JSONArray TO = new JSONArray();
-                            TO.add(servicio.getReg_logycus());
-                            System.err.println("agrego apra quien va");
-                            datos.Metodos.EnvioNotificacion(servicio, TO);
-                            System.err.println("envio y temino proceso");
+                    if(tipo!=1){
+                        Servicio servicio = datos.get.Objetos.DatosServicio(retorno);
+                        JSONArray TO = new JSONArray();
+                        TO.add(servicio.getReg_logycus());
+                        datos.Metodos.EnvioNotificacion(servicio, TO);
                     }
                 }
                 
@@ -967,6 +954,44 @@ public class Guardar {
             
     }
    
+    public static boolean ActualizarCorreo(String id, int tipo) {
+        boolean b=false;
+        PreparedStatement st = null;
+        Connection con=null;
+        try {						
+            con=conexion();
+            con.setAutoCommit(false);
+            if( con != null ) {
+                String instruccion = "";
+                if(tipo == 1){
+                    instruccion="UPDATE tblSolicitud SET enviado = 1 WHERE id_solicitud = '"+id + "';" ;
+                }else{
+                    instruccion= "UPDATE tblServicio SET enviado = 1 WHERE id_servicio = '"+id + "';";
+                }
+                st=con.prepareStatement(instruccion);
+
+                st.executeUpdate();
+                con.commit();
+                b=true;
+            }			
+        }
+        catch( Exception e ) {
+            try {
+                    con.rollback();
+            } catch (SQLException e1) {
+                    e1.printStackTrace();
+            }
+            System.out.println("error al intentar crear un cliente");
+        }
+        finally {
+            try {
+                st.close();
+                con.close();				
+            }
+            catch( Exception e ) {}
+        }
+        return b;
+    }
     
     public static int CambioEstadoServicio(String servicio, int estado, int equipo_conductor, String imagen, int tipo, int valor) throws ClassNotFoundException, SQLException{
         Connection conn=null;
@@ -1008,4 +1033,72 @@ public class Guardar {
 
     }
     
+    public static Boolean CambioEstadoTicket(String ticket, String registro) throws ClassNotFoundException, SQLException{
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        conn=conexion();
+        String pp = "{CALL logycus360.change_state_ticket(?, ?)}";
+        
+            try (CallableStatement cs = conn.prepareCall(pp)) {
+                cs.setString(1, ticket);
+                cs.registerOutParameter(2, Types.INTEGER);
+                
+                cs.executeQuery();
+                
+                int retorno = cs.getInt(2);
+                
+                if(retorno==1){
+                    return true;
+                }else{
+                    return false;
+                }
+                
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en CambioEstadoServicio");
+                System.out.println(e.toString());
+            }catch (Exception e){
+                System.out.println("error Exception en CambioEstadoServicio");
+                System.out.println(e.toString());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return false;
+
+    }
+    
+     public static String NextTicket(String punto) throws ClassNotFoundException, SQLException{
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        conn=conexion();
+        
+        String pp = "{CALL logycus360.next_ticket(?, ?)}";
+        
+            try (CallableStatement cs = conn.prepareCall(pp)) {
+                cs.setString(1, punto);
+                cs.registerOutParameter(2, Types.VARCHAR);
+                
+                cs.executeQuery();
+                
+                String retorno = cs.getString(2);
+                
+                return retorno;
+               
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en CambioEstadoServicio");
+                System.out.println(e.toString());
+            }catch (Exception e){
+                System.out.println("error Exception en CambioEstadoServicio");
+                System.out.println(e.toString());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return "-1";
+
+    }
 }

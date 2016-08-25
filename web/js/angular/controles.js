@@ -1,5 +1,30 @@
 'use strict';
-
+/*
+ * 
+ * @param {type} param1
+ * @param {type} param2
+ * function notificacion(equipo,contrato,placa) {
+    if (Notification) {
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission()
+        }
+        var title = "Mensaje de alerta"
+        var extra = {
+            icon: "http://www.infocarga.net/images/boxes.png",
+            body: "El dispositivo " + equipo + ", placa " + placa + " ha reportado apertura."
+        }
+        var noti = new Notification(title, extra)
+        noti.onclick = function () {
+            openPopup("popuptrafico.aspx?id=" + contrato, "", 750, 520);
+            openPopup("popupreport.aspx?id=" + contrato, "", 1080,550);
+        }
+        noti.onclose = {
+            // Al cerrar
+        }
+        setTimeout(function () { noti.close() }, 10000)
+    }
+}
+ */
 angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$http', '$interval', '$templateCache', '$timeout', '$alert', 'ServiceTables', 'storageService',  
     function(NgMap, $http, $interval, $templateCache, $timeout, $alert, ServiceTables, storageService) {
             var vm = this;
@@ -109,6 +134,40 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 vm.ReloadVehiculos();
             };
             
+            vm.notificacion = function(vehiculo) {
+                var enviar = true;
+                vm.notificaciones = storageService.getNotificaciones();
+                if(vm.notificaciones.length === 0 ){
+                    enviar = true;
+                    vm.notificaciones.push({placa:vehiculo.placa});
+                    storageService.iniciarNotificaciones(vm.notificaciones);
+                }else{
+                    for(var i = 0; i < vm.notificaciones.length; i++){
+                        if(vm.notificaciones[i].placa){
+                            enviar = false;
+                            break;
+                        }
+                    }
+                }
+                
+                if (Notification && enviar) {
+                    if (Notification.permission !== "granted") {
+                        Notification.requestPermission()
+                    }
+                    var title = "Mensaje de alerta"
+                    var extra = {
+                        body: "Se ha asignado la placa "+ vehiculo.placa + " a la solicitud"
+                    };
+                    var noti = new Notification(title, extra)
+                    noti.onclick = function () {
+                        vm.map.showInfoWindow('foo-iw', vehiculo.placa);
+                    };
+                    noti.onclose = {
+                        // Al cerrar
+                    };
+                }
+            };
+
             vm.showDetail = function(e, vehiculo) {
                 console.log(vehiculo);
                 vm.vehiculo = vehiculo;
@@ -152,6 +211,26 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 });
             };
             
+            function notificacion(mensaje) {
+                if (Notification) {
+                    if (Notification.permission !== "granted") {
+                        Notification.requestPermission()
+                    }
+                    var title = "Notificacion de servicio";
+                    var extra = {
+                        body: mensaje
+                    };
+                    var noti = new Notification(title, extra)
+                    noti.onclick = function () {
+                        
+                    };
+                    noti.onclose = {
+                        // Al cerrar
+                    };
+                    setTimeout(function () { noti.close() }, 10000);
+                }
+            }
+
             vm.SendCCosto = function(){
                 ServiceTables.saveCCostos(vm.ccosto).then(function(d) {
                     console.log(d);
@@ -168,6 +247,11 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.ReloadVehiculos = function(){
                 ServiceTables.listaGeneracionVehiculo(vm.mapa).then(function(d) {
                     vm.vehiculos = d;
+                    for(var i = 0; i < vm.vehiculos.length;i ++){
+                        if(vm.vehiculo[i].asignado === 1){
+                            vm.notificacion(vm.vehiculo[i]);
+                        }
+                    }
                 },function(errResponse){
                    console.error('Error en sendPunto');
                });
@@ -269,18 +353,33 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.options = {format: "HH:mm", allowInputToggle:true, showClose:true};
             vm.shape = {center:[], radius:50000};
             vm.puntos = [];
+            vm.ccostos = [];
             vm.cargues = [];
             vm.alerta = {title: 'Solicitud Enviada', container:'#alerta-submit', duration:5, animation:'am-fade-and-slide-top', show: false};
             vm.date = new Date();
-            vm.nuevaSol = {id:"", dia:"", mes:"", inicio:"", fin:"", min_carg:"", max_carg:"", min_desc:"", max_desc:"", cargue:"", equipos:""};
+            vm.nuevaSol = {id:"-1", dia:"", mes:"", anio:2016, desc_inicio:"", desc_fin:"", desc_tipocargue:"", id_inicio:"", id_fin:"", min_carg:"", max_carg:"", min_desc:"", max_desc:"", id_tipocargue:"", equipos:"", id_ccosto:""};
             vm.calendario = [];            
             vm.meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             vm.mes;
             vm.mes_num;
+            vm.anio_num;
+            vm.actual = true;
             NgMap.getMap().then(function(map) {
                 vm.map = map;
             });
             
+            vm.SendCCosto = function(){
+                ServiceTables.saveCCostos(vm.ccosto).then(function(d) {
+                    console.log(d);
+                        vm.ccostos.push(vm.ccosto);
+                        vm.ccosto = {id:"", desc:""};
+                        storageService.updateCCostos(vm.ccostos);
+                        nuevoCC.modal("hide");
+                    //}
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });
+            };
             
             vm.listaAllPuntos = function(){
                 vm.puntos = [];
@@ -295,6 +394,21 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                }
             };
             
+            vm.listaProgramadas = function(){
+                var date = new Date();
+                vm.mes = vm.meses[date.getMonth()];
+                vm.mes_num = date.getMonth()+1;
+                vm.anio_num = date.getFullYear();
+                vm.calendario = storageService.getCalendario();
+                if(vm.calendario.length===0){
+                    ServiceTables.listProgramadas({mes:vm.mes_num,anio:vm.anio_num,actual:vm.actual}).then(function(d) {
+                        vm.calendario = d;
+                        storageService.iniciarCalendario(d);
+                    },function(errResponse){
+                       console.error('Error en sendPunto');
+                   });
+               }
+            };
            
             vm.listaCargues = function(){
                 vm.cargues = [];
@@ -305,6 +419,19 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                         storageService.iniciarCargues(d);
                     },function(errResponse){
                        console.error('Error en sendPunto');
+                   });
+               }
+            };
+            
+            vm.listaCCosto = function(){
+
+                vm.ccostos = storageService.getCCostos();
+                if(vm.ccostos.length===0){
+                    ServiceTables.listCCostos().then(function(d) {
+                        vm.ccostos = d;
+                        storageService.iniciarCCostos(d);
+                    },function(errResponse){
+                       console.error('Error en CCosto');
                    });
                }
             };
@@ -347,16 +474,24 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 }
             };
             
-            vm.llenarObjetoDias = function(dias){
-                for(var i = 0; i < dias; i++){
-                    vm.calendario.push({dia:i+1,spots:[]});
-                }
-            };
-            
             vm.abrirVentana = function(dia){
                 AgregarSolicitud.modal("show");
+                vm.nuevaSol = {id:"-1", dia:"", mes:"", anio:2016, desc_inicio:"", desc_fin:"", desc_tipocargue:"", id_inicio:"", id_fin:"", min_carg:"", max_carg:"", min_desc:"", max_desc:"", id_tipocargue:"", equipos:"", id_ccosto:""};
+                vm.dateMinCargue=null;
+                vm.dateMinDescargue=null;
+                vm.dateMaxCargue=null;
+                vm.dateMaxDescargue=null;
                 vm.nuevaSol.dia=dia;
                 vm.nuevaSol.mes = vm.mes_num;
+            };
+            
+            vm.AbrirProgramada = function(spot){
+                vm.nuevaSol = spot;
+                vm.dateMinCargue = vm.nuevaSol.min_carg;
+                vm.dateMaxCargue = vm.nuevaSol.max_carg;
+                vm.dateMinDescargue = vm.nuevaSol.min_desc;
+                vm.dateMaxDescargue = vm.nuevaSol.max_desc;
+                AgregarSolicitud.modal("show");
             };
             
             vm.sendSolicitud = function(){
@@ -364,14 +499,26 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 vm.nuevaSol.max_carg = new Date(vm.dateMaxCargue).toString("HH:mm:ss");
                 vm.nuevaSol.min_desc = new Date(vm.dateMinDescargue).toString("HH:mm:ss");
                 vm.nuevaSol.max_desc = new Date(vm.dateMaxDescargue).toString("HH:mm:ss");
-                ServiceTables.SaveSolicitudProgramada.then(function(d) {
+                ServiceTables.SaveSolicitudProgramada(vm.nuevaSol).then(function(d) {
                         if(d.mensaje!=="Error"){
                             for(var i = 0; i < vm.calendario.length; i++){
                                 if(vm.calendario[i].dia === vm.nuevaSol.dia){
-                                    vm.nuevaSol.id = d.id;
+                                    if(vm.nuevaSol.id === "-1"){
+                                        vm.nuevaSol.id = d.id;
+                                        vm.nuevaSol.desc_inicio = vm.nuevaSol.inicio.desc;
+                                        vm.nuevaSol.desc_fin = vm.nuevaSol.fin.desc;
+                                        vm.nuevaSol.desc_tipocargue = vm.nuevaSol.cargue.desc;
+                                    }else{
+                                        for(var j=0; j <vm.calendario[i].spots.length; j++){
+                                            if(vm.calendario[i].spots[j].id === d.id){
+                                                vm.calendario[i].spots.splice(j, 1);
+                                                break;
+                                            }
+                                        }                                        
+                                    }
                                     vm.calendario[i].spots.push(vm.nuevaSol);
                                     AgregarSolicitud.modal("hide");
-                                    vm.nuevaSol = {id:"",dia:"", mes:"", inicio:"", fin:"", min_carg:"", max_carg:"", min_desc:"", max_desc:"", cargue:"", equipos:""};
+                                    vm.nuevaSol = {id:"-1", dia:"", mes:"", anio:2016, desc_inicio:"", desc_fin:"", desc_tipocargue:"", id_inicio:"", id_fin:"", min_carg:"", max_carg:"", min_desc:"", max_desc:"", id_tipocargue:"", equipos:"", id_ccosto:""};
                                     vm.dateMinCargue=null;
                                     vm.dateMinDescargue=null;
                                     vm.dateMaxCargue=null;
@@ -386,18 +533,11 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                });
             };
             
-            var date = new Date();
-            vm.mes = vm.meses[date.getMonth()+1];
-            vm.mes_num = date.getMonth()+1;
-            vm.calendario = storageService.getCalendario();
-            if(vm.calendario.length===0){
-                vm.llenarObjetoDias(vm.diasDelMes(date.getMonth()+1, date.getFullYear()));
-                storageService.iniciarCalendario(vm.calendario);
-            }
             vm.listaAllPuntos();
             vm.listaCargues();
+            vm.listaCCosto();
+            vm.listaProgramadas();
             
-
             vm.TipoCarga = [
                 {"ID":2,"Value":"Liquida"},
                 {"ID":5,"Value":"Refrigerada"},
@@ -443,8 +583,8 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.puntos = [];
             vm.cargues = [];
             vm.servicio;
-            vm.mapa = {servicio:"", solicitud:"", placa:"", conductor:"", estados:"", inicio:"", fin:"", carga:"", transportadora:""};
-            vm.options = {format: "YYYY/MM/DD hh:mm A", allowInputToggle:true, showClose:true};
+            vm.mapa = {q:"", conductor:"", estado:"", inicio:"", fin:"", carga:"", desde:"", hasta:""};
+            vm.options = {format: "YYYY/MM/DD", allowInputToggle:true, showClose:true};
             var stopTime;
             
             NgMap.getMap().then(function(map) {
@@ -476,6 +616,10 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                console.log(vm.puntos);
             };
             
+            vm.abrirModalInfo = function(servicio){
+                vm.servicio = servicio;
+                infoServicio.modal("show");
+            };
            
             vm.listaCargues = function(){
                 vm.cargues = storageService.getCargues();
@@ -504,7 +648,7 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             };
             
             vm.limpiar = function(){
-                vm.mapa = {servicio:"", solicitud:"", placa:"", conductor:"", estados:"", inicio:"", fin:"", carga:"", transportadora:""};
+                vm.mapa = {q:"", conductor:"", estado:"", inicio:"", fin:"", carga:"", desde:"", hasta:""};
                 vm.listaServicios();
             };
             
@@ -539,11 +683,167 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 {ID:10, Value:"En zona de descargue"},
                 {ID:5, Value:"Enturnado"},
                 {ID:8, Value:"Finalizo cargue"},
-                {ID:1, Value:"Lanzada"},
-                {ID:11, Value:"Viaje finalizado"}
+                {ID:1, Value:"Lanzada"}
             ];
 
-}]).controller('ServiciosController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', function($http, $templateCache, $timeout, $alert, $modal) {
+}]).controller('ServHistoricosController', ['NgMap', '$http', '$interval', '$templateCache', '$timeout', '$alert', 'ServiceTables', 'storageService',
+    function(NgMap, $http, $interval, $templateCache, $timeout, $alert, ServiceTables, storageService) {
+            var vm = this;
+            vm.desde = null;
+            vm.hasta = null;
+            vm.cap_cargada = 0;
+            vm.servicios = [];
+            vm.puntos = [];
+            vm.cargues = [];
+            vm.servicio;
+            vm.mapa = {q:"", conductor:"", estado:"11", inicio:"", fin:"", carga:"", desde:"", hasta:""};
+            vm.options = {format: "YYYY/MM/DD", allowInputToggle:true, showClose:true};
+            var stopTime;
+            
+            NgMap.getMap().then(function(map) {
+                vm.map = map;
+            });
+     
+            vm.showDetail = function(e, servicio) {
+                vm.servicio = servicio;
+                vm.map.showInfoWindow('foo-iw', servicio.servicio);
+            };
+            
+            vm.sumarCapacidad = function(){
+                vm.cap_cargada = 0;
+                for(var i = 0; i< vm.servicios.length; i++){
+                    vm.cap_cargada = vm.cap_cargada + vm.servicios[i].cap_carg;
+                }
+            };
+            
+            vm.listaAllPuntos = function(){
+                vm.puntos = storageService.getPuntos();
+                if(vm.puntos.length===0){
+                    ServiceTables.listaAllPuntos().then(function(d) {
+                        vm.puntos = d;
+                        storageService.iniciarPuntos(d);
+                    },function(errResponse){
+                       console.error('Error en sendPunto');
+                   });
+               }
+               console.log(vm.puntos);
+            };
+            
+            
+            vm.abrirModal = function(servicio){
+                vm.servicio = servicio;
+                indicadores.modal("show");
+            };
+            
+            vm.abrirModalInfo = function(servicio){
+                vm.servicio = servicio;
+                infoServicio.modal("show");
+            };
+            
+           vm.calcularTiempo = function(primera,segunda){
+               // Set the unit values in milliseconds.
+                var msecPerMinute = 1000 * 60;
+                var msecPerHour = msecPerMinute * 60;
+                var vector = new Array(4);
+                // Set a date and get the milliseconds
+                var date = new Date(primera);
+                var date2 = new Date(segunda);
+                
+                // Get the difference in milliseconds.
+                console.log(primera);
+                console.log(segunda);
+                console.log(date.getTime());
+                console.log(date2.getTime());
+                var interval = date2.getTime() - date.getTime();
+                console.log(interval);
+                var desde = "";
+                
+                if(interval>0){
+                    // Calculate the hours, minutes, and seconds.
+                    var hours = Math.floor(interval / msecPerHour );
+                    interval = interval - (hours * msecPerHour );
+
+                    var minutes = Math.floor(interval / msecPerMinute );
+                    interval = interval - (minutes * msecPerMinute );
+
+                    var seconds = Math.floor(interval / 1000 );
+                    
+                    if(minutes==0&&seconds>0){
+                        minutes = 1;
+                    }
+                    
+                    vector[1] = Math.abs(minutes);
+                    vector[0] = Math.abs(hours);
+
+
+                    var medidas = [" horas", " minutos"];
+                    
+                    for(var i=0; i<vector.length; i++){
+                        if(vector[i]!==0 && !vector[i].NaN){
+                                desde += vector[i] + "" + medidas[i];
+                                break;
+                        }
+                    }
+                }
+                return desde;
+            };
+           
+            vm.listaCargues = function(){
+                vm.cargues = storageService.getCargues();
+                if(vm.cargues.length===0){
+                    ServiceTables.listaCargues().then(function(d) {
+                        vm.cargues = d;
+                        storageService.iniciarCargues(d);
+                    },function(errResponse){
+                       console.error('Error en sendPunto');
+                   });
+               }
+            };
+            
+            vm.listaServicios = function(){
+                vm.mapa.estado = 11;
+                vm.mapa.desde = new Date(vm.desde).toString("yyyy/MM/dd");
+                vm.mapa.hasta = new Date(vm.hasta).toString("yyyy/MM/dd");
+                ServiceTables.listaServiciosActivos(vm.mapa).then(function(d) {
+                    vm.servicios = d;
+                    vm.sumarCapacidad();
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });
+
+            };
+            
+            
+            
+            vm.buscar = function(){
+                vm.listaServicios();
+            };
+            
+            vm.resetForm = function(){
+                vm.mapa = {q:"", conductor:"", estado:"11", inicio:"", fin:"", carga:"", desde:"", hasta:""};
+                vm.listaServicios();
+            };
+            
+            vm.listaAllPuntos();
+            vm.listaCargues();
+            vm.listaServicios();
+
+            vm.dtOptions = {
+                stateSave: true,
+                paging:false,
+                scrollY: 390,
+                bFilter: false,
+                language: {
+                    "lengthMenu": "Mostrar _MENU_ registros",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "",
+                    "infoEmpty": "No se encontraron registros",
+                    "infoFiltered": "(filtrado de _MAX_ registros)",
+                    "search": "Buscar"
+                }
+            };
+
+}]).controller('SolicitudesActivasController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', 'ServiceTables', 'storageService',  function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storageService) {
     var vm = this;
     vm.options = {format:"YYYY/MM/DD", allowInputToggle:true};
     vm.dcargue=null;
@@ -552,6 +852,7 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
     vm.servicios = [];
     vm.foto={id:"", url:"", desc:"", fecha:"", tipo_foto:""};
     vm.fotos=[];
+    vm.cargues = [];
     vm.servicio={origen:"", destino:"", carge:"", descarge:"", id:"-1", nestado:"" ,estado:"",solicitud:0,orden:"", vehiculos:[]};
     vm.vehiculos=[];
     vm.vehiculo = {servicio:"", solicitud:"", placa:"", marca:"", referencia:"", modelo:"", trailer:"", poliza:"", compania:"", 
@@ -585,6 +886,19 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
     
     vm.getData(vm.pageno);
     
+    vm.listaCargues = function(){
+        vm.cargues = storageService.getCargues();
+        if(vm.cargues.length===0){
+            ServiceTables.listaCargues().then(function(d) {
+                vm.cargues = d;
+                storageService.iniciarCargues(d);
+            },function(errResponse){
+               console.error('Error en sendPunto');
+           });
+       }
+    };
+    
+    vm.listaCargues();
     
     function MyModalController($scope) {
         $scope.title = 'Detalle de servicio';
@@ -676,28 +990,203 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
         vm.getData(1);
     };
     
-    vm.TipoCarga = [
-        {"ID":1,"Value":"Gases"},
-        {"ID":2,"Value":"Liquida"},
-        {"ID":3,"Value":"Liquida Inflamable"},
-        {"ID":4,"Value":"Reciduo Peligroso"},
-        {"ID":5,"Value":"Refrigerada"},
-        {"ID":6,"Value":"Seca"}
+        
+    vm.EstadoSolicitud = [
+        {ID:2, Value:"Asignada"},
+        {ID:6, Value:"Aviso para cargue"},
+        {ID:12, Value:"Cancelada"},
+        {ID:7, Value:"En cargue"},
+        {ID:4, Value:"En geocerca de origen"},
+        {ID:9, Value:"En transito a destino"},
+        {ID:3, Value:"En transito a origen"},
+        {ID:10, Value:"En zona de descargue"},
+        {ID:5, Value:"Enturnado"},
+        {ID:8, Value:"Finalizo cargue"},
+        {ID:1, Value:"Lanzada"}
     ];
+        
+    vm.dtOptions = {
+            bAutoWidth:true,
+            stateSave: true,
+            paging:false,
+            //order: [[ 0, "desc" ]],
+            bFilter: false,
+            columnDefs: [ 
+                {
+                targets: 7,
+                orderable: false
+                }
+            ],
+            language: {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "zeroRecords": "No se encontraron registros",
+                "info": "",
+                "infoEmpty": "No se encontraron registros",
+                "infoFiltered": "(filtrado de _MAX_ registros)",
+                "search": "Buscar"
+            }
+        };
+        
+}]).controller('SolHistoricoController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', 'ServiceTables', 'storageService', 
+function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storageService) {
+    var vm = this;
+    vm.options = {format:"YYYY/MM/DD", allowInputToggle:true};
+    vm.dcargue=null;
+    vm.ddescargue=null;
+    vm.busqueda={porpage:20, pageno:1, q:"", cargue:"", descargue:"", orden:"", carga:"", estado:"11"};
+    vm.servicios = [];
+    vm.foto={id:"", url:"", desc:"", fecha:"", tipo_foto:""};
+    vm.fotos=[];
+    vm.cargues = [];
+    vm.servicio={origen:"", destino:"", carge:"", descarge:"", id:"-1", nestado:"" ,estado:"",solicitud:0,orden:"", vehiculos:[]};
+    vm.vehiculos=[];
+    vm.vehiculo = {servicio:"", solicitud:"", placa:"", marca:"", referencia:"", modelo:"", trailer:"", poliza:"", compania:"", 
+    exp_poliza:"", vence_poliza:"", soat:"", exp_soat:"", vence_soat:"", tecno:"", exp_tecno:"", vence_tecno:"", 
+    nombre:"", tipo_doc:"", doc:"", num_lic:"", exp_lic:"",  vence_lic:"", telefono:"", direccion:"", imagen:"", 
+    tipo_carga:"", ntipocarga:"", tipo_remolque:"", ntipo_remolque:"", tipo_equipo:"", ntipo_equipo:"", turno_cargue:"", 
+    turno_descargue:"", fotos:[]};
+    vm.date = new Date();
+    vm.pageno = 1; // initialize page no to 1
+    vm.total_count = 0;
+    vm.itemsPerPage = 20; //this could be a dynamic value from a drop down
+
+    vm.getData = function(pageno){ // This would fetch the data on page change.
+        //In practice this should be in a factory.
+        vm.busqueda.porpage = vm.itemsPerPage;
+        vm.busqueda.pageno = pageno;
+        vm.servicios = []; 
+        if(vm.dcargue!=="" && vm.dcargue!==null){
+            vm.busqueda.cargue = new Date(vm.dcargue).toString("yyyy/MM/dd");
+        }
+        if(vm.ddescargue!=="" && vm.ddescargue!==null){
+            vm.busqueda.descargue = new Date(vm.ddescargue).toString("yyyy/MM/dd");
+        }
+        $http.post("../list_solicitudes", vm.busqueda).success(function(response){ 
+            //ajax request to fetch data into vm.data
+            vm.servicios = response.data;  // data to be displayed on current page.
+            vm.total_count = response.total_count; // total data count.
+            //Modal_filter.modal('hide');
+        });
+    };
+    
+    vm.getData(vm.pageno);
+    vm.listaCargues = function(){
+        vm.cargues = storageService.getCargues();
+        if(vm.cargues.length===0){
+            ServiceTables.listaCargues().then(function(d) {
+                vm.cargues = d;
+                storageService.iniciarCargues(d);
+            },function(errResponse){
+               console.error('Error en sendPunto');
+           });
+       }
+    };
+            
+    vm.listaCargues();
+    
+    function MyModalController($scope) {
+        $scope.title = 'Detalle de servicio';
+        $scope.servicio = vm.servicio;
+        $scope.vehiculos = vm.servicio.vehiculos;
+         
+        $scope.abrirFotos =  function(id){
+            console.log(id);
+            for(var i = 0; i < $scope.vehiculos.length; i++){
+                if($scope.vehiculos[i].servicio === id) {
+                    console.log(id);
+                   $scope.vehiculo = angular.copy($scope.vehiculos[i]);
+                   $scope.fotos = $scope.vehiculo.fotos;
+                   vm.fotos = $scope.vehiculo.fotos;
+                   console.log(vm.fotos);
+                   vm.showModalFotos();
+                   break;
+                }
+            }
+        };
+    }
+    
+    function FotosController($scope) {
+        $scope.title = 'Fotos del servicio';
+        var slides = $scope.slides = [];
+        var currIndex = 0;
+        for (var i = 0; i < vm.fotos.length; i++) {
+            slides.push({
+                image: '../upload/'+vm.fotos[i].url,
+                text: vm.fotos[i].desc,
+                id: currIndex++
+            });
+            console.log(vm.fotos[i]);
+        }
+    }
+    
+     MyModalController.$inject = ['$scope'];
+    var myAlert = $alert({title: 'Holy guacamole!', content: 'Best check yo self, you\'re not looking too good.', placement: 'top', type: 'success', container:'#alerta-busqueda', show: false});
+    var detSolicitud = $modal({controller: MyModalController, templateUrl: '../modal/det-solicitud.html', show: false});
+    var fotos = $modal({controller: FotosController, templateUrl: '../modal/fotos.html', show: false});
+    
+    vm.showAlert = function() {
+      myAlert.show(); // or myAlert.$promise.then(myAlert.show) if you use an external html template
+    };
+    
+    
+    vm.showModalSol = function() {
+      detSolicitud.show();
+    };
+    
+    
+    vm.showModalFotos = function() {
+      fotos.show();
+    };
+    
+    vm.verDetalleSol = function(id){
+        for(var i = 0; i < vm.servicios.length; i++){
+            if(vm.servicios[i].id === id) {
+               vm.servicio = angular.copy(vm.servicios[i]);
+               console.log(vm.servicio);
+               vm.showModalSol();
+               break;
+            }
+        }
+    };
+    
+    vm.verFotos = function(id){
+        for(var i = 0; i < vm.servicios.length; i++){
+            if(vm.servicios[i].id === id) {
+               vm.servicio = angular.copy(vm.servicios[i]);
+               console.log(vm.servicio);
+               vm.showModalFotos();
+               break;
+            }
+        }
+    };
+    
+    vm.formatDate = function(date){
+        var dateOut = new Date(date);
+        return dateOut;
+    };
+    
+    vm.limpiar = function(){
+        //vm.showModal();
+        vm.dcargue=null;
+        vm.ddescargue=null;
+        vm.busqueda={porpage:20, pageno:1, q:"", cargue:"", descargue:"", orden:"", carga:"", estado:""};
+        console.log(vm.busqueda);
+        vm.getData(1);
+    };
+    
     
     vm.EstadoSolicitud = [
-        {"ID":1, "Value": "Lanzada"},
-        {"ID":2, "Value": "Asignada"},
-        {"ID":3, "Value": "Enturnada para cargue"},
-        {"ID":4, "Value": "Cargando"},
-        {"ID":5, "Value": "Cargada"},
-        {"ID":6, "Value": "En ruta"},
-        {"ID":7, "Value": "En destino"},
-        {"ID":8, "Value": "Enturnada para Descargue"},
-        {"ID":9, "Value": "Descargando"},
-        {"ID":10, "Value": "Entregada"},
-        {"ID":11, "Value": "Terminada"},
-        {"ID":12, "Value": "Cerrada"}
+        {ID:2, Value:"Asignada"},
+        {ID:6, Value:"Aviso para cargue"},
+        {ID:12, Value:"Cancelada"},
+        {ID:7, Value:"En cargue"},
+        {ID:4, Value:"En geocerca de origen"},
+        {ID:9, Value:"En transito a destino"},
+        {ID:3, Value:"En transito a origen"},
+        {ID:10, Value:"En zona de descargue"},
+        {ID:5, Value:"Enturnado"},
+        {ID:8, Value:"Finalizo cargue"},
+        {ID:1, Value:"Lanzada"}
     ];
         
     vm.dtOptions = {
@@ -831,18 +1320,18 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval, ServiceTabl
     ];
     
     vm.EstadoSolicitud = [
-        {"ID":1, "Value": "Lanzada"},
-        {"ID":2, "Value": "Asignada"},
-        {"ID":3, "Value": "Enturnada para cargue"},
-        {"ID":4, "Value": "Cargando"},
-        {"ID":5, "Value": "Cargada"},
-        {"ID":6, "Value": "En ruta"},
-        {"ID":7, "Value": "En destino"},
-        {"ID":8, "Value": "Enturnada para Descargue"},
-        {"ID":9, "Value": "Descargando"},
-        {"ID":10, "Value": "Entregada"},
-        {"ID":11, "Value": "Terminada"},
-        {"ID":12, "Value": "Cerrada"}
+        {ID:2, Value:"Asignada"},
+                {ID:6, Value:"Aviso para cargue"},
+                {ID:12, Value:"Cancelada"},
+                {ID:7, Value:"En cargue"},
+                {ID:4, Value:"En geocerca de origen"},
+                {ID:9, Value:"En transito a destino"},
+                {ID:3, Value:"En transito a origen"},
+                {ID:10, Value:"En zona de descargue"},
+                {ID:5, Value:"Enturnado"},
+                {ID:8, Value:"Finalizo cargue"},
+                {ID:1, Value:"Lanzada"},
+                {ID:11, Value:"Viaje finalizado"}
     ];
         
     vm.dtOptions = {
@@ -1054,18 +1543,18 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
     ];
     
     vm.EstadoSolicitud = [
-        {"ID":1, "Value": "Lanzada"},
-        {"ID":2, "Value": "Asignada"},
-        {"ID":3, "Value": "Enturnada para cargue"},
-        {"ID":4, "Value": "Cargando"},
-        {"ID":5, "Value": "Cargada"},
-        {"ID":6, "Value": "En ruta"},
-        {"ID":7, "Value": "En destino"},
-        {"ID":8, "Value": "Enturnada para Descargue"},
-        {"ID":9, "Value": "Descargando"},
-        {"ID":10, "Value": "Entregada"},
-        {"ID":11, "Value": "Terminada"},
-        {"ID":12, "Value": "Cerrada"}
+        {ID:2, Value:"Asignada"},
+                {ID:6, Value:"Aviso para cargue"},
+                {ID:12, Value:"Cancelada"},
+                {ID:7, Value:"En cargue"},
+                {ID:4, Value:"En geocerca de origen"},
+                {ID:9, Value:"En transito a destino"},
+                {ID:3, Value:"En transito a origen"},
+                {ID:10, Value:"En zona de descargue"},
+                {ID:5, Value:"Enturnado"},
+                {ID:8, Value:"Finalizo cargue"},
+                {ID:1, Value:"Lanzada"},
+                {ID:11, Value:"Viaje finalizado"}
     ];
         
     vm.dtOptionsAsign = {
@@ -1860,19 +2349,520 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         }
     ];
     
+
+        
+    vm.dtOptionsAsign = {
+        bAutoWidth:true,
+        stateSave: true,
+        destroy: true,
+        DisplayLength: 100
+    };
+       
+    vm.dtOptionsTerm = {
+        bAutoWidth:true,
+        stateSave: true,
+        destroy: true,
+        DisplayLength: 100
+    };
+    
+    vm.dtOptionsRegs = {
+        bAutoWidth:true,
+        stateSave: true,
+        destroy: true,
+        columnDefs: [ 
+            {
+            targets: 3,
+            orderable: false
+            }
+        ],
+        DisplayLength: 100
+    };
+   //     
+}]).controller('ConfEquiposGeneradoraController', ['$http', '$templateCache', '$timeout', '$alert', '$interval', 'ServiceTables', 'storageService',
+function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, storageService) {
+    var vm = this;
+    vm.options = {format:"YYYY/MM/DD HH:mm:ss", allowInputToggle:true};
+    vm.dcargue=null;
+    vm.ddescargue=null;
+    vm.fecha_enturnado = null;
+    vm.zonas = []
+    vm.zona = {id:"", id_punto:"", desc:"", bahias:[]};
+    vm.bahias = [];
+    vm.bahia = {id:"", id_zona:"", desc:"", nota:""};
+    vm.puntos = [];
+    vm.punto = {id:"", desc:"", nota:"", zonas:[]};
+    vm.equipos = [];
+    vm.changes = [];
+    vm.dispos = [];
+    vm.conductores = [];
+    vm.equiposconductores = [];
+    vm.Remolques=[];
+    vm.Cargas=[];
+    vm.ticket={ticket:"", fecha:"", operacion:"", tipo_cargue:"", fecha_enturne:"", placa:"", remolque:"", 
+    tipo_equipo:"", marca:"", modelo:"", referencia:"", trailer:"", poliza:"", soat:"", 
+    tecno:"", zona:"", bahia:"", punto :"", npunto:"", nzona:"", nbahia:"", fecha_enturnado:"", fecha_terminada:"", turno:""};
+    vm.reasignar = false;
+    vm.equipo = {placa:"", tipocarga:"", n_tipocarga:"", tipoequipo:"", n_tipoequipo:"", lic_transito:"", trailer:"", lic_transito_r:"", 
+    remolque:"", n_remolque:"", capacidad:"", unidad:"", marca:"", modelo:"", referencia:"", poliza:"", compania:"", 
+    exp_poliza:"", vence_poliza:"", soat:"", exp_soat:"", vence_soat:"", tecno:"", exp_tecno:"", vence_tecno:"", propietario:"",
+    poliza_hc:"", compania_hc:"", exp_poliza_hc:"", vence_poliza_hc:""};
+    vm.conductor = {codigo: "", tipo_doc:"", doc:"", lic:"", exp_lic:"", vence_lic:"", nombre:"", 
+    apellido:"", telefono:"", direccion:"", mail:"", contrasena:""};
+    var stopTime;
+    
+    vm.llenarZonasBahias = function(){ // This would fetch the data on page change.
+        ServiceTables.listaAllPuntos().then(function(d) {
+            console.log(d);
+            vm.puntos = d;  // data to be displayed on current page.
+        },function(errResponse){
+           console.error('Error en getDataRegistradas');
+       });
+    };
+
+    
+    vm.nuevoVehiculo = function(){
+        sendVehiculo.modal("show");
+    };
+    
+    vm.nuevoConductor = function(){
+        sendConductor.modal("show");
+    };
+
+    vm.getDataEquipos = function(){ // This would fetch the data on page change.
+        vm.ticketsR = [];
+        ServiceTables.listaEquipos().then(function(d) {
+            if(d!=="sesion"){
+                vm.equipos = d;  // data to be displayed on current page.
+                storageService.iniciarEquipos(d);
+            }else{
+                $window.location = '../../';
+            }
+        },function(errResponse){
+           console.error('Error en getDataRegistradas');
+       });
+    };
+    
+    vm.verConductor = function(conductor){
+      vm.conductor = angular.copy(conductor);  
+      
+      sendConductor.modal("show");
+    };
+    
+    vm.verVehiculo = function(equipo){
+        vm.equipo = angular.copy(equipo);
+        vm.equipo.exp_poliza = new Date(vm.equipo.exp_poliza);
+        vm.equipo.vence_poliza = new Date(vm.equipo.vence_poliza);
+        vm.equipo.exp_poliza_hc = new Date(vm.equipo.exp_poliza_hc);
+        vm.equipo.vence_poliza_hc = new Date(vm.equipo.vence_poliza_hc);
+        vm.equipo.exp_soat = new Date(vm.equipo.exp_soat);
+        vm.equipo.vence_soat =  new Date(vm.equipo.vence_soat);
+        vm.equipo.exp_tecno = new Date(vm.equipo.exp_tecno);
+        vm.equipo.vence_tecno = new Date(vm.equipo.vence_tecno);
+        sendVehiculo.modal("show");
+    };
+    
+    vm.getDataConductores = function(){ // This would fetch the data on page change.
+        vm.ticketsA = []; 
+        ServiceTables.listaConductores().then(function(d) {
+            if(d!=="sesion"){
+                console.log(d);
+                vm.conductores = d;  // data to be displayed on current page.
+                storageService.iniciarConductores(d);
+            }else{
+                $window.location = '../../';
+            }
+        },function(errResponse){
+           console.error('Error en getDataConductores');
+       });
+    };
+    
+    vm.getDataEquiposConductores = function(page){ // This would fetch the data on page change.
+        vm.ticketsT = []; 
+        ServiceTables.listaEquiposConductores().then(function(d) {
+            if(d!=="sesion"){
+                vm.equiposconductores = d;  // data to be displayed on current page.
+            }else{
+                $window.location = '../../';
+            }
+        },function(errResponse){
+           console.error('Error en getDataRegistradas');
+       });
+    };
+    
+    vm.init = function(){
+        vm.getDataEquipos();
+        vm.getDataConductores();
+        vm.getDataEquiposConductores();
+    };
+    
+    vm.stopinit = function() {
+      if (angular.isDefined(stopTime)) {
+        $interval.cancel(stopTime);
+        stopTime = undefined;
+      }
+    };
+    
+    vm.cambiarConductor = function(equipoconductor){
+        for(var i = 0; i < vm.equiposconductores.length; i++){
+            if(vm.equiposconductores[i].conductor === equipoconductor.conductor &&
+                vm.equiposconductores[i].id !== equipoconductor.id){
+                    var r = confirm("El conductor que desea asignar, esta asignado ya a la placa: " + vm.equiposconductores[i].placa + "\n\
+                    ¿Desea segir con la nueva asignación?.");
+                    if (r == true) {
+                        if(vm.equiposconductores[i].en_servicio === '1'){
+                            alert("El conductor que desea asignar esta cumpliendo un servicio en este momento.");
+                            equipoconductor.conductor = "";
+                        }else{
+                            vm.equiposconductores[i].conductor = "";
+                            equipoconductor.editar = true;
+                        }
+                    }else{
+                        equipoconductor.conductor = "";
+                    } 
+                    break;
+            }else{
+                equipoconductor.editar = true;
+            }
+        }
+        vm.addChanges(equipoconductor);
+    };
+    
+    vm.addChanges = function(equipoconductor){
+        console.log(equipoconductor.editar);
+        if(!equipoconductor.editar){
+            for(var i = 0; i < vm.changes.length; i++){
+                if(vm.changes[i].placa === equipoconductor.placa){
+                    vm.changes.splice(i, 1);
+                    break;
+                }
+            }
+        }else{
+            equipoconductor.editar = true;
+            for(var i = 0; i < vm.changes.length; i++){
+                if(vm.changes[i].placa === equipoconductor.placa){
+                    vm.changes.splice(i, 1);
+                    break;
+                }
+            }
+            vm.changes.push(equipoconductor);
+        }
+        console.log(vm.changes);
+    };
+    
+    vm.addDisponibles = function(equipoconductor){
+        console.log(equipoconductor.disponible);
+        for(var i = 0; i < vm.dispos.length; i++){
+            if(vm.dispos[i].placa === equipoconductor.placa){
+                vm.dispos.splice(i, 1);
+                break;
+            }
+        }
+        vm.dispos.push(equipoconductor);
+        console.log(vm.dispos);
+    };
+    
+    vm.enviarChanges = function(){
+        ServiceTables.SaveEquiposConductor(vm.changes).then(function(d) {
+            if(d){
+                alert("Se ejecuto el proceso correctamente");
+                
+            }else{
+                alert("Ocurrio un error y no se ejecuto el proceso completo");
+            }
+        },function(errResponse){
+           console.error('Error en getDataRegistradas');
+       });
+    };
+    
+    vm.enviarDisponibles = function(){
+        ServiceTables.SaveEquiposConductorDisp(vm.dispos).then(function(d) {
+            if(d){
+                alert("Se ejecuto el proceso correctamente");
+                
+            }else{
+                alert("Ocurrio un error y no se ejecuto el proceso completo");
+            }
+        },function(errResponse){
+           console.error('Error en getDataRegistradas');
+       });
+    };
+    
+    vm.enviarVehiculo = function(){
+        vm.equipo.exp_poliza = vm.equipo.exp_poliza.toString("yyyy/MM/dd");
+        vm.equipo.vence_poliza = vm.equipo.vence_poliza.toString("yyyy/MM/dd");
+        vm.equipo.exp_poliza_hc = vm.equipo.exp_poliza_hc.toString("yyyy/MM/dd");
+        vm.equipo.vence_poliza_hc = vm.equipo.vence_poliza_hc.toString("yyyy/MM/dd");
+        vm.equipo.exp_soat = vm.equipo.exp_soat.toString("yyyy/MM/dd");
+        vm.equipo.vence_soat =  vm.equipo.vence_soat.toString("yyyy/MM/dd");
+        vm.equipo.exp_tecno = vm.equipo.exp_tecno.toString("yyyy/MM/dd");
+        vm.equipo.vence_tecno = vm.equipo.vence_tecno.toString("yyyy/MM/dd");
+        ServiceTables.SaveVehiculos(vm.equipo).then(function(d) {
+            if(d){
+                alert("Se ejecuto el proceso correctamente");
+                sendVehiculo.modal("show");
+                vm.equipo = {placa:"", tipocarga:"", n_tipocarga:"", tipoequipo:"", n_tipoequipo:"", lic_transito:"", trailer:"", lic_transito_r:"", 
+                remolque:"", n_remolque:"", capacidad:"", unidad:"", marca:"", modelo:"", referencia:"", poliza:"", compania:"", 
+                exp_poliza:"", vence_poliza:"", soat:"", exp_soat:"", vence_soat:"", tecno:"", exp_tecno:"", vence_tecno:"", propietario:"",
+                poliza_hc:"", compania_hc:"", exp_poliza_hc:"", vence_poliza_hc:""};
+            }else{
+                alert("Ocurrio un error y no se ejecuto el proceso completo");
+            }
+        },function(errResponse){
+           console.error('Error en getDataRegistradas');
+       });
+    };
+    
+    vm.sendConductor = function(){
+        vm.conductor.exp_lic = vm.conductor.exp_lic.toString("yyyy/MM/dd");
+        vm.conductor.vence_lic = vm.conductor.vence_lic.toString("yyyy/MM/dd");
+        console.log(vm.conductor);
+        ServiceTables.SaveConductores(vm.conductor).then(function(d) {
+            if(d){
+                alert("Se ejecuto el proceso correctamente");
+                sendConductor.modal("show");
+                vm.conductor = {codigo: "", tipo_doc:"", doc:"", lic:"", exp_lic:"", vence_lic:"", nombre:"", 
+                apellido:"", telefono:"", direccion:"", mail:"", contrasena:""};
+            }else{
+                alert("Ocurrio un error y no se ejecuto el proceso completo");
+            }
+        },function(errResponse){
+           console.error('Error en getDataRegistradas');
+       });
+    };    
+    
+    vm.enviarConductor = function(){
+        vm.conductor.exp_lic = vm.conductor.exp_lic.toString("yyyy/MM/dd");
+        vm.conductor.vence_lic = vm.conductor.vence_lic.toString("yyyy/MM/dd");
+        ServiceTables.SaveConductor(vm.conductor).then(function(d) {
+            if(d){
+                alert("Se ejecuto el proceso correctamente");
+            }else{
+                alert("Ocurrio un error y no se ejecuto el proceso completo");
+            }
+        },function(errResponse){
+           console.error('Error en getDataRegistradas');
+       });
+    };
+    
+    vm.changeStopTime = function(tabla){
+        vm.stopinit();
+        
+        if(tabla===1){
+            vm.getDataRegistradas(vm.pagenoR);
+        }else if(tabla===2){
+            vm.getDataAsignadas(vm.pagenoA);
+        }else if(tabla===3){
+            vm.getDataTerminadas(vm.pagenoT);
+        }
+
+        stopTime = $interval(function() {
+          if(tabla===1){
+              vm.getDataRegistradas(vm.pagenoR);
+          }else if(tabla===2){
+              vm.getDataAsignadas(vm.pagenoA);
+          }else if(tabla===3){
+              vm.getDataTerminadas(vm.pagenoT);
+          }
+        }, 30 * 1000);
+    };
+
+    vm.llenarZonasBahias();
+    vm.init();
+    
+    vm.formatDate = function(date){
+        var dateOut = new Date(date);
+        return dateOut;
+    };
+    
+    
+    
+    vm.asignarTickets = function(ticket) {
+        vm.ticket = ticket;
+        vm.zonas = [];
+        for(var i=0; i < vm.puntos.length; i++){
+            if(vm.puntos[i].id===vm.ticket.punto){
+                vm.zonas = vm.puntos[i].zonas;
+                break;
+            }
+        }
+        Asignacion.modal("show");
+    };
+    
+    vm.sendAsignacion = function(){ // This would fetch the data on page change.
+            vm.ticket.fecha_enturnado = new Date(vm.fecha_enturnado).toString("yyyy-MM-dd HH:mm:ss");
+            $http.post("../asignTurno", vm.ticket).success(function(response){ 
+                //ajax request to fetch data into vm.data
+                console.log(response);
+                if(response!=="false"){
+                    vm.init();
+                    Asignacion.modal("hide");
+                }
+            });
+        };
+        
+    vm.selectZonas = function(id){
+        vm.bahias = [];
+        for(var i = 0; i < vm.zonas.length; i++){
+            if(vm.zonas[i].id === id) {
+               vm.bahias = angular.copy(vm.zonas[i].bahias);
+               break;
+            }
+        }
+    };
+
+    
+    vm.reasignarTickets = function(ticket){
+        console.log("entro aqui");
+        vm.reasignar = true;
+        vm.ticket = ticket;
+        vm.fecha_enturnado = vm.ticket.fecha_enturnado;
+        console.log(vm.ticket);
+        vm.zonas = [];
+        for(var i=0; i < vm.puntos.length; i++){
+            if(vm.puntos[i].id===vm.ticket.punto){
+                vm.zonas = vm.puntos[i].zonas;
+                break;
+            }
+        }
+        Asignacion.modal("show");
+
+    };
+    
+    
+    vm.cambiarTipo = function(tipo){
+        vm.Remolques=[];
+        vm.Cargas=[];
+        for(var i = 0; i < vm.TipoRemolque.length; i++){
+            if(vm.TipoRemolque[i].Carga===tipo){
+                vm.Remolques = vm.TipoRemolque[i].Remolques;
+                break;
+            }
+
+        }
+        for(var i = 0; i < vm.Carga.length; i++){
+            if(vm.Carga[i].TipoCarga===tipo){
+                vm.Cargas = vm.Carga[i].Cargas;
+                break;
+            }
+
+        }
+
+    };
+
+    vm.cambiarRemolque = function(){
+        var flag = false;
+        var flag2 = false;
+        console.log(vm.mapa.remolques);
+        for(var i = 0; i < vm.mapa.remolques.length; i++){
+
+            if(vm.mapa.remolques[i] === 9){
+                flag2 = true;
+            }
+
+            if(vm.mapa.remolques[i] === 9 && vm.Cargas.length === 6){
+                vm.Cargas.splice(4,1);
+                flag = true;
+                break;
+            }
+        }
+
+        if(flag===false && flag2===false){
+            vm.Cargas = [];
+            for(var i = 0; i < vm.Carga.length; i++){
+                if(vm.Carga[i].TipoCarga===vm.mapa.tipocarga){
+                    vm.Cargas = vm.Carga[i].Cargas;
+                    console.log(vm.Cargas);
+                    console.log(vm.Carga[i].Cargas);
+                    break;
+                }
+
+            }
+        }
+    };
+
+
+    vm.TipoCarga = [
+        {"ID":2,"Value":"Liquida"},
+        {"ID":5,"Value":"Refrigerada"},
+        {"ID":6,"Value":"Seca"}
+    ];
+
+    
+    vm.TipoDoc = [
+        {"ID":"CC","Value":"Cedula de ciudadania"},
+        {"ID":"CE","Value":"Cedula de extrangeria"},
+        {"ID":"PS","Value":"Pasaporte"}
+    ];
+    
+    vm.TipoRemolque = [
+        {"Carga":6,
+         "Remolques": [
+            {"ID":1, Value:"Carbonera"},
+            {"ID":2, Value:"Carbonera con varilla"},
+            {"ID":3, Value:"Carroceria"},
+            {"ID":4, Value:"Plancha"},
+            {"ID":5, Value:"Porta contenedor"},
+            {"ID":6, Value:"Tolva"},
+            {"ID":7, Value:"Van"}
+        ]
+        },
+        {"Carga":2,
+         "Remolques" : [
+            {"ID":8, Value:"Tanque acero inoxidable"},
+            {"ID":9, Value:"Tanque aluminio"},
+            {"ID":10, Value:"Tanque lamina"}
+         ]
+        }
+    ];
+
+    vm.TipoEquipo = [
+        {"ID": 1,"Value":"Camión 3.5 Ton"},
+        {"ID": 2,"Value":"Camión 7 Ton"},
+        {"ID": 3,"Value":"Camión 10.5 Ton"},
+        {"ID": 4,"Value":"Camión Sencillo S2"},
+        {"ID": 5,"Value":"Camión Sencillo S3"},
+        {"ID": 6,"Value":"Patineta"},
+        {"ID": 7,"Value":"Tractomula 3S2"},
+        {"ID": 8,"Value":"Tractomula 3S3"}
+    ];
+
+    vm.Carga = [
+        {   
+            "TipoCarga":2,
+            "Cargas":[
+                {"ID": 1,"Value":"Aceites y grasas"},
+                {"ID": 2,"Value":"ACPM"},
+                {"ID": 3,"Value":"Alcohol y derivados"},
+                {"ID": 4,"Value":"Gasolinas"},
+                {"ID": 5,"Value":"JP-1 (Jet Full)"},
+                {"ID": 6,"Value":"Petróleo"}
+            ]
+        },
+        {   
+            "TipoCarga":6,
+            "Cargas":[
+                {"ID": 7,"Value":"Bolsones"},
+                {"ID": 8,"Value":"Bolsas"},
+                {"ID": 9,"Value":"Contenedor"},
+                {"ID": 10,"Value":"Granel"},
+                {"ID": 11,"Value":"Pallets"}
+            ]
+        }
+    ];
+    
     vm.EstadoSolicitud = [
-        {"ID":1, "Value": "Lanzada"},
-        {"ID":2, "Value": "Asignada"},
-        {"ID":3, "Value": "Enturnada para cargue"},
-        {"ID":4, "Value": "Cargando"},
-        {"ID":5, "Value": "Cargada"},
-        {"ID":6, "Value": "En ruta"},
-        {"ID":7, "Value": "En destino"},
-        {"ID":8, "Value": "Enturnada para Descargue"},
-        {"ID":9, "Value": "Descargando"},
-        {"ID":10, "Value": "Entregada"},
-        {"ID":11, "Value": "Terminada"},
-        {"ID":12, "Value": "Cerrada"}
+        {ID:2, Value:"Asignada"},
+        {ID:6, Value:"Aviso para cargue"},
+        {ID:12, Value:"Cancelada"},
+        {ID:7, Value:"En cargue"},
+        {ID:4, Value:"En geocerca de origen"},
+        {ID:9, Value:"En transito a destino"},
+        {ID:3, Value:"En transito a origen"},
+        {ID:10, Value:"En zona de descargue"},
+        {ID:5, Value:"Enturnado"},
+        {ID:8, Value:"Finalizo cargue"},
+        {ID:1, Value:"Lanzada"},
+        {ID:11, Value:"Viaje finalizado"}
     ];
         
     vm.dtOptionsAsign = {
@@ -1901,5 +2891,114 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         ],
         DisplayLength: 100
     };
-        
+   //     
+}]).controller('TicketsController', ['$interval', '$templateCache', '$timeout', '$alert', 'ServiceTables',
+    function($interval, $templateCache, $timeout, $alert, ServiceTables) {
+            var vm = this;
+            vm.cap_cargada = 0;
+            vm.servicios = [];
+            vm.tickets = [];
+            vm.cargues = [];
+            vm.activo = {placa:"", nombre:"", img_conductor:"", registro:"", turno:""};
+            vm.servicio;
+            vm.mapa = {servicio:"", solicitud:"", placa:"", conductor:"", estados:"", inicio:"", fin:"", carga:"", transportadora:""};
+            vm.options = {format: "YYYY/MM/DD hh:mm A", allowInputToggle:true, showClose:true};
+            var stopTime;
+           var ws = new WebSocket("ws://logycus360.com/notificaciones"); 
+            var audio = new Audio('../css/sounds/timbre.mp3');
+
+            vm.listaTickets = function(){
+                ServiceTables.listTickets().then(function(d) {
+                    vm.tickets = d.lista;
+                    vm.activo = d.activo;
+                    console.log(d.activo);
+                    if(d.activo.ticket!==null){
+                        audio.play();
+                    }
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });
+            };
+            
+            stopTime = $interval(vm.listaTickets, 10 * 1000 *  60);
+            
+            vm.siguiente = function(){
+                ServiceTables.SaveNextTicket().then(function(d) {
+                    if(d.mensaje==="OK"){
+                        postToServer();
+                    }else if(d.mensaje==="NO"){
+                        alert("No existe mas turnos en cola en el momento");
+                        vm.listaTickets();
+                    }else{
+                        alert("Error");
+                        vm.listaTickets();
+                    }
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });
+            };
+           
+           vm.terminar = function(ticket){
+               console.log(ticket);
+               ServiceTables.SaveCambioTicket(ticket).then(function(d) {
+                    if(d.mensaje!=="OK"){
+                        alert("Error");
+                    }else{
+                        postToServer();
+                    }
+                    vm.listaTickets();
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });               
+           };
+           
+            ws.onopen = function(){
+                console.log("conecto");
+            };
+            
+            ws.onmessage = function(mensaje){
+                console.log(mensaje.data);
+                if(mensaje.data==="Next"){
+                    vm.listaTickets();
+                }
+            };
+            function postToServer(){
+                ws.send("next");
+            }
+            function closeConnect(){
+                ws.close();
+            }
+            
+            vm.listaTickets();
+            
+            vm.dtOptions = {
+                stateSave: true,
+                paging:false,
+                scrollY: 180,
+                bFilter: false,
+                language: {
+                    "lengthMenu": "Mostrar _MENU_ registros",
+                    "zeroRecords": "No se encontraron registros",
+                    "info": "",
+                    "infoEmpty": "No se encontraron registros",
+                    "infoFiltered": "(filtrado de _MAX_ registros)",
+                    "search": "Buscar"
+                }
+            };
+            
+            vm.Estados = [
+                {ID:2, Value:"Asignada"},
+                {ID:6, Value:"Aviso para cargue"},
+                {ID:12, Value:"Cancelada"},
+                {ID:7, Value:"En cargue"},
+                {ID:4, Value:"En geocerca de origen"},
+                {ID:9, Value:"En transito a destino"},
+                {ID:3, Value:"En transito a origen"},
+                {ID:10, Value:"En zona de descargue"},
+                {ID:5, Value:"Enturnado"},
+                {ID:8, Value:"Finalizo cargue"},
+                {ID:1, Value:"Lanzada"},
+                {ID:11, Value:"Viaje finalizado"}
+            ];
+
 }]);

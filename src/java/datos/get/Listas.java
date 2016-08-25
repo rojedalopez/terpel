@@ -29,10 +29,77 @@ public class Listas {
                 conn=conexion();
                 String instruccion="SELECT distinct mail_usuario FROM \n" +
                 "tblUsuario AS us INNER JOIN tblAsocio AS aso ON us.nit_empresa = aso.nit_transportadora\n" +
-                "WHERE id_rol = 3 AND aso.nit_empresa = ?;";        
+                "WHERE id_rol = 3 AND aso.nit_empresa = '"+empresa+"';";        
+                System.out.println(instruccion);
                 
                 st=conn.prepareStatement(instruccion);
-                st.setString(1, empresa);
+                
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    System.out.println(datos.getString(1));
+                    lista.add(datos.getString(1));                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static List<String> listaSolicitudes(String empresa) throws SQLException{
+        List<String> lista=new ArrayList<>();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="select * from tblSolicitud where enviado = 0;";        
+                
+                st=conn.prepareStatement(instruccion);
+                
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    lista.add(datos.getString(1));                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static List<String> listaServicios(String empresa) throws SQLException{
+        List<String> lista=new ArrayList<>();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="select * from tblServicio where enviado = 0;";        
+                
+                st=conn.prepareStatement(instruccion);
                 datos=(ResultSet) st.executeQuery();
                 while (datos.next()) {
                     lista.add(datos.getString(1));                

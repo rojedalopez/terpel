@@ -196,6 +196,22 @@
         <servlet-name>saveSolProgramada</servlet-name>
         <servlet-class>servletsSave.saveSolProgramada</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>saveEstadoTicket</servlet-name>
+        <servlet-class>servletsSave.saveEstadoTicket</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_tickets</servlet-name>
+        <servlet-class>servletsList.list_tickets</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>saveNextTicket</servlet-name>
+        <servlet-class>servletsSave.saveNextTicket</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_programadas</servlet-name>
+        <servlet-class>servletsList.list_programadas</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>saveServicio</servlet-name>
         <url-pattern>/saveServicio</url-pattern>
@@ -391,6 +407,22 @@
     <servlet-mapping>
         <servlet-name>saveSolProgramada</servlet-name>
         <url-pattern>/saveSolProgramada</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>saveEstadoTicket</servlet-name>
+        <url-pattern>/saveEstadoTicket</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_tickets</servlet-name>
+        <url-pattern>/list_tickets</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>saveNextTicket</servlet-name>
+        <url-pattern>/saveNextTicket</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_programadas</servlet-name>
+        <url-pattern>/list_programadas</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

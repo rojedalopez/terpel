@@ -41,13 +41,12 @@ public class list_servicios_act extends HttpServlet {
         JSONObject joEmploye = null;
          
         joEmploye = (JSONObject) parser.parse(sb.toString());
-        String servicio = (String) joEmploye.get("servicio");
-        String solicitud = (String) joEmploye.get("solicitud");
-        String transportadora = (String) joEmploye.get("transportadora");
-        String placa = (String) joEmploye.get("placa");
+        String q = (String) joEmploye.get("q");
         String conductor = (String) joEmploye.get("conductor");
         String inicio = (String) joEmploye.get("inicio");
         String fin = (String) joEmploye.get("fin");
+        String desde = (String) joEmploye.get("desde");
+        String hasta = (String) joEmploye.get("hasta");
         
         int carga = -1;
         int estado = -1;
@@ -78,9 +77,9 @@ public class list_servicios_act extends HttpServlet {
                 Usuario u = (Usuario)session.getAttribute("user");
                 JSONArray lista;
                 if(u.getTipo()==1){
-                    lista = Listas.ServiciosActivosByGeneradora(u.getNit(), solicitud, servicio, placa, transportadora, conductor, inicio, fin, carga, estado);
+                    lista = Listas.ServiciosActivosByGeneradora(u.getNit(), q, conductor, inicio, fin, carga, estado);
                 }else{
-                    lista = Listas.ServiciosActivosByTransportadora(u.getNit(), solicitud, servicio, placa, transportadora, conductor, inicio, fin, carga, estado);
+                    lista = Listas.ServiciosActivosByTransportadora(u.getNit(), q, conductor, inicio, fin, carga, estado);
                 }
                 String x = lista.toJSONString();
                 out.println(x);

@@ -152,9 +152,6 @@ if(session.getAttribute("user") != null){
                                     <div style="float: left;">
                                         <i class="fa fa-calendar fa-fw"></i> {{ctrl.mes}} {{dias.dia}}
                                     </div>
-                                    <div style="float: right;">
-                                        <a ng-click="ctrl.abrirVentana(dias.dia)">Nueva solicitud <i class="fa fa-arrow-circle-right"></i></a>
-                                    </div>
                                     <br/>
                                 </div>
                             </div>
@@ -166,7 +163,6 @@ if(session.getAttribute("user") != null){
                                         <p class="list-group-item-text"><b>Tipo de cargue:</b> {{spot.desc_tipocargue}}</p>
                                         <p class="list-group-item-text"><b>Intervalo de servicio:</b> {{spot.min_carg}} - {{spot.max_desc}}</p>
                                         <p class="list-group-item-text"><b>Cantidad equipos:</b> {{spot.equipos}}</p>
-                                        <p style="text-align: right;"><button type="button" class="btn btn-sm btn-success" ng-click="ctrl.AbrirProgramada(spot)">Editar</button></p>
                                     </a>
                                 </div>
                             </div>
@@ -186,30 +182,31 @@ if(session.getAttribute("user") != null){
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Punto de cargue:</label>
-                        <select ng-disabled="ctrl.enviado" ng-model="ctrl.nuevaSol.id_inicio"
+                        <select ng-disabled="ctrl.enviado" ng-model="ctrl.nuevaSol.inicio"
                         type="text" name="nameOrigin"
                         clase="text_valid" class="form-control"
                         required-message="'El campo no puede estar vacio'" 
-                        required ng-options="punto.id as punto.desc for punto in ctrl.puntos"
+                        required ng-options="punto as punto.desc for punto in ctrl.puntos"
                         ng-change="ctrl.selectInicio()">
                             <option value="">--- Seleccione inicio ---</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Punto de descargue:</label>
-                        <select ng-disabled="ctrl.enviado" ng-model="ctrl.nuevaSol.id_fin"
+                        <select ng-disabled="ctrl.enviado" ng-model="ctrl.nuevaSol.fin"
                         type="text" name="nameDestination"
                         clase="text_valid" class="form-control"
                         required-message="'El campo no puede estar vacio'" 
-                        required ng-options="punto.id as punto.desc for punto in ctrl.puntos">
+                        required ng-options="punto as punto.desc for punto in ctrl.puntos"
+                        ng-change="ctrl.selectFin()">
                             <option value="">--- Seleccione fin ---</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Centro de costos:</label>
                         <div class="input-group">
-                            <select class="form-control" ng-model="ctrl.nuevaSol.id_ccosto"
-                            ng-options="ccosto.id as ccosto.desc for ccosto in ctrl.ccostos"
+                            <select class="form-control" ng-model="ctrl.nuevaSol.ccosto"
+                            ng-options="ccosto.id as ccosto.desc for ccosto in ctrl.ccostos" ng-disabled="ctrl.enviado"
                             name="carga" clase="text_valid" required-message="'Debe seleccionar una opcion'" required>
                                 <option value="">--- Seleccione Tipo ---</option>
                             </select>
@@ -220,9 +217,9 @@ if(session.getAttribute("user") != null){
                     </div>
                     <div class="form-group">
                         <label>Tipo de cargue:</label>
-                        <select class="form-control" ng-model="ctrl.nuevaSol.id_tipocargue" 
-                        ng-options="Tipo.id as Tipo.desc for Tipo in ctrl.cargues"
-                        name="carga" clase="text_valid" required-message="'Debe seleccionar una opcion'">
+                        <select class="form-control" ng-model="ctrl.nuevaSol.carga" ng-change="ctrl.cambiarCargue(ctrl.servicio.carga)"
+                        ng-options="Tipo as Tipo.desc for Tipo in ctrl.cargues" ng-disabled="ctrl.enviado"
+                        name="carga" clase="text_valid" required-message="'Debe seleccionar una opcion'" required>
                             <option value="">--- Seleccione Tipo ---</option>
                         </select>
                     </div>
@@ -245,7 +242,7 @@ if(session.getAttribute("user") != null){
                     </div>
                     <div class="form-group">
                         <label>Fecha max de cargue:</label>
-                        <div class="input-group input-group-sm date" 
+                        <div class="input-group input-group-sm date" ng-change="ctrl.colocarFecha()"
                             datetimepicker ng-model="ctrl.dateMaxCargue" options="ctrl.options" ng-disabled="ctrl.enviado">
                             <input type="text" class="form-control" ng-disabled="ctrl.enviado"/>
                               <span class="input-group-addon">

@@ -347,8 +347,8 @@ public class Mails {
     public static void SendMailSolicitudTransportadoras(List<String> users, Solicitud solicitud){
         String servidorSMTP = "smtp.gmail.com";
         String puerto = "587";
-        String usuario = "logycus.noreply@gmail.com";
-        String password = "l0gycus360";
+        String usuario = "rojedalopez@gmail.com";
+        String password = "r0b3rto,.,1047";
         String asunto = "Nueva solicitud generada.";
  System.out.println("0 ");
         Properties props = new Properties();

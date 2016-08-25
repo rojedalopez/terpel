@@ -14,20 +14,22 @@
                     <td><span ng-bind="servicio.nestado"></span></td>
                 </tr>
                 <tr>
-                    <td style="background-color: #E8E8E8;">ORIGEN</td>
+                    <td style="background-color: #E8E8E8;">RUTA</td>
                     <td colspan="3">
-                            <span ng-bind="servicio.origen"></span>
+                            <span ng-bind="servicio.origen"></span> - <span ng-bind="servicio.destino"></span>
                     </td>
-                </tr>
-                <tr>
-                    <td style="background-color: #E8E8E8;">DESTINO</td>
-                    <td colspan="3"><span ng-bind="servicio.destino"></span></td>
                 </tr>
                 <tr>
                     <td style="background-color: #E8E8E8;">FECHA/HORA CARGUE</td>
                     <td><span ng-bind="servicio.cargue"></span></td>
                     <td style="background-color: #E8E8E8;">FECHA/HORA DESCARGUE</td>
                     <td><span ng-bind="servicio.descargue"></span></td>
+                </tr>
+                 <tr>
+                    <td style="background-color: #E8E8E8;">CANTIDAD DE CUPOS</td>
+                    <td><span ng-bind="servicio.cant_cupos"></span></td>
+                    <td style="background-color: #E8E8E8;">PORCENTAJE DE ASIGNACION</td>
+                    <td><span ng-bind="servicio.porcentaje"></span>%</td>
                 </tr>
             </table>
             <div class="collapse navbar-collapse navbar-ex1-collapse">
@@ -43,7 +45,7 @@
                         <div id="{{vehiculo.placa}}" class="panel-collapse collapse container-fluid in" style="margin: 10px auto;">
                             <div class="noticia-content box">
                                 <div class="foto">
-                                    <div style="background-image: url('{{vehiculo.imagen}}');background-size: cover !important;background-repeat: no-repeat;position: absolute;top: 0;left: 0;right: 0;bottom: 0;"> </div>
+                                    <div style="background-image: url('{{vehiculo.url_conductor}}');background-size: cover !important;background-repeat: no-repeat;position: absolute;top: 0;left: 0;right: 0;bottom: 0;"> </div>
                                 </div>
                                 <div class="titulo">
                                     <table class="table table-bordered compact">
@@ -51,12 +53,35 @@
                                             <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DE VIAJE</th>
                                         </tr>
                                         <tr>
-                                            <td style="background-color: #E8E8E8;width: 40%;">TURNO DE CARGUE</td>
-                                            <td>{{(vehiculo.turno_cargue==='0')?'-':vehiculo.turno_cargue}}</td>
+                                            <td style="background-color: #E8E8E8;width: 40%;">ESTADO</td>
+                                            <td>{{vehiculo.desc_estado}}</td>
                                         </tr>
                                         <tr>
-                                            <td style="background-color: #E8E8E8;width: 40%;">TURNO DE DESCARGUE</td>
-                                            <td>{{(vehiculo.turno_descargue==='0')?'-':vehiculo.turno_descargue}}</td>
+                                            <td style="background-color: #E8E8E8;width: 40%;">ASIGNACIÓN</td>
+                                            <td>{{vehiculo.delta_1}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">LLEGADA a CARGUE</td>
+                                            <td>{{vehiculo.delta_2}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">ENTURNADO</td>
+                                            <td>{{vehiculo.delta_3}}</td>
+                                        </tr><tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">AVISADO</td>
+                                            <td>{{vehiculo.delta_4}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">CARGUE</td>
+                                            <td>{{vehiculo.delta_5}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">FIN DE CARGUE</td>
+                                            <td>{{vehiculo.delta_6}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">FIN DE SERVICIO</td>
+                                            <td>{{vehiculo.delta_7}}</td>
                                         </tr>
                                         <tr>
                                             <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DEL CONDUCTOR</th>
@@ -66,8 +91,8 @@
                                             <td><span ng-bind="vehiculo.doc"></span></td>
                                         </tr>
                                         <tr>
-                                            <td style="background-color: #E8E8E8;width: 40%;"># DE LICENCIA </td>
-                                            <td><span ng-bind="vehiculo.num_lic"></span></td>
+                                            <td style="background-color: #E8E8E8;width: 40%;">NOMBRE </td>
+                                            <td><span ng-bind="vehiculo.nombre_completo"></span></td>
                                         </tr>
                                         <tr>
                                             <td style="background-color: #E8E8E8;width: 40%;">TELEFONO</td>
@@ -78,20 +103,31 @@
                                         </tr>
                                         <tr>
                                             <td style="background-color: #E8E8E8;width: 40%;">PROPIETARIO</td>
-                                            <td><span ng-bind="vehiculo.ntipo_remolque"></span></td>
+                                            <td><span ng-bind="vehiculo.generador"></span></td>
                                         </tr>
                                         <tr>
-                                            <td style="background-color: #E8E8E8;width: 40%;">TIPO CARGA</td>
-                                            <td><span ng-bind="vehiculo.ntipo_carga"></span></td>
+                                            <td style="background-color: #E8E8E8;width: 40%;">PLACA</td>
+                                            <td><span ng-bind="vehiculo.placa"></span></td>
                                         </tr>
                                         <tr>
-                                            <td style="background-color: #E8E8E8;width: 40%;"># POLIZA</td>
-                                            <td><span ng-bind="vehiculo.poliza"></span></td>
+                                            <td style="background-color: #E8E8E8;width: 40%;">TIPO REMOLQUE</td>
+                                            <td><span ng-bind="vehiculo.tipo_remolque"></span></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="2">
-                                                <button class="btn btn-lg btn-info" ng-click="abrirFotos(vehiculo.servicio)">Fotos</button>
-                                            </td>
+                                            <td style="background-color: #E8E8E8;width: 40%;">PLACA REMOLQUE</td>
+                                            <td><span ng-bind="vehiculo.placa_rem"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">TIPO EQUIPO</td>
+                                            <td><span ng-bind="vehiculo.tipo_equipo"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">MARCA</td>
+                                            <td><span ng-bind="vehiculo.marca"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #E8E8E8;width: 40%;">REF/MODELO</td>
+                                            <td><span ng-bind="vehiculo.referencia"></span>/<span ng-bind="vehiculo.modelo"></span></td>
                                         </tr>
                                     </table>
                                 </div>

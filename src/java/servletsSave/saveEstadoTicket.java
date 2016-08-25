@@ -13,14 +13,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+public class saveEstadoTicket extends HttpServlet {
 
-public class saveSolProgramada extends HttpServlet {
-
+   
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, ParseException, ClassNotFoundException, SQLException {
         response.setContentType("text/html;charset=UTF-8");
@@ -41,42 +40,28 @@ public class saveSolProgramada extends HttpServlet {
         System.out.println(sb.toString());
         joSolicitud = (JSONObject) parser.parse(sb.toString());
         
-        String inicio = (String)joSolicitud.get("id_inicio").toString();
         
-        String fin = (String)joSolicitud.get("id_fin").toString();
-        
-        int tipo_carga = Integer.parseInt(joSolicitud.get("id_tipocargue").toString());
-                
-       
-        String carguemin = (String) joSolicitud.get("min_carg");
-        String carguemax = (String) joSolicitud.get("max_carg");
-        String descarguemax = (String) joSolicitud.get("min_desc");
-        String descarguemin = (String) joSolicitud.get("max_desc");
-        
-        int equipos = Integer.parseInt(joSolicitud.get("equipos").toString());
-        int id = Integer.parseInt(joSolicitud.get("id").toString());
-        
-        int mes = Integer.parseInt(joSolicitud.get("mes").toString());
-        int dia = Integer.parseInt(joSolicitud.get("dia").toString());
-        int anio = Integer.parseInt(joSolicitud.get("anio").toString());
-        String ccosto = (String) joSolicitud.get("id_ccosto");
-        
+        String ticket = (String) joSolicitud.get("ticket");
         
         HttpSession session =  null;
  
         session = request.getSession(false);
         
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
-                JSONObject x = Guardar.SaveSolProgramada(id, anio, mes, dia, carguemin, carguemax, descarguemin, descarguemax,  
-                equipos, tipo_carga, ccosto, inicio, fin);
-                System.out.println(x);
-                out.println(x.toJSONString());
+                boolean x = Guardar.CambioEstadoTicket(ticket, "");
+                JSONObject json = new JSONObject();
+                if(x){
+                    json.put("mensaje", "OK");
+                }else{
+                    json.put("mensaje", "Error");
+                }
+                out.println(json.toJSONString());
             }
         }
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -84,11 +69,11 @@ public class saveSolProgramada extends HttpServlet {
         try {
             processRequest(request, response);
         } catch (ParseException ex) {
-            Logger.getLogger(saveSolProgramada.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(saveSolProgramada.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
-            Logger.getLogger(saveSolProgramada.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(savePunto.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

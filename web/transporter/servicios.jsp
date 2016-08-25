@@ -8,8 +8,8 @@ response.setHeader("Cache", "no-cache");
 if(session.getAttribute("user") != null){
     Usuario u = (Usuario)session.getAttribute("user");
     if(u.getRol()==2||u.getRol()==3){
-        if(u.getTipo()==1){
-            response.sendRedirect("/empresa/servicios.jsp");
+        if(u.getTipo()==2){
+            response.sendRedirect("/transporter/servicios.jsp");
         }
 
     }
@@ -67,6 +67,18 @@ if(session.getAttribute("user") != null){
     <script src="../js/angular-strap.tpl.min.js"></script>
     <script src="../js/ui-bootstrap-tpls-2.0.0.js"></script>
 
+    <script>
+        var infoServicio;
+        $(document).ready(function(){
+            if (Notification) {
+                if (Notification.permission !== "granted") {
+                    Notification.requestPermission()
+                }
+            }
+            infoServicio = $("#infoServicio");
+        });
+    </script>
+    
     <script src="../js/bootstrap.min.js"></script>  
     <script type="text/javascript" src="../js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="../js/dataTables.bootstrap.min.js"></script>
@@ -110,16 +122,19 @@ if(session.getAttribute("user") != null){
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr} <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr}<b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-calendar"></i> Calendario Cont.</a>
+                            <a href="spot.jsp"><i class="fa fa-fw fa-truck"></i> Generar Spot</a>
                         </li>
                         <li>
-                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes</a>
+                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Activas</a>
                         </li>
                         <li>
-                            <a href="vehiculos.jsp"><i class="fa fa-fw fa-automobile"></i> Vehiculos</a>
+                            <a href="programada.jsp"><i class="fa fa-fw fa-calendar"></i> Calendario Cont.</a>
+                        </li>
+                        <li>
+                            <a href="puntos.jsp"><i class="fa fa-fw fa-map-marker"></i> Puntos</a>
                         </li>
                         <li class="divider"></li>
                         <li>
@@ -139,43 +154,28 @@ if(session.getAttribute("user") != null){
                                 <div class="panel-heading">
                                   <a data-toggle="collapse" data-parent="#accordion" href="#collapse1" style="text-decoration: none; color: #808080;">
                                     <h4 class="panel-title">
-                                          Buscar
+                                          FILTRAR
                                     </h4>
                                   </a>
                                 </div>
                                 <div id="collapse1" class="panel-collapse collapse in">
                                     <div class="form-group" style="padding: 10px;">
                                         <div class="form-group">
-                                            <label>Buscar por Solitud</label>
+                                            <label>Por Solicitud, Servicio, Placa</label>
                                             <div class='date'>
-                                                <input type='text' class="form-control" ng-model="ctrl.mapa.solicitud"
+                                                <input type='text' class="form-control" ng-model="ctrl.mapa.q"
                                                        name="flete"/>
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Buscar por Servicio</label>
-                                            <div class='date'>
-                                                <input type='text' class="form-control" ng-model="ctrl.mapa.servicio"
-                                                       name="flete" />
-                                                <input type="hidden" ng-model="ctrl.mapa.transportadora" value=""/>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Buscar por Placa</label>
-                                            <div class='date'>
-                                                <input type='text' class="form-control" ng-model="ctrl.mapa.placa"
-                                                       name="flete" />
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Buscar por Conductor</label>
+                                            <label>Por Conductor</label>
                                             <div class='date'>
                                                 <input type='text' class="form-control" ng-model="ctrl.mapa.conductor"
                                                        name="flete" />
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Punto de cargue:</label>
+                                            <label>Por Punto de cargue:</label>
                                             
                                             <select ng-model="ctrl.mapa.inicio" class="form-control" ng-options="inicio.id as inicio.desc for inicio in ctrl.puntos">
                                                 <option value="">--- Seleccione inicio ---</option>
@@ -183,13 +183,13 @@ if(session.getAttribute("user") != null){
                                                 
                                         </div>
                                         <div class="form-group">
-                                            <label>Punto de descargue:</label>
+                                            <label>Por Punto de descargue:</label>
                                             <select ng-model="ctrl.mapa.fin" class="form-control" ng-options="fin.id as fin.desc for fin in ctrl.puntos">
                                                 <option value="">--- Seleccione fin ---</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label>Tipo de cargue:</label>
+                                            <label>Por Tipo de cargue:</label>
                                             <select class="form-control" ng-model="ctrl.servicio.carga" 
                                             ng-options="Tipo.id as Tipo.desc for Tipo in ctrl.cargues" 
                                             name="carga" clase="text_valid" required-message="'Debe seleccionar una opcion'" required>
@@ -197,7 +197,7 @@ if(session.getAttribute("user") != null){
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label>Estados</label>
+                                            <label>Por Estados</label>
                                             <select ng-model="ctrl.mapa.estados" class="form-control" ng-options="estado.ID as estado.Value for estado in ctrl.Estados">
                                                 <option value="">--- Seleccione estado ---</option>
                                             </select>
@@ -233,6 +233,10 @@ if(session.getAttribute("user") != null){
                                         <table style="width:100%;height: 100%;padding: 5px;">
                                             <tr>
                                                 <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DEL SERVICIO</th>
+                                            </tr>
+                                            <tr>
+                                              <td style="background-color: #E8E8E8;">TRANSPORTADORA</td>
+                                              <td>{{ctrl.servicio.transportadora}}</td>
                                             </tr>
                                             <tr>
                                               <td style="background-color: #E8E8E8;">RUTA</td>
@@ -376,9 +380,6 @@ if(session.getAttribute("user") != null){
                                     <td>Servicio</td>
                                     <td>Cargue</td>
                                     <td>Placa</td>
-                                    <td>Marca</td>
-                                    <td>Modelo</td>
-                                    <td>Referencia</td>
                                     <td>Placa R.</td>
                                     <td>Conductor</td>
                                     <td>Telefono</td>
@@ -392,13 +393,11 @@ if(session.getAttribute("user") != null){
                                     <td><span ng-bind="servicio.servicio"></span></td>
                                     <td><span ng-bind="servicio.tipo_cargue"></span></td>
                                     <td><span ng-bind="servicio.placa"></span></td>
-                                    <td><span ng-bind="servicio.marca"></span></td>
-                                    <td><span ng-bind="servicio.modelo"></span></td>
-                                    <td><span ng-bind="servicio.referencia"></span></td>
                                     <td><span ng-bind="servicio.placa_rem"></span></td>
                                     <td><span ng-bind="servicio.nombre_completo"></span></td>
                                     <td><span ng-bind="servicio.telefono"></span></td>
                                     <td><span style="cursor: pointer;" ng-click="ctrl.showDetail(servicio)"><i class="fa-globe fa fa-2x fa-align-center"></i></span></td>
+                                    <td><span style="cursor: pointer;" ng-click="ctrl.abrirModalInfo(servicio)"><i class="fa-info-circle fa fa-2x fa-align-center"></i></span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -409,6 +408,185 @@ if(session.getAttribute("user") != null){
 
         </div>
         <!-- /#page-wrapper -->
+        
+        <div class="modal fade" id="infoServicio" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title">INFORMACIÓN DEL SERVICIO</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered compact">
+                        <tr>
+                            <th colspan="2" style="background-color: #E8E8E8;text-align: center;">RESUMEN DE SOLICITUD CUBIERTA</th>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">NO. DE SOLICITUD</td>
+                            <td>{{ctrl.servicio.solicitud}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">RUTA</td>
+                            <td>{{ctrl.servicio.desc_inicio}} - {{ctrl.servicio.desc_fin}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">FECHA/HORA MIN DE CARGUE</td>
+                            <td>{{ctrl.servicio.min_carg}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">FECHA/HORA MAX DE DESCARGUE</td>
+                            <td>{{ctrl.servicio.max_desc}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">FECHA/HORA ASIGNACIÓN</td>
+                            <td>{{ctrl.servicio.fecha_asignacion}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">FECHA/HORA LLEGADA A PUNTO DE CARGUE</td>
+                            <td>{{ctrl.servicio.fecha_geo}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">FECHA/HORA ENTURNADO</td>
+                            <td>{{ctrl.servicio.fecha_enturnado}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">FECHA/HORA AVISADO PARA CARGAR</td>
+                            <td>{{ctrl.servicio.fecha_avisado}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">FECHA/HORA INICIO DE CARGUE</td>
+                            <td>{{ctrl.servicio.fecha_cargue}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">FECHA/HORA FIN DE CARGUE</td>
+                            <td>{{ctrl.servicio.fecha_fin_cargue}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;width: 40%;">FECHA/HORA LLEGADA A PUNTO DE DESCARGUE</td>
+                            <td>{{ctrl.servicio.fecha_fin}}</td>
+                        </tr>
+                    </table>
+                    
+                    <table class="table table-bordered compact">
+                        <tr>
+                            <th colspan="2" style="background-color: #E8E8E8;text-align: center;">INFORMACION DE CONDUCTOR</th>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="background-color:#000000;padding: 4px;">
+                                 <center><img width="150px" src="{{ctrl.servicio.url_conductor}}"/></center>
+                            </td> 
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;">NOMBRE</td>
+                            <td>{{ctrl.servicio.nombre_completo}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;">DOCUMENTO</td>
+                            <td>{{ctrl.servicio.doc}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">NO. LICENCIA</td>
+                          <td>{{ctrl.servicio.licencia}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">VIGENCIA LICENCIA</td>
+                          <td>{{ctrl.servicio.exp_lic}} - {{ctrl.servicio.vence_lic}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;">TELEFONO</td>
+                            <td>{{ctrl.servicio.telefono}}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #E8E8E8;">DIRECCION</td>
+                            <td>{{ctrl.servicio.direccion}}</td>
+                        </tr>
+                        <tr>
+                            <th colspan="2" style="background-color: #E8E8E8;text-align: center;">DATOS DEL VEHICULO</th>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">TIPO EQUIPO</td>
+                          <td>{{ctrl.servicio.tipo_equipo}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">PLACA</td>
+                          <td>{{ctrl.servicio.placa}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">LIC. DE TRANSITO</td>
+                          <td>{{ctrl.servicio.lic_transito}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">MARCA</td>
+                          <td>{{ctrl.servicio.marca}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">REFERENCIA</td>
+                          <td>{{ctrl.servicio.referencia}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">MODELO</td>
+                          <td>{{ctrl.servicio.modelo}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">PLACA REMOLQUE</td>
+                          <td>{{ctrl.servicio.placa_rem}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">TIPO REMOLQUE</td>
+                          <td>{{ctrl.servicio.tipo_remolque}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">LIC. TRANSITO REMOLQUE</td>
+                          <td>{{ctrl.servicio.lic_transito_r}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">POLIZA DE SEGURO</td>
+                          <td>{{ctrl.servicio.poliza}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">COMPAÑIA ASEGURADORA</td>
+                          <td>{{ctrl.servicio.comp}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">VIGENCIA POLIZA</td>
+                          <td>{{ctrl.servicio.exp_poliza}} - {{ctrl.servicio.vence_poliza}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">POLIZA DE SEGURO H.C.</td>
+                          <td>{{ctrl.servicio.poliza_hc}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">COMPAÑIA ASEGURADORA</td>
+                          <td>{{ctrl.servicio.comp_hc}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">VIGENCIA POLIZA H.C.</td>
+                          <td>{{ctrl.servicio.exp_poliza_hc}} - {{ctrl.servicio.vence_poliza_hc}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">SOAT</td>
+                          <td>{{ctrl.servicio.soat}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">VIGENCIA SOAT</td>
+                          <td>{{ctrl.servicio.exp_soat}} - {{ctrl.servicio.vence_soat}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">TECNOMECANICA</td>
+                          <td>{{ctrl.servicio.tecno}}</td>
+                        </tr>
+                        <tr>
+                          <td style="background-color: #E8E8E8;">VIGENCIA TECNOMECANICA</td>
+                          <td>{{ctrl.servicio.exp_tecno}} - {{ctrl.servicio.vence_tecno}}</td>
+                        </tr>
+                    </table>
+                </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                  </div>
+              </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+          </div><!-- /.modal -->
         
     </div>
     <!-- /#wrapper -->
