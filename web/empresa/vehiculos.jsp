@@ -130,13 +130,25 @@ else{
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr} <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-calendar"></i> Calendario Cont.</a>
+                            <a href="spot.jsp"><i class="fa fa-fw fa-truck"></i> Generar Spot</a>
                         </li>
                         <li>
-                            <a href="servicios.jsp"><i class="fa fa-fw fa-truck"></i> Servicios en ruta</a>
+                            <a href="programada.jsp"><i class="fa fa-fw fa-truck"></i> Calendario cont.</a>
                         </li>
                         <li>
-                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes</a>
+                            <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Activas</a>
+                        </li>
+                        <li>
+                            <a href="solicitudes_hist.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Historicas</a>
+                        </li>
+                        <li>
+                            <a href="servicios.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Activos</a>
+                        </li>
+                        <li>
+                            <a href="servicios_hist.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Historicos</a>
+                        </li>
+                        <li>
+                            <a href="puntos.jsp"><i class="fa fa-fw fa-map-marker"></i> Puntos</a>
                         </li>
                         <li class="divider"></li>
                         <li>

@@ -8,8 +8,8 @@ response.setHeader("Cache", "no-cache");
 if(session.getAttribute("user") != null){
     Usuario u = (Usuario)session.getAttribute("user");
     if(u.getRol()==2||u.getRol()==3){
-        if(u.getTipo()==2){
-            response.sendRedirect("/transporter/servicios.jsp");
+        if(u.getTipo()==1){
+            response.sendRedirect("/empresa/servicios.jsp");
         }
 
     }
@@ -126,16 +126,16 @@ if(session.getAttribute("user") != null){
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr}<b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="spot.jsp"><i class="fa fa-fw fa-truck"></i> Generar Spot</a>
+                            <a href="programada.jsp"><i class="fa fa-fw fa-truck"></i> Calendario cont.</a>
                         </li>
                         <li>
                             <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Activas</a>
                         </li>
                         <li>
-                            <a href="programada.jsp"><i class="fa fa-fw fa-calendar"></i> Calendario Cont.</a>
+                            <a href="servicios.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Activos</a>
                         </li>
                         <li>
-                            <a href="puntos.jsp"><i class="fa fa-fw fa-map-marker"></i> Puntos</a>
+                            <a href="vehiculos.jsp"><i class="fa fa-fw fa-map-marker"></i> vehiculos</a>
                         </li>
                         <li class="divider"></li>
                         <li>

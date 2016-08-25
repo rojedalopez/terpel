@@ -157,13 +157,16 @@ if(session.getAttribute("user") != null){
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr} <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-calendar"></i> Calendario Cont.</a>
+                            <a href="programada.jsp"><i class="fa fa-fw fa-truck"></i> Calendario cont.</a>
                         </li>
                         <li>
-                            <a href="servicios.jsp"><i class="fa fa-fw fa-truck"></i> Servicios en ruta</a>
+                            <a href="servicios.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Activos</a>
                         </li>
                         <li>
-                            <a href="vehiculos.jsp"><i class="fa fa-fw fa-automobile"></i> Vehiculos</a>
+                            <a href="servicios_hist.jsp"><i class="fa fa-fw fa-truck"></i> Servicios Historicos</a>
+                        </li>
+                        <li>
+                            <a href="vehiculos.jsp"><i class="fa fa-fw fa-map-marker"></i> vehiculos</a>
                         </li>
                         <li class="divider"></li>
                         <li>
