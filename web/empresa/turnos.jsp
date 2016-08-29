@@ -119,6 +119,7 @@ if(session.getAttribute("user") != null){
 <body ng-app="myApp" class="ng-cloak">
     <div ng-controller="TicketsController as ctrl"> 
     <div class="principal">
+        <img src="http://4.bp.blogspot.com/-oD3N9uaV7qU/UL7uYv3YGnI/AAAAAAAARWE/dsZ4ZmqJzHs/s1600/Terpel+logo+2006.png" width="300" height="120" style="position: absolute; top: 5%; left: 5%;" />
         <a href="../logout">..</a>
         <div class="turnoactivo" >
             PROXIMO TURNO:

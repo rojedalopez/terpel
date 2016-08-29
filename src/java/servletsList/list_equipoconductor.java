@@ -27,7 +27,7 @@ public class list_equipoconductor extends HttpServlet {
             /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
                 Usuario u = (Usuario)session.getAttribute("user"); 
-                JSONArray objeto = Listas.listaEquiposConductoresByPropietario(u.getNit(), false);
+                JSONArray objeto = Listas.listaEquiposConductoresByPropietario(u.getNit(), true);
                 out.println(objeto.toJSONString());
             }else{
                 response.sendRedirect("../");

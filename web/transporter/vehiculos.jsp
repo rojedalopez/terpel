@@ -318,7 +318,7 @@ else{
                                                 <div class="col-md-9 col-xs-12">
                                                     <div class="input-group">
                                                         <select class="form-control" ng-model="ctrl.equipo.n_tipocarga"
-                                                                ng-options="tipo.ID as tipo.Value for tipo in ctrl.TipoCarga" ng-change="ctrl.cambiarTipo(ctrl.equipo.n_tipocarga)">
+                                                                ng-options="tipo.ID as tipo.Value for tipo in ctrl.TipoCarga">
                                                             <option value="">--- Seleccionar tipo carga ---</option>
                                                         </select>
                                                     </div>            

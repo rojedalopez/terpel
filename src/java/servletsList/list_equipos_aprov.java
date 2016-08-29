@@ -13,8 +13,7 @@ import javax.servlet.http.HttpSession;
 import org.json.simple.JSONArray;
 
 
-public class list_conductores extends HttpServlet {
-
+public class list_equipos_aprov extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -26,12 +25,12 @@ public class list_conductores extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
-                Usuario u = (Usuario)session.getAttribute("user"); 
+                Usuario u = (Usuario)session.getAttribute("user");
                 JSONArray objeto = new JSONArray();
                 if(u.getTipo()==1){
-                    objeto = Listas.listaConductoresByGeneradora(u.getNit(),false);
+                    objeto = Listas.listaVehiculosByGeneradora(u.getNit(), true);
                 }else{
-                    objeto = Listas.listaConductoresByPropietario(u.getNit());
+                    objeto = Listas.listaVehiculosByPropietario(u.getNit());
                 }
                 System.out.println(objeto.toJSONString());
                 out.println(objeto.toJSONString());

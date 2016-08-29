@@ -633,6 +633,41 @@ public class Guardar {
 
     }
     
+    public static boolean AprovEquipoConductor(String id, int tipo) throws ClassNotFoundException, SQLException{
+        boolean b=false;
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        
+        
+        conn=conexion();
+            try (CallableStatement cs = conn.prepareCall("{CALL logycus360.aprov_equipo_conductor(?, ?, ?)}")) {
+                cs.setString(1, id);
+                cs.setInt(2, tipo);
+                cs.registerOutParameter(3, Types.INTEGER);
+                cs.executeQuery();
+                
+                int retorno = cs.getInt(3);
+                if(retorno == 1){
+                    return true;
+                }else{  
+                    return false;
+                }
+                
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en InsertEquipoConductor");
+                System.out.println(e.toString());
+            }catch (Exception e){
+                System.out.println("error Exception en InsertEquipoConductor");
+                System.out.println(e.toString());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return false;
+
+    }
      public static boolean InsertPunto(String id, String nit, String desc, String nota, float lat, float lng) throws ClassNotFoundException, SQLException{
         boolean b=false;
         Connection conn=null;
@@ -965,11 +1000,57 @@ public class Guardar {
                 String instruccion = "";
                 if(tipo == 1){
                     instruccion="UPDATE tblSolicitud SET enviado = 1 WHERE id_solicitud = '"+id + "';" ;
-                }else{
+                }else if(tipo == 2){
                     instruccion= "UPDATE tblServicio SET enviado = 1 WHERE id_servicio = '"+id + "';";
+                }else if(tipo == 3){
+                    instruccion= "update tblEquipo set enviado = 1 where plca_equipo = '"+id + "';";
+                }else if(tipo == 4){
+                    instruccion= "update tblConductor set enviado = 1 where cod_conductor = '"+id + "';";
+                }else if(tipo == 5){
+                    instruccion= "update tblEquipo set enviado_aprov = 1 where plca_equipo = '"+id + "';";
+                }else if(tipo == 6){
+                    instruccion= "update tblConductor set enviado_aprov = 1 where cod_conductor = '"+id + "';";
                 }
+                
                 st=con.prepareStatement(instruccion);
 
+                st.executeUpdate();
+                con.commit();
+                b=true;
+            }			
+        }
+        catch( Exception e ) {
+            try {
+                    con.rollback();
+            } catch (SQLException e1) {
+                    e1.printStackTrace();
+            }
+            System.out.println("error al intentar crear un cliente");
+        }
+        finally {
+            try {
+                st.close();
+                con.close();				
+            }
+            catch( Exception e ) {}
+        }
+        return b;
+    }
+    
+     public static boolean avisarConductor(String id) {
+        boolean b=false;
+        PreparedStatement st = null;
+        Connection con=null;
+        try {						
+            con=conexion();
+            con.setAutoCommit(false);
+            if( con != null ) {
+                String instruccion="update tblServicio set id_estados = 6, ult_esta_servicio = case when ult_esta_servicio is null then now() else ult_esta_servicio end , fech_avisado =  case when fech_avisado is null then now() else fech_avisado end \n" +    
+                    "where ticket_carg_servicio = ?" ;
+               
+                
+                st=con.prepareStatement(instruccion);
+                st.setString(1, id);
                 st.executeUpdate();
                 con.commit();
                 b=true;

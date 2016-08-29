@@ -2,7 +2,9 @@
 package datos.json;
 
 import static datos.Aplicacion.conexion;
+import datos.Metodos;
 import static datos.Metodos.calcular;
+import static datos.save.Guardar.avisarConductor;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -130,6 +132,49 @@ public class Listas {
             }catch (Exception e){
                     System.out.println("error Exception en listaVehiculos");
                     System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaNotificaciones(String fecha) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        JSONObject retorno= new JSONObject();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+        System.err.println(fecha);
+            try{
+                conn=conexion();
+                String instruccion="SELECT * FROM logycus360.Notificacion ";
+                if(fecha!=null){
+                    instruccion+= " WHERE fech_eventoserv > '"+fecha+"' ";
+                }
+                instruccion+=" ORDER BY fech_eventoserv DESC LIMIT 100;";        
+                
+                st=conn.prepareStatement(instruccion);
+                System.out.println(instruccion);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("fecha", datos.getString(1));
+                    objeto.put("nota", datos.getString(2));
+                    objeto.put("desde", Metodos.calcular(datos.getString(1)));
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en listaNotificaciones");
+                    System.out.println(e.toString());
+            }catch (Exception e){
+                    System.out.println("error Exception en listaNotificaciones");
+                    System.out.println(e.toString());
             }finally{
                 if(conn!=null){
                     if(!conn.isClosed()){
@@ -637,20 +682,29 @@ public class Listas {
         
             try{
                 conn=conexion();
-                String instruccion="SELECT plca_equipo, CONCAT(co.nomb_conductor, ' ', co.apll_conductor), img_conductor, ec.regs_imei_conductor, turno_enturne " +
+                String instruccion="SELECT plca_equipo, CONCAT(co.nomb_conductor, ' ', co.apll_conductor), img_conductor, ec.regs_imei_conductor, turno_enturne, id_ticketenturne, id_estados " +
                 "FROM tblTicketEnturne AS te INNER JOIN tblEquipoConductor AS ec ON te.id_equipoconductor = ec.id_equipoconductor " +
                 "INNER JOIN tblConductor AS co ON co.cod_conductor = ec.cod_conductor " +
+                "INNER JOIN tblServicio as se ON se.ticket_carg_servicio = te.id_ticketenturne " +
                 "WHERE activo_ticketenturne = 0 AND term_enturne = 0 AND id_punto = '"+punto+"' ORDER BY turno_enturne asc LIMIT 1;";
                 
                 System.out.println(instruccion);
                 st=conn.prepareStatement(instruccion);
                 datos=(ResultSet) st.executeQuery();
-                while (datos.next()) {
+                if (datos.next()) {
                     objeto.put("placa", datos.getString(1));
                     objeto.put("nombre", datos.getString(2));
                     objeto.put("img_conductor", datos.getString(3));                    
                     objeto.put("registro", datos.getString(4));
                     objeto.put("turno", datos.getInt(5));
+                    if(datos.getInt(7)==5){
+                        objeto.put("sonar", 1);
+                    }else{
+                        objeto.put("sonar", 0);
+                    }
+                    avisarConductor(datos.getString(6));
+                }else{
+                    objeto.put("sonar", 0);
                 }
                 
             }catch (SQLException e) {
@@ -1018,8 +1072,12 @@ public class Listas {
                     instruccion += " AND id_tipocargue = " + carga;
                 }
                 
-                if(estado!=-1){
-                    instruccion += " AND e.id_estados = " + estado;
+                if(estado != -1 && estado!=11){
+                    instruccion += " AND e.id_estados < 11 AND e.id_estados = " + estado ;
+                }else if(estado==11){
+                    instruccion += " AND e.id_estados = " + estado ;
+                }else if(estado == -1){
+                    instruccion += " AND e.id_estados < 11 ";
                 }
                 
                 instruccion+=      " ORDER BY fech_carg_solicitud DESC ";	        
@@ -1161,7 +1219,7 @@ public class Listas {
                 "INNER JOIN tblAsocio AS aso ON aso.nit_empresa = s.nit_empresa " +
                 "INNER JOIN tblEmpresa AS emp ON emp.nit_empresa = aso.nit_empresa " +
                 "INNER JOIN tblTipoCargue AS car ON car.id_tipocargue = s.id_tipocargue " +
-                "WHERE nit_transportadora = ?; " ;
+                "WHERE nit_transportadora = ? AND cup_eqpos_solicitud > 0 and s.id_estados < 11; " ;
                     
                 System.out.println(instruccion);
                 
@@ -1947,7 +2005,8 @@ public class Listas {
                 "marca_equipo, modelo_equipo, refer_equipo, plac_trailer_equipo, poliza_equipo, " +
                 "comp_poliza_equipo, fech_exp_poliz_equipo, fech_venc_poliz_equipo, soat_equipo, " +
                 "fech_exp_soat_equipo, fech_venc_soat_equipo,  tecno_equipo, fech_exp_tecno_equipo, " +
-                "fech_venc_tecno_equipo, cap_equipo, und_equipo " +
+                "fech_venc_tecno_equipo, cap_equipo, und_equipo, aprov_equipo, " +
+                "lic_trans_equipo, lic_trans_r_equipo, poliza_hc_equipo, comp_poliza_hc_equipo, exp_poliza_hc_equipo, vence_poliza_hc_equipo "+
                 "FROM tblEquipo AS eq INNER JOIN tblTipoCarga AS tc ON eq.id_tipocarga = tc.id_tipocarga " +
                 "INNER JOIN tblTipoEquipo AS te ON eq.id_tipoequipo = te.id_tipoequipo " +
                 "INNER JOIN tblRemolque AS re ON eq.id_remolque = re.id_remolque " +
@@ -1980,7 +2039,14 @@ public class Listas {
                     objeto.put("exp_tecno", datos.getString(20));
                     objeto.put("vence_tecno", datos.getString(21));
                     objeto.put("capacidad", datos.getString(22));     
-                    objeto.put("unidad", datos.getString(23));     
+                    objeto.put("unidad", datos.getString(23)); 
+                    objeto.put("aprovado", datos.getInt(24));
+                    objeto.put("lic_transito", datos.getString(25));
+                    objeto.put("lic_transito_r", datos.getString(26));
+                    objeto.put("poliza_hc", datos.getString(27));
+                    objeto.put("compania_hc", datos.getString(28));
+                    objeto.put("exp_poliza_hc", datos.getString(29));
+                    objeto.put("vence_poliza_hc", datos.getString(30));
                     lista.add(objeto);                
                 }
                 
@@ -2000,6 +2066,86 @@ public class Listas {
         return lista;
     }
     
+    public static JSONArray listaVehiculosByGeneradora(String propietario, boolean aprov) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        JSONObject retorno= new JSONObject();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT plca_equipo, eq.id_tipocarga, tc.desc_tipocarga, eq.id_tipoequipo, "+
+                "te.desc_tipoequipo, eq.id_remolque, re.desc_remolque, " +
+                "marca_equipo, modelo_equipo, refer_equipo, plac_trailer_equipo, poliza_equipo, " +
+                "comp_poliza_equipo, fech_exp_poliz_equipo, fech_venc_poliz_equipo, soat_equipo, " +
+                "fech_exp_soat_equipo, fech_venc_soat_equipo,  tecno_equipo, fech_exp_tecno_equipo, " +
+                "fech_venc_tecno_equipo, cap_equipo, und_equipo, aprov_equipo, " +
+                "lic_trans_equipo, lic_trans_r_equipo, poliza_hc_equipo, comp_poliza_hc_equipo, exp_poliza_hc_equipo, vence_poliza_hc_equipo "+
+                "FROM tblEquipo AS eq INNER JOIN tblTipoCarga AS tc ON eq.id_tipocarga = tc.id_tipocarga " +
+                "INNER JOIN tblTipoEquipo AS te ON eq.id_tipoequipo = te.id_tipoequipo " +
+                "INNER JOIN tblRemolque AS re ON eq.id_remolque = re.id_remolque " +
+                "WHERE empresa_asig = ? ";        
+                
+                if(aprov){
+                    instruccion += " AND aprov_equipo = 0 ";
+                }
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, propietario);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("placa", datos.getString(1));
+                    objeto.put("n_tipocarga", datos.getInt(2)); 
+                    objeto.put("tipocarga", datos.getString(3));                    
+                    objeto.put("n_tipoequipo", datos.getInt(4));
+                    objeto.put("tipoequipo", datos.getString(5));
+                    objeto.put("n_remolque", datos.getInt(6)); 
+                    objeto.put("remolque", datos.getString(7));                    
+                    objeto.put("marca", datos.getString(8));
+                    objeto.put("modelo", datos.getString(9));
+                    objeto.put("referencia", datos.getString(10));
+                    objeto.put("trailer", datos.getString(11));
+                    objeto.put("poliza", datos.getString(12));
+                    objeto.put("compania", datos.getString(13));
+                    objeto.put("exp_poliza", datos.getString(14));
+                    objeto.put("vence_poliza", datos.getString(15));
+                    objeto.put("soat", datos.getString(16));
+                    objeto.put("exp_soat", datos.getString(17));
+                    objeto.put("vence_soat", datos.getString(18));
+                    objeto.put("tecno", datos.getString(19));
+                    objeto.put("exp_tecno", datos.getString(20));
+                    objeto.put("vence_tecno", datos.getString(21));
+                    objeto.put("capacidad", datos.getString(22));     
+                    objeto.put("unidad", datos.getString(23)); 
+                    objeto.put("aprovado", datos.getInt(24)); 
+                    objeto.put("lic_transito", datos.getString(25));
+                    objeto.put("lic_transito_r", datos.getString(26));
+                    objeto.put("poliza_hc", datos.getString(27));
+                    objeto.put("compania_hc", datos.getString(28));
+                    objeto.put("exp_poliza_hc", datos.getString(29));
+                    objeto.put("vence_poliza_hc", datos.getString(30));
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en listaVehiculosByPropietario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en listaVehiculosByPropietario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    
     public static JSONArray listaConductoresByPropietario(String propietario) throws SQLException{
         JSONArray lista=new JSONArray();        
         PreparedStatement st = null;
@@ -2010,7 +2156,7 @@ public class Listas {
                 conn=conexion();
                 String instruccion="SELECT cod_conductor, tipo_doc_conductor, doc_conductor, num_lic_conductor, fech_exp_lic_conductor, " +
                 "fech_venc_lic_conductor, nomb_conductor, apll_conductor, tel_conductor, " +
-                "dire_conductor, mail_conductor, img_conductor " +
+                "dire_conductor, mail_conductor, img_conductor, aprov_conductor " +
                 "FROM tblConductor WHERE nit_empresa = ?;";        
                 
                 st=conn.prepareStatement(instruccion);
@@ -2030,7 +2176,63 @@ public class Listas {
                     objeto.put("telefono", datos.getString(9));
                     objeto.put("direccion", datos.getString(10));
                     objeto.put("mail", datos.getString(11));
-                    objeto.put("imagen", datos.getString(12));             
+                    objeto.put("imagen", datos.getString(12));
+                    objeto.put("aprovado", datos.getInt(13));
+                    lista.add(objeto);                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en listaConductoresByPropietario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en listaConductoresByPropietario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static JSONArray listaConductoresByGeneradora(String propietario, boolean aprov) throws SQLException{
+        JSONArray lista=new JSONArray();        
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT cod_conductor, tipo_doc_conductor, doc_conductor, num_lic_conductor, fech_exp_lic_conductor, " +
+                "fech_venc_lic_conductor, nomb_conductor, apll_conductor, tel_conductor, " +
+                "dire_conductor, mail_conductor, img_conductor, aprov_conductor " +
+                "FROM tblConductor WHERE empresa_asig = ? ";        
+                
+                if(aprov){
+                    instruccion += " AND aprov_conductor = 0 ";
+                }
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, propietario);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    JSONObject objeto= new JSONObject();
+                    objeto.put("codigo", datos.getString(1));
+                    objeto.put("tipo_doc", datos.getString(2));                    
+                    objeto.put("doc", datos.getString(3));
+                    objeto.put("lic", datos.getString(4));                    
+                    objeto.put("exp_lic", datos.getString(5));
+                    objeto.put("venc_lic", datos.getString(6));
+                    objeto.put("nombre", datos.getString(7));
+                    objeto.put("apellido", datos.getString(8));
+                    objeto.put("n_completo", datos.getString(7) + " " + datos.getString(8));
+                    objeto.put("telefono", datos.getString(9));
+                    objeto.put("direccion", datos.getString(10));
+                    objeto.put("mail", datos.getString(11));
+                    objeto.put("imagen", datos.getString(12));   
+                    objeto.put("aprovado", datos.getInt(13));
                     lista.add(objeto);                
                 }
                 
@@ -2061,7 +2263,7 @@ public class Listas {
                 conn=conexion();
                 String instruccion="SELECT IFNULL(ec.id_equipoconductor, -1), eq.plca_equipo, ec.cod_conductor, ec.fech_equipoconductor, acti_equipoconductor, " +
                 "CASE WHEN se.activ_servicio = 1 OR sen.activ_servicioenturne = 1 THEN 1 ELSE 0 END AS en_servicio, ec.regs_imei_conductor, " +
-                "ec.pila_equipoconductor, ec.disp_equipoconductor " +
+                "ec.pila_equipoconductor, IFNULL(ec.disp_equipoconductor,0) " +
                 "FROM tblEquipo AS eq LEFT JOIN tblEquipoConductor AS ec ON eq.plca_equipo = ec.plca_equipo " +
                 "LEFT JOIN (SELECT id_servicio, id_equipoconductor, activ_servicio " +
                 "FROM tblServicio WHERE activ_servicio = 1) AS se ON se.id_equipoconductor = ec.id_equipoconductor " +
@@ -2345,7 +2547,7 @@ public class Listas {
                     if(datos.getString(93) != null){
                         fecha6.put("desc", "Fecha Ini. Cargue");
                         fecha6.put("fecha_cargue", formateador.format(formateador.parse(datos.getString(93))));
-                        objeto.put("fecha_fin_cargue", formateador.format(formateador.parse(datos.getString(93))));
+                        objeto.put("fecha_cargue", formateador.format(formateador.parse(datos.getString(93))));
                     }
                     if(datos.getString(94) != null){
                         fecha7.put("desc", "Fecha Fin Cargue");
@@ -2553,6 +2755,69 @@ public class Listas {
                     objeto.put("delta_5", calcular(datos.getInt(85)));
                     objeto.put("delta_6", calcular(datos.getInt(86)));
                     objeto.put("delta_7", calcular(datos.getInt(87)));
+                    JSONObject fecha1 = new JSONObject();
+                    JSONObject fecha2 = new JSONObject();
+                    JSONObject fecha3 = new JSONObject();
+                    JSONObject fecha4 = new JSONObject();
+                    JSONObject fecha5 = new JSONObject();
+                    JSONObject fecha6 = new JSONObject();
+                    JSONObject fecha7 = new JSONObject();
+                    JSONObject fecha8 = new JSONObject();
+                    JSONArray fechas = new JSONArray();
+                    if(datos.getString(88) != null){
+                        fecha1.put("desc", "Fecha Asignación");
+                        fecha1.put("fecha", formateador.format(formateador.parse(datos.getString(88))));
+                        objeto.put("fecha_asignacion", formateador.format(formateador.parse(datos.getString(88))));
+                    }
+                    if(datos.getString(89) != null){
+                        fecha2.put("desc", "Fecha Transito Origen");
+                        fecha2.put("fecha", formateador.format(formateador.parse(datos.getString(89))));
+                        objeto.put("fecha_trans_origen", formateador.format(formateador.parse(datos.getString(89))));
+                    }
+                    if(datos.getString(90) != null){
+                        fecha3.put("desc", "Fecha Ing. Geocerca");
+                        fecha3.put("fecha", formateador.format(formateador.parse(datos.getString(90))));
+                        objeto.put("fecha_geo", formateador.format(formateador.parse(datos.getString(90))));
+                    }
+                    if(datos.getString(91) != null){
+                        fecha4.put("desc", "Fecha Enturnado");
+                        fecha4.put("fecha", formateador.format(formateador.parse(datos.getString(91))));
+                        objeto.put("fecha_enturnado", formateador.format(formateador.parse(datos.getString(91))));
+                    }
+                    if(datos.getString(92) != null){
+                        fecha5.put("desc", "Fecha Avisado");
+                        fecha5.put("fecha", formateador.format(formateador.parse(datos.getString(92))));
+                        objeto.put("fecha_avisado", formateador.format(formateador.parse(datos.getString(92))));
+                    }
+                    if(datos.getString(93) != null){
+                        fecha6.put("desc", "Fecha Ini. Cargue");
+                        fecha6.put("fecha_cargue", formateador.format(formateador.parse(datos.getString(93))));
+                        objeto.put("fecha_cargue", formateador.format(formateador.parse(datos.getString(93))));
+                    }
+                    if(datos.getString(94) != null){
+                        fecha7.put("desc", "Fecha Fin Cargue");
+                        fecha7.put("fecha", formateador.format(formateador.parse(datos.getString(94))));
+                        objeto.put("fecha_fin_cargue", formateador.format(formateador.parse(datos.getString(94))));
+                    }
+                    if(datos.getString(95) != null){
+                        fecha7.put("desc", "Fecha Transito");
+                        fecha7.put("fecha", formateador.format(formateador.parse(datos.getString(95))));
+                        objeto.put("fecha_transito", formateador.format(formateador.parse(datos.getString(95))));
+                    }
+                    if(datos.getString(96) != null){
+                        fecha8.put("desc", "Fecha Finalización");
+                        fecha8.put("fecha", formateador.format(formateador.parse(datos.getString(96))));
+                        objeto.put("fecha_fin", formateador.format(formateador.parse(datos.getString(96))));
+                    }
+                    fechas.add(fecha1);
+                    fechas.add(fecha2);
+                    fechas.add(fecha3);
+                    fechas.add(fecha4);
+                    fechas.add(fecha5);
+                    fechas.add(fecha6);
+                    fechas.add(fecha7);
+                    fechas.add(fecha8);
+                    objeto.put("fechas", fechas);
                     lista.add(objeto);
                 }
                 

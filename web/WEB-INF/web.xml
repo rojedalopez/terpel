@@ -212,6 +212,22 @@
         <servlet-name>list_programadas</servlet-name>
         <servlet-class>servletsList.list_programadas</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>list_conductotes_aprov</servlet-name>
+        <servlet-class>servletsList.list_conductotes_aprov</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_equipos_aprov</servlet-name>
+        <servlet-class>servletsList.list_equipos_aprov</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>aprovEquipoConductor</servlet-name>
+        <servlet-class>servletsSave.aprovEquipoConductor</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>list_notificaciones</servlet-name>
+        <servlet-class>servletsList.list_notificaciones</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>saveServicio</servlet-name>
         <url-pattern>/saveServicio</url-pattern>
@@ -423,6 +439,22 @@
     <servlet-mapping>
         <servlet-name>list_programadas</servlet-name>
         <url-pattern>/list_programadas</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_conductotes_aprov</servlet-name>
+        <url-pattern>/list_conductotes_aprov</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_equipos_aprov</servlet-name>
+        <url-pattern>/list_equipos_aprov</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>aprovEquipoConductor</servlet-name>
+        <url-pattern>/aprovEquipoConductor</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>list_notificaciones</servlet-name>
+        <url-pattern>/list_notificaciones</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

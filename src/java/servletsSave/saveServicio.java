@@ -25,23 +25,21 @@ public class saveServicio extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, ParseException, ClassNotFoundException, SQLException {
         response.setContentType("text/html;charset=UTF-8");
-//        StringBuilder sb = new StringBuilder();
-//        
-//        try
-//        {
-//          BufferedReader reader = request.getReader();
-//          String line = null;
-//          while ((line = reader.readLine()) != null)
-//          {
-//            sb.append(line);
-//          }
-//        } catch (Exception e) {}
+        StringBuilder sb = new StringBuilder();
+        
+        try
+        {
+          BufferedReader reader = request.getReader();
+          String line = null;
+          while ((line = reader.readLine()) != null)
+          {
+            sb.append(line);
+          }
+        } catch (Exception e) {}
  
-        String texto = "{\"id\":\"\",\"carga\":4,\"dcarguemin\":\"2016-08-24 00:00:00\",\"dcarguemax\":\"2016-08-24 00:00:00\",\"ddescarguemin\":\"2016-08-24 00:00:00\",\"ddescarguemax\":\"2016-08-24 00:00:00\",\"equipos\":19,\"orden\":\"-\",\"kms\":\"1.404 km\",\"time\":\"22h 16 min\",\"nota_detalle\":\"\",\"flete\":\"510 x GAL\",\"vlr_flete\":\"\",\"enrutado\":false,\"inicio\":{\"zonas\":[{\"bahias\":[{\"id_zona\":14,\"id\":22,\"nota\":null,\"desc\":\"BAHIA 1\"}],\"id_punto\":\"1P22\",\"id\":14,\"desc\":\"ZONA 1\"},{\"bahias\":[{\"id_zona\":15,\"id\":23,\"nota\":null,\"desc\":\"BAHIA 1\"}],\"id_punto\":\"1P22\",\"id\":15,\"desc\":\"ZONA 2\"}],\"lng\":-74.8134,\"id\":\"1P22\",\"nota\":\"BARANOA\",\"lat\":11.0045,\"desc\":\"PLANTA BARANOA\"},\"fin\":{\"zonas\":[],\"lng\":-72.64,\"id\":\"1P38\",\"nota\":\"SAN JOSE DEL GUAVIARE\",\"lat\":2.58584,\"desc\":\"PLANTA SAN JOSE DEL GUAVIARE\"},\"kms_value\":1403777,\"time_value\":80185,\"unidad\":\"\",\"remolques\":[8,9],\"ccosto\":\"00004\",\"addressOrigin\":{\"lat\":11.0045,\"lng\":-74.8134},\"addressDestination\":{\"lat\":2.58584,\"lng\":-72.64}}";
         JSONParser parser = new JSONParser();
         JSONObject joSolicitud = null;
-        System.out.println(texto);
-        joSolicitud = (JSONObject) parser.parse(texto);
+        joSolicitud = (JSONObject) parser.parse(sb.toString());
         
         JSONObject origen = (JSONObject) joSolicitud.get("inicio");
         float lat_origen = Float.parseFloat(origen.get("lat").toString());

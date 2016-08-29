@@ -80,6 +80,13 @@ angular.module('myApp',[
                 console.error('Error guardando bahia ' +errResponse);
                 return $q.reject(errResponse);
             });
+	},SaveEquiposConductorAprov: function(equiposconductores){
+            return $http.post('../aprovEquipoConductor', equiposconductores).then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error guardando bahia ' +errResponse);
+                return $q.reject(errResponse);
+            });
 	},SaveTakeSolicitud: function(datos){
             return $http.post('../takeSolicitud', datos).then(function(response){
                 return response.data;
@@ -112,6 +119,15 @@ angular.module('myApp',[
 	},
         ListaEnturnesEstados: function(busqueda){
             return $http.post('../list_enturnes_estados', busqueda).then(function(response){
+                console.log(response);
+                return response.data;
+            },function(errResponse){
+		console.error('Error obteniendo lista de enturnes ' +errResponse);
+		return $q.reject(errResponse);
+            });
+	},
+        ListaNotificaciones: function(hora){
+            return $http.post('../list_notificaciones', hora).then(function(response){
                 console.log(response);
                 return response.data;
             },function(errResponse){
@@ -207,6 +223,20 @@ angular.module('myApp',[
                 console.error('Error while fetching expenses');
                 return $q.reject(errResponse);
             });
+	},listaEquiposAprov: function() {
+            return $http.post('../list_equipos_aprov').then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error while fetching expenses');
+                return $q.reject(errResponse);
+            });
+	},listaConductoresAprov: function() {
+            return $http.post('../list_conductotes_aprov').then(function(response){
+                return response.data;
+            },function(errResponse){
+                console.error('Error while fetching expenses');
+                return $q.reject(errResponse);
+            });
 	},listaFletes: function() {
             return $http.post('../list_fletes').then(function(response){
                 return response.data;
@@ -284,7 +314,7 @@ angular.module('myApp',[
         getConductores: function () {  
             //Get data from Local Storage  
             listaRetorno = angular.fromJson(sessionStorage.getItem("conductores"));  
-            return puntosList ? puntosList : [];  
+            return listaRetorno ? listaRetorno : [];  
         },
         iniciarConductores: function (array) {
             if (window.sessionStorage) {

@@ -121,6 +121,80 @@ public class Listas {
         return lista;
     }
     
+    public static List<String> listaConductores(String empresa, int tipo) throws SQLException{
+        List<String> lista=new ArrayList<>();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="";        
+                if(tipo==1){
+                    instruccion="select cod_conductor from tblConductor where enviado = 0;";        
+                }else{
+                    instruccion="select cod_conductor from tblConductor where enviado_aprov = 0;";        
+                }
+                                
+                st=conn.prepareStatement(instruccion);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    lista.add(datos.getString(1));                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
+    public static List<String> listaEquiposs(String empresa, int tipo) throws SQLException{
+        List<String> lista=new ArrayList<>();
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="";        
+                if(tipo==1){
+                    instruccion="select plca_equipo from tblEquipo where enviado = 0;";        
+                }else{
+                    instruccion="select plca_equipo from tblEquipo where enviado_aprov = 0;";        
+                }
+                
+                st=conn.prepareStatement(instruccion);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    lista.add(datos.getString(1));                
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return lista;
+    }
+    
     public static List<String> listaMailsDespachadoresEmpresa(String empresa) throws SQLException{
         List<String> lista=new ArrayList<>();
         PreparedStatement st = null;

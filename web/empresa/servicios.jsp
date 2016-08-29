@@ -381,7 +381,7 @@ if(session.getAttribute("user") != null){
                 </div>
                 <div class="row" style="margin-top: 15px;">
                     <div class="col-lg-12" >
-                        <table datatable="ng" dt-options="ctrl.dtOptions" class="table table-striped table-bordered dt-responsive compact" cellspacing="0" width="100%" dt-options="ctrl.dtOptions">
+                        <table datatable="ng" class="table table-striped table-bordered dt-responsive compact" cellspacing="0" width="100%" dt-options="ctrl.dtOptions">
                             <thead>
                                 <tr>
                                     <td>Solicitud</td>
@@ -392,6 +392,7 @@ if(session.getAttribute("user") != null){
                                     <td>Placa R.</td>
                                     <td>Conductor</td>
                                     <td>Telefono</td>
+                                    <td></td>
                                     <td></td>
                                 </tr>
                             </thead>
@@ -405,7 +406,7 @@ if(session.getAttribute("user") != null){
                                     <td><span ng-bind="servicio.placa_rem"></span></td>
                                     <td><span ng-bind="servicio.nombre_completo"></span></td>
                                     <td><span ng-bind="servicio.telefono"></span></td>
-                                    <td><span style="cursor: pointer;" ng-click="ctrl.showDetail(servicio)"><i class="fa-globe fa fa-2x fa-align-center"></i></span></td>
+                                    <td><span style="cursor: pointer;" ng-click="ctrl.showDetalles(servicio)"><i class="fa-globe fa fa-2x fa-align-center"></i></span></td>
                                     <td><span style="cursor: pointer;" ng-click="ctrl.abrirModalInfo(servicio)"><i class="fa-info-circle fa fa-2x fa-align-center"></i></span></td>
                                 </tr>
                             </tbody>

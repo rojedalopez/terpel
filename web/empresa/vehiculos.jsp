@@ -8,8 +8,8 @@ response.setHeader("Cache", "no-cache");
 if(session.getAttribute("user") != null){
     Usuario u = (Usuario)session.getAttribute("user");
     if(u.getRol()==2||u.getRol()==3){
-        if(u.getTipo()==1){
-            response.sendRedirect("/empresa/servicios.jsp");
+        if(u.getTipo()==2){
+            response.sendRedirect("/transporter/servicios.jsp");
         }
 
     }
@@ -110,7 +110,7 @@ else{
 
 <body ng-app="myApp" class="ng-cloak" >
     
-    <div style="height: 600px;" ng-controller="ConfEquiposController as ctrl">
+    <div style="height: 600px;" ng-controller="ConfEquiposGeneradoraController as ctrl">
 
         <!-- Navigation -->
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -129,11 +129,8 @@ else{
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${sessionScope.usr} <b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                        <li>
+                       <li>
                             <a href="spot.jsp"><i class="fa fa-fw fa-truck"></i> Generar Spot</a>
-                        </li>
-                        <li>
-                            <a href="programada.jsp"><i class="fa fa-fw fa-truck"></i> Calendario cont.</a>
                         </li>
                         <li>
                             <a href="solicitudes.jsp"><i class="fa fa-fw fa-truck"></i> Solicitudes Activas</a>
@@ -149,6 +146,9 @@ else{
                         </li>
                         <li>
                             <a href="puntos.jsp"><i class="fa fa-fw fa-map-marker"></i> Puntos</a>
+                        </li>
+                        <li>
+                            <a href="programada.jsp"><i class="fa fa-fw fa-map-marker"></i> Programada Cont.</a>
                         </li>
                         <li class="divider"></li>
                         <li>
@@ -179,54 +179,16 @@ else{
                     <div class="col-lg-12">
                         <div class="panel panel-default tabs">
                             <ul class="nav nav-tabs nav-justified">
-                                <li><a href="../#tab1" data-toggle="tab">Vehiculos y conductores asociados</a></li>
-                                <li class="active"><a href="../#tab2" data-toggle="tab" >Vehiculos</a></li>
-                                <li><a href="../#tab3" data-toggle="tab" >Conductores</a></li>
+                                <li class="active"><a href="../#tab1" data-toggle="tab">Vehiculos en espera de aceptacion</a></li>
+                                <li><a href="../#tab2" data-toggle="tab" >Conductores en espera de aceptacion</a></li>
+                                <li><a href="../#tab3" data-toggle="tab" >Todos los Vehiculos</a></li>
+                                <li><a href="../#tab4" data-toggle="tab" >Todos los Conductores</a></li>
                             </ul>
                             <div class="panel-body tab-content">
-                                <div class="tab-pane" id="tab1">
+                                <div class="tab-pane  active" id="tab1">
                                     <div class="panel panel-default">
                                         <div class="panel-body">                                                                        
                                             <div class="row">
-                                                <table class="table table-striped nowrap table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptionsRegs" id="dataTables-regs">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Placa</th>
-                                                            <th>Conductor</th>
-                                                            <th>Fecha asignacion</th>
-                                                            <th><button ng-click="ctrl.enviarChanges()" ng-disabled="ctrl.changes.length<1">Cambios</button></th>
-                                                            <th><button ng-click="ctrl.enviarDisponibles()" ng-disabled="ctrl.dispos.length<1">Disponibles</button></th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr ng-repeat="equipoconductor in ctrl.equiposconductores">
-                                                            <td>
-                                                                <span ng-bind="equipoconductor.placa"></span>
-                                                            </td>
-                                                            <td>
-                                                                <select ng-disabled="equipoconductor.en_servicio === '1'" class="form-control" 
-                                                                        ng-options="conductor.codigo as conductor.n_completo for conductor in ctrl.conductores" 
-                                                                        ng-model="equipoconductor.conductor" ng-change="ctrl.cambiarConductor(equipoconductor)">
-                                                                    <option value="">Seleccione conductor</option>
-                                                                </select>
-                                                            </td>
-                                                            <td>
-                                                                <span ng-bind="equipoconductor.fecha_desde"></span>
-                                                            </td>
-                                                            <td><input type="checkbox" ng-disabled="equipoconductor.en_servicio === '1'" ng-model="equipoconductor.editar" ng-change="ctrl.addChanges(equipoconductor)"/></td>
-                                                            <td><input type="checkbox" ng-disabled="equipoconductor.en_servicio === '1'" ng-model="equipoconductor.disponible" ng-change="ctrl.addDisponibles(equipoconductor)"/></td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane active" id="tab2">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body">                                                                        
-                                            <div class="row">
-                                                <a ng-click="ctrl.nuevoVehiculo()">Nuevo vehiculo...</a>
                                                 <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptionsAsign" id="dataTables-asign">
                                                     <thead>
                                                         <tr>
@@ -236,6 +198,73 @@ else{
                                                             <th>Referencia</th>
                                                             <th>T. Trailer</th>
                                                             <th>Trailer</th>
+                                                            <th></th>
+                                                            <th><button ng-click="ctrl.enviarEquipos()">Aprovar</button></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="equipo in ctrl.equipos_aprov">
+                                                            <td>{{equipo.placa}}</td>
+                                                            <td>{{equipo.marca}}</td>
+                                                            <td>{{equipo.modelo}}</td>
+                                                            <td>{{equipo.referencia}}</td>
+                                                            <td>{{equipo.remolque}}</td>
+                                                            <td>{{equipo.trailer}}</td>
+                                                            <td><button class="btn btn-xs btn-info" ng-click="ctrl.verVehiculo(equipo)">Detalles</button></td>
+                                                            <td><input type="checkbox" ng-model="equipo.aprovado"  ng-change="ctrl.aprovarEquipo(equipo)" /></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="tab2">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">                                                                        
+                                            <div class="row">
+                                                <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptionsTerm" id="dataTables-term">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Doc.</th>
+                                                            <th>Nombre</th>
+                                                            <th>Apellido</th>
+                                                            <th>Telefono</th>
+                                                            <th>Dirección</th>
+                                                            <th></th>
+                                                            <th><button ng-click="ctrl.enviarConductores()">Aprovar</button></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="conductor in ctrl.conductores_aprov">
+                                                            <td>{{conductor.doc}}</td>
+                                                            <td>{{conductor.nombre}}</td>
+                                                            <td>{{conductor.apellido}}</td>
+                                                            <td>{{conductor.telefono}}</td>
+                                                            <td>{{conductor.direccion}}</td>
+                                                            <td><button class="btn btn-xs btn-info" ng-click="ctrl.verConductor(conductor)">Detalles</button></td>
+                                                            <td><input type="checkbox" ng-model="conductor.aprovado" ng-change="ctrl.aprovarConductor(conductor)" /></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>     
+                                <div class="tab-pane" id="tab3">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">                                                                        
+                                            <div class="row">
+                                                <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptionsAsign" id="dataTables-asign">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Placa</th>
+                                                            <th>Marca</th>
+                                                            <th>Modelo</th>
+                                                            <th>Referencia</th>
+                                                            <th>T. Trailer</th>
+                                                            <th>Trailer</th>
+                                                            <th>Estado</th>
                                                             <th></th>
                                                         </tr>
                                                     </thead>
@@ -247,6 +276,7 @@ else{
                                                             <td>{{equipo.referencia}}</td>
                                                             <td>{{equipo.remolque}}</td>
                                                             <td>{{equipo.trailer}}</td>
+                                                            <td>{{(equipo.aprovado===1)?'Aprovado':'En espera'}}</td>
                                                             <td><button class="btn btn-xs btn-info" ng-click="ctrl.verVehiculo(equipo)">Detalles</button></td>
                                                         </tr>
                                                     </tbody>
@@ -255,11 +285,10 @@ else{
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane" id="tab3">
+                                <div class="tab-pane" id="tab4">
                                     <div class="panel panel-default">
                                         <div class="panel-body">                                                                        
                                             <div class="row">
-                                                <a ng-click="ctrl.nuevoConductor()">Nuevo conductor...</a>
                                                 <table class="table table-striped table-bordered dt-responsive compact table-hover" width="100%" cellspacing="0" datatable="ng" dt-options="ctrl.dtOptionsTerm" id="dataTables-term">
                                                     <thead>
                                                         <tr>
@@ -268,6 +297,7 @@ else{
                                                             <th>Apellido</th>
                                                             <th>Telefono</th>
                                                             <th>Dirección</th>
+                                                            <th>Estado</th>
                                                             <th></th>
                                                         </tr>
                                                     </thead>
@@ -278,6 +308,7 @@ else{
                                                             <td>{{conductor.apellido}}</td>
                                                             <td>{{conductor.telefono}}</td>
                                                             <td>{{conductor.direccion}}</td>
+                                                            <td>{{(conductor.aprovado===1)?'Aprovado':'En espera'}}</td>
                                                             <td><button class="btn btn-xs btn-info" ng-click="ctrl.verConductor(conductor)">Detalles</button></td>
                                                         </tr>
                                                     </tbody>
@@ -571,7 +602,6 @@ else{
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" ng-click="ctrl.enviarVehiculo()">Save changes</button>
               </div>
             </div>
           </div>
@@ -691,14 +721,6 @@ else{
                                                 </div>
                                             </div>
                                             
-                                            <div class="form-group">                                        
-                                                <label class="col-md-3 control-label">Asignar Contraseña</label>
-                                                <div class="col-md-9 col-xs-12">
-                                                    <div class="input-group">
-                                                        <input type="password" class="form-control" ng-model="ctrl.conductor.contrasena"/>
-                                                    </div>            
-                                                </div>
-                                            </div>
                                         </div>
                                         
                                     </div>
@@ -711,7 +733,6 @@ else{
               </div>
               <div class="modal-footer">
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" ng-click="ctrl.sendConductor()">Enviar cambios</button>
               </div>
             </div>
           </div>

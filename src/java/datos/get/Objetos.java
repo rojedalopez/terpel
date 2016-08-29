@@ -64,7 +64,7 @@ public class Objetos {
             try{
                 conn=conexion();
                 String instruccion="SELECT  id_solicitud, fech_carg_solicitud, fech_max_carg_solicitud, fech_desc_solicitud, fech_max_desc_solicitud, \n" +
-                "p_i.desc_punto, p_f.desc_punto, cant_eqpos_solicitud, desc_tipocargue, desc_tari_solicitud, not_det_solicitud, kms_esti_solicitud, em.razn_soci_empresa, url_img_empresa \n" +
+                "p_i.desc_punto, p_f.desc_punto, cant_eqpos_solicitud, desc_tipocargue, IFNULL(desc_tari_solicitud,'-'), IFNULL(not_det_solicitud,'-'), kms_esti_solicitud, em.razn_soci_empresa, url_img_empresa \n" +
                 "FROM tblSolicitud AS s \n" +
                 "INNER JOIN tblPunto AS p_i ON p_i.id_punto = s.id_punto_inicio\n" +
                 "INNER JOIN tblPunto AS p_f ON p_f.id_punto = s.id_punto_fin\n" +
@@ -108,6 +108,124 @@ public class Objetos {
         return retorno;
     }
     
+    public static Servicio DatosVehiculo(String id) throws SQLException{
+        Servicio retorno= new Servicio();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT plca_equipo, eq.id_tipocarga, tc.desc_tipocarga, eq.id_tipoequipo, "+
+                "te.desc_tipoequipo, eq.id_remolque, re.desc_remolque, " +
+                "marca_equipo, modelo_equipo, refer_equipo, plac_trailer_equipo, poliza_equipo, " +
+                "comp_poliza_equipo, fech_exp_poliz_equipo, fech_venc_poliz_equipo, poliza_hc_equipo, exp_poliza_hc_equipo, vence_poliza_hc_equipo, comp_poliza_hc_equipo, soat_equipo, " +
+                "fech_exp_soat_equipo, fech_venc_soat_equipo,  tecno_equipo, fech_exp_tecno_equipo, " +
+                "fech_venc_tecno_equipo, cap_equipo, und_equipo, " +
+                "lic_trans_equipo, lic_trans_r_equipo, razn_soci_empresa, url_img_empresa, eq.nit_empresa "+
+                "FROM tblEquipo AS eq INNER JOIN tblTipoCarga AS tc ON eq.id_tipocarga = tc.id_tipocarga " +
+                "INNER JOIN tblTipoEquipo AS te ON eq.id_tipoequipo = te.id_tipoequipo " +
+                "INNER JOIN tblRemolque AS re ON eq.id_remolque = re.id_remolque " +
+                "JOIN tblEmpresa AS em ON em.nit_empresa = eq.nit_empresa "+
+                "WHERE plca_equipo = ? ";        
+                
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, id);
+                datos=(ResultSet) st.executeQuery();
+                while (datos.next()) {
+                    retorno.setPlaca(datos.getString(1));
+                    retorno.setTipo_carga(datos.getString(3));
+                    retorno.setTipo_equipo( datos.getString(5));
+                    retorno.setTipo_remolque(datos.getString(7));
+                    retorno.setMarca(datos.getString(8));
+                    retorno.setModelo(datos.getString(9));
+                    retorno.setReferencia(datos.getString(10));
+                    retorno.setPlaca_rem(datos.getString(11));
+                    retorno.setPoliza(datos.getString(12));
+                    retorno.setComp(datos.getString(13));
+                    retorno.setExp_poliza(datos.getString(14));
+                    retorno.setVence_poliza(datos.getString(15));
+                    retorno.setPoliza_hc(datos.getString(16));
+                    retorno.setComp_hc(datos.getString(17));
+                    retorno.setExp_poliza_hc(datos.getString(18));
+                    retorno.setVence_poliza_hc(datos.getString(19));
+                    retorno.setSoat(datos.getString(20));
+                    retorno.setExp_soat(datos.getString(21));
+                    retorno.setVence_soat(datos.getString(22));
+                    retorno.setTecno(datos.getString(23));
+                    retorno.setExp_tecno(datos.getString(24));
+                    retorno.setVence_tecno(datos.getString(25));
+                    retorno.setCapacidad(datos.getInt(26));
+                    retorno.setLic_transito(datos.getString(27));
+                    retorno.setLic_transito_r(datos.getString(28));
+                    retorno.setTransportadora(datos.getString(29));
+                    retorno.setUrl_transportadora(datos.getString(30));
+                    retorno.setNit_transportadora(datos.getString(31));
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return retorno;
+    }
+    
+    public static Servicio DatosConductor(String id) throws SQLException{
+        Servicio retorno= new Servicio();       
+        PreparedStatement st = null;
+        Connection conn=null;
+        ResultSet datos=null;
+        
+            try{
+                conn=conexion();
+                String instruccion="SELECT cod_conductor, tipo_doc_conductor, doc_conductor, num_lic_conductor, fech_exp_lic_conductor, " +
+                "fech_venc_lic_conductor, nomb_conductor, apll_conductor, tel_conductor, " +
+                "dire_conductor, mail_conductor, img_conductor, razn_soci_empresa, url_img_empresa, co.nit_empresa " +
+                "FROM tblConductor AS co JOIN tblEmpresa AS em ON em.nit_empresa = co.nit_empresa WHERE cod_conductor = ? ";        
+
+                st=conn.prepareStatement(instruccion);
+                st.setString(1, id);
+                datos=(ResultSet) st.executeQuery();
+                if (datos.next()) {
+                    retorno.setDoc(datos.getString(2));
+                    retorno.setLicencia(datos.getString(4));                    
+                    retorno.setExp_lic(datos.getString(5));
+                    retorno.setVence_lic(datos.getString(6));
+                    retorno.setNombre(datos.getString(7));
+                    retorno.setApellido(datos.getString(8));
+                    retorno.setNombre_completo(datos.getString(7) + " " + datos.getString(8));
+                    retorno.setTelefono(datos.getString(9));
+                    retorno.setDireccion(datos.getString(10));
+                    retorno.setUrl_conductor(datos.getString(12));
+                    retorno.setTransportadora(datos.getString(13));
+                    retorno.setUrl_transportadora(datos.getString(14));
+                    retorno.setNit_transportadora(datos.getString(15));
+                }
+                
+            }catch (SQLException e) {
+            System.out.println("error SQLException en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }catch (Exception e){
+                    System.out.println("error Exception en ObtenerUsuario");
+                    System.out.println(e.getMessage());
+            }finally{
+                if(conn!=null){
+                    if(!conn.isClosed()){
+                        conn.close();
+                    }
+                }
+            }
+        return retorno;
+    }
     
     public static Servicio DatosServicio(String id) throws SQLException{
         Servicio retorno= new Servicio();       

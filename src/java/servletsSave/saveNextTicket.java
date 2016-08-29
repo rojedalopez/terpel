@@ -43,6 +43,7 @@ public class saveNextTicket extends HttpServlet {
                     }else{
                         json.put("retorno", x);
                         json.put("mensaje", "OK");
+                        json.put("sonar", 1);
                     }
                     out.print(json.toJSONString());
             }

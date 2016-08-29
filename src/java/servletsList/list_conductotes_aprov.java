@@ -1,4 +1,3 @@
-
 package servletsList;
 
 import bean.Usuario;
@@ -13,8 +12,7 @@ import javax.servlet.http.HttpSession;
 import org.json.simple.JSONArray;
 
 
-public class list_conductores extends HttpServlet {
-
+public class list_conductotes_aprov extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -29,7 +27,7 @@ public class list_conductores extends HttpServlet {
                 Usuario u = (Usuario)session.getAttribute("user"); 
                 JSONArray objeto = new JSONArray();
                 if(u.getTipo()==1){
-                    objeto = Listas.listaConductoresByGeneradora(u.getNit(),false);
+                    objeto = Listas.listaConductoresByGeneradora(u.getNit(), true);
                 }else{
                     objeto = Listas.listaConductoresByPropietario(u.getNit());
                 }

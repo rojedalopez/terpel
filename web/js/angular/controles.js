@@ -1,30 +1,4 @@
 'use strict';
-/*
- * 
- * @param {type} param1
- * @param {type} param2
- * function notificacion(equipo,contrato,placa) {
-    if (Notification) {
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission()
-        }
-        var title = "Mensaje de alerta"
-        var extra = {
-            icon: "http://www.infocarga.net/images/boxes.png",
-            body: "El dispositivo " + equipo + ", placa " + placa + " ha reportado apertura."
-        }
-        var noti = new Notification(title, extra)
-        noti.onclick = function () {
-            openPopup("popuptrafico.aspx?id=" + contrato, "", 750, 520);
-            openPopup("popupreport.aspx?id=" + contrato, "", 1080,550);
-        }
-        noti.onclose = {
-            // Al cerrar
-        }
-        setTimeout(function () { noti.close() }, 10000)
-    }
-}
- */
 angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$http', '$interval', '$templateCache', '$timeout', '$alert', 'ServiceTables', 'storageService',  
     function(NgMap, $http, $interval, $templateCache, $timeout, $alert, ServiceTables, storageService) {
             var vm = this;
@@ -50,9 +24,11 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.fletes = [];
             vm.cargues = [];
             vm.ccostos = [];
+            vm.fechaAct = {fecha:""};
             vm.alerta = {title: 'Solicitud Enviada', container:'#alerta-submit', duration:5, animation:'am-fade-and-slide-top', show: false};
             vm.date = new Date();
             var stopTime;
+            var stopTimeN;
             
             vm.selectInicio = function(){
                 vm.servicio.addressOrigin = {lat:vm.servicio.inicio.lat, lng:vm.servicio.inicio.lng};
@@ -98,6 +74,52 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                }
             };
             
+            vm.notificacionText = function(mensaje) {
+                if (Notification) {
+                    if (Notification.permission !== "granted") {
+                        Notification.requestPermission()
+                    }
+                    var title = "Notificacion de servicio";
+                    var extra = {
+                        body: mensaje
+                    };
+                    var noti = new Notification(title, extra)
+                    noti.onclick = function () {
+                        window.location = 'notificaciones.jsp';
+                        noti.close()
+                    };
+                    noti.onclose = {
+                        // Al cerrar
+                    };
+                    setTimeout(function () { noti.close(); }, 7000);
+                }
+            };
+            
+            vm.listaNotifiaciones = function(){
+                var fecha_ = storageService.getNotificaciones().fecha;
+                var entro = false;
+                vm.fechaAct.fecha = fecha_;
+                ServiceTables.ListaNotificaciones(vm.fechaAct).then(function(d) {
+                    if(fecha_){
+                        entro = true;
+                    }
+                    vm.fechaAct.fecha = (new Date).toString('yyyy-MM-dd HH:mm:ss');
+                    if(entro){
+                        storageService.updateNotificaciones(vm.fechaAct);
+                    }else{
+                        storageService.iniciarNotificaciones(vm.fechaAct);
+                    }
+                    
+                    if(d.length == 1){
+                        vm.notificacionText(d[0].nota);
+                    }else if(d.length > 1){
+                        vm.notificacionText("Tiene "+d.length+" nuevas notificaciones");
+                    }
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });
+            };
+           
            
             vm.listaCargues = function(){
                 vm.cargues = [];
@@ -134,7 +156,7 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 vm.ReloadVehiculos();
             };
             
-            vm.notificacion = function(vehiculo) {
+            vm.notificacionVehiculo = function(vehiculo) {
                 var enviar = true;
                 vm.notificaciones = storageService.getNotificaciones();
                 if(vm.notificaciones.length === 0 ){
@@ -156,7 +178,7 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                     }
                     var title = "Mensaje de alerta"
                     var extra = {
-                        body: "Se ha asignado la placa "+ vehiculo.placa + " a la solicitud"
+                        body: "Se ha asignado la placa "+ vehiculo.placa + " a la solicitud No. "+ vehiculo.solicitud
                     };
                     var noti = new Notification(title, extra)
                     noti.onclick = function () {
@@ -165,9 +187,11 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                     noti.onclose = {
                         // Al cerrar
                     };
+                    setTimeout(function () { noti.close() }, 10000);
                 }
             };
 
+            
             vm.showDetail = function(e, vehiculo) {
                 console.log(vehiculo);
                 vm.vehiculo = vehiculo;
@@ -211,25 +235,7 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 });
             };
             
-            function notificacion(mensaje) {
-                if (Notification) {
-                    if (Notification.permission !== "granted") {
-                        Notification.requestPermission()
-                    }
-                    var title = "Notificacion de servicio";
-                    var extra = {
-                        body: mensaje
-                    };
-                    var noti = new Notification(title, extra)
-                    noti.onclick = function () {
-                        
-                    };
-                    noti.onclose = {
-                        // Al cerrar
-                    };
-                    setTimeout(function () { noti.close() }, 10000);
-                }
-            }
+            
 
             vm.SendCCosto = function(){
                 ServiceTables.saveCCostos(vm.ccosto).then(function(d) {
@@ -303,8 +309,9 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.listaAllPuntos();
             vm.listaCargues();
             vm.ReloadVehiculos();
+            vm.listaNotifiaciones();
             stopTime = $interval(vm.ReloadVehiculos, 30000);
-
+            stopTimeN = $interval(vm.listaNotifiaciones, 60000);
             vm.TipoCarga = [
                 {"ID":2,"Value":"Liquida"},
                 {"ID":5,"Value":"Refrigerada"},
@@ -354,6 +361,7 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.shape = {center:[], radius:50000};
             vm.puntos = [];
             vm.ccostos = [];
+            vm.fechaAct = {fecha:""};
             vm.cargues = [];
             vm.alerta = {title: 'Solicitud Enviada', container:'#alerta-submit', duration:5, animation:'am-fade-and-slide-top', show: false};
             vm.date = new Date();
@@ -364,9 +372,56 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.mes_num;
             vm.anio_num;
             vm.actual = true;
+            var stopTimeN;
+            
             NgMap.getMap().then(function(map) {
                 vm.map = map;
             });
+            
+            vm.notificacionText = function(mensaje) {
+                if (Notification) {
+                    if (Notification.permission !== "granted") {
+                        Notification.requestPermission()
+                    }
+                    var title = "Notificacion de servicio";
+                    var extra = {
+                        body: mensaje
+                    };
+                    var noti = new Notification(title, extra)
+                    noti.onclick = function () {
+                        window.location = 'notificaciones.jsp';
+                    };
+                    noti.onclose = {
+                        // Al cerrar
+                    };
+                    setTimeout(function () { noti.close() }, 10000);
+                }
+            };
+            
+            vm.listaNotifiaciones = function(){
+                var fecha_ = storageService.getNotificaciones().fecha;
+                var entro = false;
+                vm.fechaAct.fecha = fecha_;
+                ServiceTables.ListaNotificaciones(vm.fechaAct).then(function(d) {
+                    if(fecha_){
+                        entro = true;
+                    }
+                    vm.fechaAct.fecha = (new Date).toString('yyyy-MM-dd HH:mm:ss');
+                    if(entro){
+                        storageService.updateNotificaciones(vm.fechaAct);
+                    }else{
+                        storageService.iniciarNotificaciones(vm.fechaAct);
+                    }
+                    
+                    if(d.length == 1){
+                        vm.notificacionText(d[0].nota);
+                    }else if(d.length > 1){
+                        vm.notificacionText("Tiene "+d.length+" nuevas notificaciones");
+                    }
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });
+            };
             
             vm.SendCCosto = function(){
                 ServiceTables.saveCCostos(vm.ccosto).then(function(d) {
@@ -514,7 +569,11 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                                                 vm.calendario[i].spots.splice(j, 1);
                                                 break;
                                             }
-                                        }                                        
+                                        }
+                                        vm.nuevaSol.id = d.id;
+                                        vm.nuevaSol.desc_inicio = vm.nuevaSol.inicio.desc;
+                                        vm.nuevaSol.desc_fin = vm.nuevaSol.fin.desc;
+                                        vm.nuevaSol.desc_tipocargue = vm.nuevaSol.cargue.desc;
                                     }
                                     vm.calendario[i].spots.push(vm.nuevaSol);
                                     AgregarSolicitud.modal("hide");
@@ -537,6 +596,8 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.listaCargues();
             vm.listaCCosto();
             vm.listaProgramadas();
+            vm.listaNotifiaciones();
+            stopTimeN = $interval(vm.listaNotifiaciones, 60000);
             
             vm.TipoCarga = [
                 {"ID":2,"Value":"Liquida"},
@@ -583,15 +644,68 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.puntos = [];
             vm.cargues = [];
             vm.servicio;
+            vm.fechaAct = {fecha:""};
             vm.mapa = {q:"", conductor:"", estado:"", inicio:"", fin:"", carga:"", desde:"", hasta:""};
             vm.options = {format: "YYYY/MM/DD", allowInputToggle:true, showClose:true};
             var stopTime;
+            var stopTimeN;
             
             NgMap.getMap().then(function(map) {
                 vm.map = map;
             });
      
+            vm.notificacionText = function(mensaje) {
+                if (Notification) {
+                    if (Notification.permission !== "granted") {
+                        Notification.requestPermission()
+                    }
+                    var title = "Notificacion de servicio";
+                    var extra = {
+                        body: mensaje
+                    };
+                    var noti = new Notification(title, extra)
+                    noti.onclick = function () {
+                        window.location = 'notificaciones.jsp';
+                    };
+                    noti.onclose = {
+                        // Al cerrar
+                    };
+                    setTimeout(function () { noti.close() }, 10000);
+                }
+            };
+            
+            vm.listaNotifiaciones = function(){
+                var fecha_ = storageService.getNotificaciones().fecha;
+                var entro = false;
+                vm.fechaAct.fecha = fecha_;
+                ServiceTables.ListaNotificaciones(vm.fechaAct).then(function(d) {
+                    if(fecha_){
+                        entro = true;
+                    }
+                    vm.fechaAct.fecha = (new Date).toString('yyyy-MM-dd HH:mm:ss');
+                    if(entro){
+                        storageService.updateNotificaciones(vm.fechaAct);
+                    }else{
+                        storageService.iniciarNotificaciones(vm.fechaAct);
+                    }
+                    
+                    if(d.length == 1){
+                        vm.notificacionText(d[0].nota);
+                    }else if(d.length > 1){
+                        vm.notificacionText("Tiene "+d.length+" nuevas notificaciones");
+                    }
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });
+            };
+            
+            
             vm.showDetail = function(e, servicio) {
+                vm.servicio = servicio;
+                vm.map.showInfoWindow('foo-iw', servicio.servicio);
+            };
+            
+            vm.showDetalles = function(servicio) {
                 vm.servicio = servicio;
                 vm.map.showInfoWindow('foo-iw', servicio.servicio);
             };
@@ -655,8 +769,10 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.listaAllPuntos();
             vm.listaCargues();
             vm.listaServicios();
+            vm.listaNotifiaciones();
             stopTime = $interval(vm.listaServicios, 30000);
-
+            stopTimeN = $interval(vm.listaNotifiaciones, 60000);
+            
             vm.dtOptions = {
                 stateSave: true,
                 paging:false,
@@ -695,15 +811,62 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.servicios = [];
             vm.puntos = [];
             vm.cargues = [];
+            vm.fechaAct = {fecha:""};
             vm.servicio;
             vm.mapa = {q:"", conductor:"", estado:"11", inicio:"", fin:"", carga:"", desde:"", hasta:""};
             vm.options = {format: "YYYY/MM/DD", allowInputToggle:true, showClose:true};
             var stopTime;
+            var stopTimeN;
             
             NgMap.getMap().then(function(map) {
                 vm.map = map;
             });
      
+            vm.notificacionText = function(mensaje) {
+                if (Notification) {
+                    if (Notification.permission !== "granted") {
+                        Notification.requestPermission()
+                    }
+                    var title = "Notificacion de servicio";
+                    var extra = {
+                        body: mensaje
+                    };
+                    var noti = new Notification(title, extra)
+                    noti.onclick = function () {
+                        window.location = 'notificaciones.jsp';
+                    };
+                    noti.onclose = {
+                        // Al cerrar
+                    };
+                    setTimeout(function () { noti.close() }, 10000);
+                }
+            };
+            
+            vm.listaNotifiaciones = function(){
+                var fecha_ = storageService.getNotificaciones().fecha;
+                var entro = false;
+                vm.fechaAct.fecha = fecha_;
+                ServiceTables.ListaNotificaciones(vm.fechaAct).then(function(d) {
+                    if(fecha_){
+                        entro = true;
+                    }
+                    vm.fechaAct.fecha = (new Date).toString('yyyy-MM-dd HH:mm:ss');
+                    if(entro){
+                        storageService.updateNotificaciones(vm.fechaAct);
+                    }else{
+                        storageService.iniciarNotificaciones(vm.fechaAct);
+                    }
+                    
+                    if(d.length == 1){
+                        vm.notificacionText(d[0].nota);
+                    }else if(d.length > 1){
+                        vm.notificacionText("Tiene "+d.length+" nuevas notificaciones");
+                    }
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });
+            };
+            
             vm.showDetail = function(e, servicio) {
                 vm.servicio = servicio;
                 vm.map.showInfoWindow('foo-iw', servicio.servicio);
@@ -827,7 +990,9 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.listaAllPuntos();
             vm.listaCargues();
             vm.listaServicios();
-
+            vm.listaNotifiaciones();
+            stopTimeN = $interval(vm.listaNotifiaciones, 60000);
+            
             vm.dtOptions = {
                 stateSave: true,
                 paging:false,
@@ -843,7 +1008,8 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 }
             };
 
-}]).controller('SolicitudesActivasController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', 'ServiceTables', 'storageService',  function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storageService) {
+}]).controller('SolicitudesActivasController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', 'ServiceTables', 'storageService', '$interval', 
+function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storageService, $interval) {
     var vm = this;
     vm.options = {format:"YYYY/MM/DD", allowInputToggle:true};
     vm.dcargue=null;
@@ -852,6 +1018,7 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
     vm.servicios = [];
     vm.foto={id:"", url:"", desc:"", fecha:"", tipo_foto:""};
     vm.fotos=[];
+    vm.fechaAct = {fecha:""};
     vm.cargues = [];
     vm.servicio={origen:"", destino:"", carge:"", descarge:"", id:"-1", nestado:"" ,estado:"",solicitud:0,orden:"", vehiculos:[]};
     vm.vehiculos=[];
@@ -864,7 +1031,9 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
     vm.pageno = 1; // initialize page no to 1
     vm.total_count = 0;
     vm.itemsPerPage = 20; //this could be a dynamic value from a drop down
-
+    var stopTimeN;
+    
+            
     vm.getData = function(pageno){ // This would fetch the data on page change.
         //In practice this should be in a factory.
         vm.busqueda.porpage = vm.itemsPerPage;
@@ -884,6 +1053,51 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
         });
     };
     
+    vm.notificacionText = function(mensaje) {
+        if (Notification) {
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission()
+            }
+            var title = "Notificacion de servicio";
+            var extra = {
+                body: mensaje
+            };
+            var noti = new Notification(title, extra)
+            noti.onclick = function () {
+                window.location = 'notificaciones.jsp';
+            };
+            noti.onclose = {
+                // Al cerrar
+            };
+            setTimeout(function () { noti.close() }, 10000);
+        }
+    };
+
+    vm.listaNotifiaciones = function(){
+        var fecha_ = storageService.getNotificaciones().fecha;
+        var entro = false;
+        vm.fechaAct.fecha = fecha_;
+        ServiceTables.ListaNotificaciones(vm.fechaAct).then(function(d) {
+            if(fecha_){
+                entro = true;
+            }
+            vm.fechaAct.fecha = (new Date).toString('yyyy-MM-dd HH:mm:ss');
+            if(entro){
+                storageService.updateNotificaciones(vm.fechaAct);
+            }else{
+                storageService.iniciarNotificaciones(vm.fechaAct);
+            }
+
+            if(d.length == 1){
+                vm.notificacionText(d[0].nota);
+            }else if(d.length > 1){
+                vm.notificacionText("Tiene "+d.length+" nuevas notificaciones");
+            }
+        },function(errResponse){
+           console.error('Error en sendPunto');
+       });
+    };
+
     vm.getData(vm.pageno);
     
     vm.listaCargues = function(){
@@ -981,6 +1195,9 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
         return dateOut;
     };
     
+    vm.listaNotifiaciones();
+    stopTimeN = $interval(vm.listaNotifiaciones, 60000);
+    
     vm.limpiar = function(){
         //vm.showModal();
         vm.dcargue=null;
@@ -1027,19 +1244,20 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             }
         };
         
-}]).controller('SolHistoricoController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', 'ServiceTables', 'storageService', 
-function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storageService) {
+}]).controller('SolHistoricoController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', 'ServiceTables', 'storageService', '$interval',
+function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storageService, $interval) {
     var vm = this;
     vm.options = {format:"YYYY/MM/DD", allowInputToggle:true};
     vm.dcargue=null;
     vm.ddescargue=null;
-    vm.busqueda={porpage:20, pageno:1, q:"", cargue:"", descargue:"", orden:"", carga:"", estado:"11"};
+    vm.busqueda={porpage:3, pageno:1, q:"", cargue:"", descargue:"", orden:"", carga:"", estado:"11"};
     vm.servicios = [];
     vm.foto={id:"", url:"", desc:"", fecha:"", tipo_foto:""};
     vm.fotos=[];
     vm.cargues = [];
     vm.servicio={origen:"", destino:"", carge:"", descarge:"", id:"-1", nestado:"" ,estado:"",solicitud:0,orden:"", vehiculos:[]};
     vm.vehiculos=[];
+    vm.fechaAct = {fecha:""};
     vm.vehiculo = {servicio:"", solicitud:"", placa:"", marca:"", referencia:"", modelo:"", trailer:"", poliza:"", compania:"", 
     exp_poliza:"", vence_poliza:"", soat:"", exp_soat:"", vence_soat:"", tecno:"", exp_tecno:"", vence_tecno:"", 
     nombre:"", tipo_doc:"", doc:"", num_lic:"", exp_lic:"",  vence_lic:"", telefono:"", direccion:"", imagen:"", 
@@ -1048,8 +1266,10 @@ function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storage
     vm.date = new Date();
     vm.pageno = 1; // initialize page no to 1
     vm.total_count = 0;
-    vm.itemsPerPage = 20; //this could be a dynamic value from a drop down
-
+    vm.itemsPerPage = 3; //this could be a dynamic value from a drop down
+    var stopTimeN;
+    
+    
     vm.getData = function(pageno){ // This would fetch the data on page change.
         //In practice this should be in a factory.
         vm.busqueda.porpage = vm.itemsPerPage;
@@ -1069,6 +1289,51 @@ function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storage
         });
     };
     
+    vm.notificacionText = function(mensaje) {
+        if (Notification) {
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission()
+            }
+            var title = "Notificacion de servicio";
+            var extra = {
+                body: mensaje
+            };
+            var noti = new Notification(title, extra)
+            noti.onclick = function () {
+                window.location = 'notificaciones.jsp';
+            };
+            noti.onclose = {
+                // Al cerrar
+            };
+            setTimeout(function () { noti.close() }, 10000);
+        }
+    };
+
+    vm.listaNotifiaciones = function(){
+        var fecha_ = storageService.getNotificaciones().fecha;
+        var entro = false;
+        vm.fechaAct.fecha = fecha_;
+        ServiceTables.ListaNotificaciones(vm.fechaAct).then(function(d) {
+            if(fecha_){
+                entro = true;
+            }
+            vm.fechaAct.fecha = (new Date).toString('yyyy-MM-dd HH:mm:ss');
+            if(entro){
+                storageService.updateNotificaciones(vm.fechaAct);
+            }else{
+                storageService.iniciarNotificaciones(vm.fechaAct);
+            }
+
+            if(d.length == 1){
+                vm.notificacionText(d[0].nota);
+            }else if(d.length > 1){
+                vm.notificacionText("Tiene "+d.length+" nuevas notificaciones");
+            }
+        },function(errResponse){
+           console.error('Error en sendPunto');
+       });
+    };
+
     vm.getData(vm.pageno);
     vm.listaCargues = function(){
         vm.cargues = storageService.getCargues();
@@ -1138,6 +1403,9 @@ function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storage
       fotos.show();
     };
     
+    vm.listaNotifiaciones();
+    stopTimeN = $interval(vm.listaNotifiaciones, 60000);
+    
     vm.verDetalleSol = function(id){
         for(var i = 0; i < vm.servicios.length; i++){
             if(vm.servicios[i].id === id) {
@@ -1211,8 +1479,8 @@ function($http, $templateCache, $timeout, $alert, $modal, ServiceTables, storage
             }
         };
         
-}]).controller('ServiciosSolicitudController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', '$interval', 'ServiceTables', 
-function($http, $templateCache, $timeout, $alert, $modal, $interval, ServiceTables) {
+}]).controller('ServiciosSolicitudController', ['$http', '$templateCache', '$timeout', '$alert' , '$modal', '$interval', 'ServiceTables', 'storageService', 
+function($http, $templateCache, $timeout, $alert, $modal, $interval, ServiceTables, storageService) {
     var vm = this;
     vm.options = {format:"YYYY/MM/DD", allowInputToggle:true};
     vm.dcargue=null;
@@ -1227,12 +1495,14 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval, ServiceTabl
     vm.servicio={origen:"", destino:"", carge:"", descarge:"", id:"-1", nestado:"" ,estado:"",solicitud:0,orden:"", vehiculos:[]};
     vm.vehiculos=[];
     vm.solicitudes=[];
+    vm.fechaAct = {fecha:""};
     vm.vehiculo = {servicio:"", solicitud:"", placa:"", marca:"", referencia:"", modelo:"", trailer:"", poliza:"", compania:"", 
     exp_poliza:"", vence_poliza:"", soat:"", exp_soat:"", vence_soat:"", tecno:"", exp_tecno:"", vence_tecno:"", 
     nombre:"", tipo_doc:"", doc:"", num_lic:"", exp_lic:"",  vence_lic:"", telefono:"", direccion:"", imagen:"", 
     tipo_carga:"", ntipocarga:"", tipo_remolque:"", ntipo_remolque:"", tipo_equipo:"", ntipo_equipo:"", turno_cargue:"", 
     turno_descargue:"", fotos:[]};
     var stopTime;
+    var stopTimeN;
     
     
     vm.listaSolicitudes = function(){
@@ -1244,6 +1514,51 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval, ServiceTabl
        });  
     };
     
+    vm.notificacionText = function(mensaje) {
+        if (Notification) {
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission()
+            }
+            var title = "Notificacion de servicio";
+            var extra = {
+                body: mensaje
+            };
+            var noti = new Notification(title, extra)
+            noti.onclick = function () {
+                window.location = 'notificaciones.jsp';
+            };
+            noti.onclose = {
+                // Al cerrar
+            };
+            setTimeout(function () { noti.close() }, 10000);
+        }
+    };
+
+    vm.listaNotifiaciones = function(){
+        var fecha_ = storageService.getNotificaciones().fecha;
+        var entro = false;
+        vm.fechaAct.fecha = fecha_;
+        ServiceTables.ListaNotificaciones(vm.fechaAct).then(function(d) {
+            if(fecha_){
+                entro = true;
+            }
+            vm.fechaAct.fecha = (new Date).toString('yyyy-MM-dd HH:mm:ss');
+            if(entro){
+                storageService.updateNotificaciones(vm.fechaAct);
+            }else{
+                storageService.iniciarNotificaciones(vm.fechaAct);
+            }
+
+            if(d.length == 1){
+                vm.notificacionText(d[0].nota);
+            }else if(d.length > 1){
+                vm.notificacionText("Tiene "+d.length+" nuevas notificaciones");
+            }
+        },function(errResponse){
+           console.error('Error en sendPunto');
+       });
+    };
+
     vm.getDataEquiposConductores = function(solicitud){ // This would fetch the data on page change.
         vm.solicitud = solicitud;
         vm.datos.id_servicio = solicitud.id;
@@ -1281,9 +1596,11 @@ function($http, $templateCache, $timeout, $alert, $modal, $interval, ServiceTabl
            console.error('Error en getDataRegistradas');
        });
     };
-
+    
+    vm.listaNotifiaciones();
     vm.listaSolicitudes();
     stopTime = $interval(vm.listaSolicitudes, 120000);
+    stopTimeN = $interval(vm.listaNotifiaciones, 60000);
     
     vm.verDetalleSol = function(id){
         for(var i = 0; i < vm.servicios.length; i++){
@@ -1895,7 +2212,6 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
     vm.dispos = [];
     vm.conductores = [];
     vm.equiposconductores = [];
-    vm.Remolques=[];
     vm.Cargas=[];
     vm.ticket={ticket:"", fecha:"", operacion:"", tipo_cargue:"", fecha_enturne:"", placa:"", remolque:"", 
     tipo_equipo:"", marca:"", modelo:"", referencia:"", trailer:"", poliza:"", soat:"", 
@@ -1920,10 +2236,16 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
 
     
     vm.nuevoVehiculo = function(){
+        vm.equipo = {placa:"", tipocarga:"", n_tipocarga:"", tipoequipo:"", n_tipoequipo:"", lic_transito:"", trailer:"", lic_transito_r:"", 
+        remolque:"", n_remolque:"", capacidad:"", unidad:"", marca:"", modelo:"", referencia:"", poliza:"", compania:"", 
+        exp_poliza:"", vence_poliza:"", soat:"", exp_soat:"", vence_soat:"", tecno:"", exp_tecno:"", vence_tecno:"", propietario:"",
+        poliza_hc:"", compania_hc:"", exp_poliza_hc:"", vence_poliza_hc:""};
         sendVehiculo.modal("show");
     };
     
     vm.nuevoConductor = function(){
+        vm.conductor = {codigo: "", tipo_doc:"", doc:"", lic:"", exp_lic:"", vence_lic:"", nombre:"", 
+        apellido:"", telefono:"", direccion:"", mail:"", contrasena:""};
         sendConductor.modal("show");
     };
 
@@ -2064,7 +2386,7 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         ServiceTables.SaveEquiposConductor(vm.changes).then(function(d) {
             if(d){
                 alert("Se ejecuto el proceso correctamente");
-                
+                vm.init();
             }else{
                 alert("Ocurrio un error y no se ejecuto el proceso completo");
             }
@@ -2077,7 +2399,7 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         ServiceTables.SaveEquiposConductorDisp(vm.dispos).then(function(d) {
             if(d){
                 alert("Se ejecuto el proceso correctamente");
-                
+                vm.init();
             }else{
                 alert("Ocurrio un error y no se ejecuto el proceso completo");
             }
@@ -2087,22 +2409,23 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
     };
     
     vm.enviarVehiculo = function(){
-        vm.equipo.exp_poliza = vm.equipo.exp_poliza.toString("yyyy/MM/dd");
-        vm.equipo.vence_poliza = vm.equipo.vence_poliza.toString("yyyy/MM/dd");
-        vm.equipo.exp_poliza_hc = vm.equipo.exp_poliza_hc.toString("yyyy/MM/dd");
-        vm.equipo.vence_poliza_hc = vm.equipo.vence_poliza_hc.toString("yyyy/MM/dd");
-        vm.equipo.exp_soat = vm.equipo.exp_soat.toString("yyyy/MM/dd");
-        vm.equipo.vence_soat =  vm.equipo.vence_soat.toString("yyyy/MM/dd");
-        vm.equipo.exp_tecno = vm.equipo.exp_tecno.toString("yyyy/MM/dd");
-        vm.equipo.vence_tecno = vm.equipo.vence_tecno.toString("yyyy/MM/dd");
+        vm.equipo.exp_poliza = new Date(vm.equipo.exp_poliza).toString("yyyy/MM/dd");
+        vm.equipo.vence_poliza = new Date(vm.equipo.vence_poliza).toString("yyyy/MM/dd");
+        vm.equipo.exp_poliza_hc = new Date(vm.equipo.exp_poliza_hc).toString("yyyy/MM/dd");
+        vm.equipo.vence_poliza_hc = new Date(vm.equipo.vence_poliza_hc).toString("yyyy/MM/dd");
+        vm.equipo.exp_soat = new Date(vm.equipo.exp_soat).toString("yyyy/MM/dd");
+        vm.equipo.vence_soat =  new Date(vm.equipo.vence_soat).toString("yyyy/MM/dd");
+        vm.equipo.exp_tecno = new Date(vm.equipo.exp_tecno).toString("yyyy/MM/dd");
+        vm.equipo.vence_tecno = new Date(vm.equipo.vence_tecno).toString("yyyy/MM/dd");
         ServiceTables.SaveVehiculos(vm.equipo).then(function(d) {
             if(d){
                 alert("Se ejecuto el proceso correctamente");
-                sendVehiculo.modal("show");
+                sendVehiculo.modal("hide");
                 vm.equipo = {placa:"", tipocarga:"", n_tipocarga:"", tipoequipo:"", n_tipoequipo:"", lic_transito:"", trailer:"", lic_transito_r:"", 
                 remolque:"", n_remolque:"", capacidad:"", unidad:"", marca:"", modelo:"", referencia:"", poliza:"", compania:"", 
                 exp_poliza:"", vence_poliza:"", soat:"", exp_soat:"", vence_soat:"", tecno:"", exp_tecno:"", vence_tecno:"", propietario:"",
                 poliza_hc:"", compania_hc:"", exp_poliza_hc:"", vence_poliza_hc:""};
+                vm.init();
             }else{
                 alert("Ocurrio un error y no se ejecuto el proceso completo");
             }
@@ -2112,15 +2435,16 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
     };
     
     vm.sendConductor = function(){
-        vm.conductor.exp_lic = vm.conductor.exp_lic.toString("yyyy/MM/dd");
-        vm.conductor.vence_lic = vm.conductor.vence_lic.toString("yyyy/MM/dd");
+        vm.conductor.exp_lic = new Date(vm.conductor.exp_lic).toString("yyyy/MM/dd");
+        vm.conductor.vence_lic = new Date(vm.conductor.vence_lic).toString("yyyy/MM/dd");
         console.log(vm.conductor);
         ServiceTables.SaveConductores(vm.conductor).then(function(d) {
             if(d){
                 alert("Se ejecuto el proceso correctamente");
-                sendConductor.modal("show");
+                sendConductor.modal("hide");
                 vm.conductor = {codigo: "", tipo_doc:"", doc:"", lic:"", exp_lic:"", vence_lic:"", nombre:"", 
                 apellido:"", telefono:"", direccion:"", mail:"", contrasena:""};
+                vm.init();
             }else{
                 alert("Ocurrio un error y no se ejecuto el proceso completo");
             }
@@ -2228,25 +2552,8 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
     };
     
     
-    vm.cambiarTipo = function(tipo){
-        vm.Remolques=[];
-        vm.Cargas=[];
-        for(var i = 0; i < vm.TipoRemolque.length; i++){
-            if(vm.TipoRemolque[i].Carga===tipo){
-                vm.Remolques = vm.TipoRemolque[i].Remolques;
-                break;
-            }
-
-        }
-        for(var i = 0; i < vm.Carga.length; i++){
-            if(vm.Carga[i].TipoCarga===tipo){
-                vm.Cargas = vm.Carga[i].Cargas;
-                break;
-            }
-
-        }
-
-    };
+    
+   
 
     vm.cambiarRemolque = function(){
         var flag = false;
@@ -2293,27 +2600,19 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         {"ID":"PS","Value":"Pasaporte"}
     ];
     
-    vm.TipoRemolque = [
-        {"Carga":6,
-         "Remolques": [
-            {"ID":1, Value:"Carbonera"},
-            {"ID":2, Value:"Carbonera con varilla"},
-            {"ID":3, Value:"Carroceria"},
-            {"ID":4, Value:"Plancha"},
-            {"ID":5, Value:"Porta contenedor"},
-            {"ID":6, Value:"Tolva"},
-            {"ID":7, Value:"Van"}
-        ]
-        },
-        {"Carga":2,
-         "Remolques" : [
-            {"ID":8, Value:"Tanque acero inoxidable"},
-            {"ID":9, Value:"Tanque aluminio"},
-            {"ID":10, Value:"Tanque lamina"}
-         ]
-        }
-    ];
-
+    vm.Remolques = [
+        {"ID":8, Value:"Tanque acero inoxidable"},
+        {"ID":9, Value:"Tanque aluminio"},
+        {"ID":10, Value:"Tanque lamina"},
+        {"ID":1, Value:"Carbonera"},
+        {"ID":2, Value:"Carbonera con varilla"},
+        {"ID":3, Value:"Carroceria"},
+        {"ID":4, Value:"Plancha"},
+        {"ID":5, Value:"Porta contenedor"},
+        {"ID":6, Value:"Tolva"},
+        {"ID":7, Value:"Van"}
+     ];
+     
     vm.TipoEquipo = [
         {"ID": 1,"Value":"Camión 3.5 Ton"},
         {"ID": 2,"Value":"Camión 7 Ton"},
@@ -2396,7 +2695,8 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
     vm.dispos = [];
     vm.conductores = [];
     vm.equiposconductores = [];
-    vm.Remolques=[];
+    vm.aprov_equipos = [];
+    vm.aprov_conductor = [];
     vm.Cargas=[];
     vm.ticket={ticket:"", fecha:"", operacion:"", tipo_cargue:"", fecha_enturne:"", placa:"", remolque:"", 
     tipo_equipo:"", marca:"", modelo:"", referencia:"", trailer:"", poliza:"", soat:"", 
@@ -2428,12 +2728,38 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         sendConductor.modal("show");
     };
 
-    vm.getDataEquipos = function(){ // This would fetch the data on page change.
-        vm.ticketsR = [];
-        ServiceTables.listaEquipos().then(function(d) {
+    vm.getDataEquipos = function(tipo){ // This would fetch the data on page change.
+        if(tipo===1){
+            vm.equipos = storageService.getEquipos();
+            ServiceTables.listaEquipos().then(function(d) {
+                if(d!=="sesion"){
+                    vm.equipos = d;  // data to be displayed on current page.
+                    storageService.iniciarEquipos(d);
+                }else{
+                    $window.location = '../../';
+                }
+            },function(errResponse){
+               console.error('Error en getDataRegistradas');
+           });
+        }else{
+            ServiceTables.listaEquipos().then(function(d) {
+                if(d!=="sesion"){
+                    vm.equipos = d;  // data to be displayed on current page.
+                    storageService.iniciarEquipos(d);
+                }else{
+                    $window.location = '../../';
+                }
+            },function(errResponse){
+               console.error('Error en getDataRegistradas');
+           });
+        }
+    };
+    
+    vm.getDataEquiposAprov = function(){ // This would fetch the data on page change.
+        ServiceTables.listaEquiposAprov().then(function(d) {
             if(d!=="sesion"){
-                vm.equipos = d;  // data to be displayed on current page.
-                storageService.iniciarEquipos(d);
+                vm.equipos_aprov = d;  // data to be displayed on current page.
+                //storageService.iniciarEquipos(d);
             }else{
                 $window.location = '../../';
             }
@@ -2461,13 +2787,41 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         sendVehiculo.modal("show");
     };
     
-    vm.getDataConductores = function(){ // This would fetch the data on page change.
-        vm.ticketsA = []; 
-        ServiceTables.listaConductores().then(function(d) {
+    vm.getDataConductores = function(tipo){ // This would fetch the data on page change.
+        if(tipo===1){
+            vm.conductores = vm.conductores = storageService.getConductores();
+            ServiceTables.listaConductores().then(function(d) {
+                if(d!=="sesion"){
+                    console.log(d);
+                    vm.conductores = d;  // data to be displayed on current page.
+                    storageService.iniciarConductores(d);
+                }else{
+                    $window.location = '../../';
+                }
+            },function(errResponse){
+               console.error('Error en getDataConductores');
+           });
+       }else{
+           ServiceTables.listaConductores().then(function(d) {
+                if(d!=="sesion"){
+                    console.log(d);
+                    vm.conductores = d;  // data to be displayed on current page.
+                    storageService.iniciarConductores(d);
+                }else{
+                    $window.location = '../../';
+                }
+            },function(errResponse){
+               console.error('Error en getDataConductores');
+           });
+       }
+    };
+    
+    vm.getDataConductoresAprov = function(){ // This would fetch the data on page change.
+        ServiceTables.listaConductoresAprov().then(function(d) {
             if(d!=="sesion"){
                 console.log(d);
-                vm.conductores = d;  // data to be displayed on current page.
-                storageService.iniciarConductores(d);
+                vm.conductores_aprov = d;  // data to be displayed on current page.
+                //storageService.iniciarConductores(d);
             }else{
                 $window.location = '../../';
             }
@@ -2476,24 +2830,16 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
        });
     };
     
-    vm.getDataEquiposConductores = function(page){ // This would fetch the data on page change.
-        vm.ticketsT = []; 
-        ServiceTables.listaEquiposConductores().then(function(d) {
-            if(d!=="sesion"){
-                vm.equiposconductores = d;  // data to be displayed on current page.
-            }else{
-                $window.location = '../../';
-            }
-        },function(errResponse){
-           console.error('Error en getDataRegistradas');
-       });
-    };
+    
+   
     
     vm.init = function(){
-        vm.getDataEquipos();
-        vm.getDataConductores();
-        vm.getDataEquiposConductores();
+        vm.getDataEquipos(1);
+        vm.getDataConductores(1);
+        vm.getDataEquiposAprov();
+        vm.getDataConductoresAprov();
     };
+    
     
     vm.stopinit = function() {
       if (angular.isDefined(stopTime)) {
@@ -2502,70 +2848,38 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
       }
     };
     
-    vm.cambiarConductor = function(equipoconductor){
-        for(var i = 0; i < vm.equiposconductores.length; i++){
-            if(vm.equiposconductores[i].conductor === equipoconductor.conductor &&
-                vm.equiposconductores[i].id !== equipoconductor.id){
-                    var r = confirm("El conductor que desea asignar, esta asignado ya a la placa: " + vm.equiposconductores[i].placa + "\n\
-                    ¿Desea segir con la nueva asignación?.");
-                    if (r == true) {
-                        if(vm.equiposconductores[i].en_servicio === '1'){
-                            alert("El conductor que desea asignar esta cumpliendo un servicio en este momento.");
-                            equipoconductor.conductor = "";
-                        }else{
-                            vm.equiposconductores[i].conductor = "";
-                            equipoconductor.editar = true;
-                        }
-                    }else{
-                        equipoconductor.conductor = "";
-                    } 
-                    break;
-            }else{
-                equipoconductor.editar = true;
-            }
-        }
-        vm.addChanges(equipoconductor);
-    };
-    
-    vm.addChanges = function(equipoconductor){
-        console.log(equipoconductor.editar);
-        if(!equipoconductor.editar){
-            for(var i = 0; i < vm.changes.length; i++){
-                if(vm.changes[i].placa === equipoconductor.placa){
-                    vm.changes.splice(i, 1);
-                    break;
+    vm.aprovarConductor = function(conductor){
+        if(conductor.aprovado!==true||conductor.aprovado!==1){
+            for(var i = 0; i < vm.aprov_conductor.length; i++){
+                if(vm.aprov_conductor[i].id === conductor.codigo){
+                    vm.aprov_conductor.splice(i, 1);
+            
                 }
             }
-        }else{
-            equipoconductor.editar = true;
-            for(var i = 0; i < vm.changes.length; i++){
-                if(vm.changes[i].placa === equipoconductor.placa){
-                    vm.changes.splice(i, 1);
-                    break;
+        }
+        vm.aprov_conductor.push({id:conductor.codigo, tipo:2});
+    };
+    
+    vm.aprovarEquipo = function(equipo){
+        if(equipo.aprovado!==true||equipo.aprovado!==1){
+            for(var i = 0; i < vm.aprov_equipos.length; i++){
+                if(vm.aprov_equipos[i].id === equipo.placa){
+                    vm.aprov_equipos.splice(i, 1);
+            
                 }
             }
-            vm.changes.push(equipoconductor);
         }
-        console.log(vm.changes);
+        vm.aprov_equipos.push({id:equipo.placa, tipo:1});
     };
+
     
-    vm.addDisponibles = function(equipoconductor){
-        console.log(equipoconductor.disponible);
-        for(var i = 0; i < vm.dispos.length; i++){
-            if(vm.dispos[i].placa === equipoconductor.placa){
-                vm.dispos.splice(i, 1);
-                break;
-            }
-        }
-        vm.dispos.push(equipoconductor);
-        console.log(vm.dispos);
-    };
-    
-    vm.enviarChanges = function(){
-        ServiceTables.SaveEquiposConductor(vm.changes).then(function(d) {
+    vm.enviarConductores = function(){
+        ServiceTables.SaveEquiposConductorAprov(vm.aprov_conductor).then(function(d) {
             if(d){
                 alert("Se ejecuto el proceso correctamente");
-                
+                vm.getDataConductores(2);
+                vm.getDataConductoresAprov();
+                vm.aprov_conductor = [];
             }else{
                 alert("Ocurrio un error y no se ejecuto el proceso completo");
             }
@@ -2574,11 +2888,13 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
        });
     };
     
-    vm.enviarDisponibles = function(){
-        ServiceTables.SaveEquiposConductorDisp(vm.dispos).then(function(d) {
+    vm.enviarEquipos = function(){
+        ServiceTables.SaveEquiposConductorAprov(vm.aprov_equipos).then(function(d) {
             if(d){
                 alert("Se ejecuto el proceso correctamente");
-                
+                vm.getDataEquipos(2);
+                vm.getDataEquiposAprov();
+                vm.aprov_equipos = [];
             }else{
                 alert("Ocurrio un error y no se ejecuto el proceso completo");
             }
@@ -2666,7 +2982,6 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         }, 30 * 1000);
     };
 
-    vm.llenarZonasBahias();
     vm.init();
     
     vm.formatDate = function(date){
@@ -2794,26 +3109,18 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
         {"ID":"PS","Value":"Pasaporte"}
     ];
     
-    vm.TipoRemolque = [
-        {"Carga":6,
-         "Remolques": [
-            {"ID":1, Value:"Carbonera"},
-            {"ID":2, Value:"Carbonera con varilla"},
-            {"ID":3, Value:"Carroceria"},
-            {"ID":4, Value:"Plancha"},
-            {"ID":5, Value:"Porta contenedor"},
-            {"ID":6, Value:"Tolva"},
-            {"ID":7, Value:"Van"}
-        ]
-        },
-        {"Carga":2,
-         "Remolques" : [
-            {"ID":8, Value:"Tanque acero inoxidable"},
-            {"ID":9, Value:"Tanque aluminio"},
-            {"ID":10, Value:"Tanque lamina"}
-         ]
-        }
-    ];
+    vm.Remolques = [
+        {"ID":8, Value:"Tanque acero inoxidable"},
+        {"ID":9, Value:"Tanque aluminio"},
+        {"ID":10, Value:"Tanque lamina"},
+        {"ID":1, Value:"Carbonera"},
+        {"ID":2, Value:"Carbonera con varilla"},
+        {"ID":3, Value:"Carroceria"},
+        {"ID":4, Value:"Plancha"},
+        {"ID":5, Value:"Porta contenedor"},
+        {"ID":6, Value:"Tolva"},
+        {"ID":7, Value:"Van"}
+     ];
 
     vm.TipoEquipo = [
         {"ID": 1,"Value":"Camión 3.5 Ton"},
@@ -2866,6 +3173,7 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
     ];
         
     vm.dtOptionsAsign = {
+        paging:false,
         bAutoWidth:true,
         stateSave: true,
         destroy: true,
@@ -2873,6 +3181,7 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
     };
        
     vm.dtOptionsTerm = {
+        paging:false,
         bAutoWidth:true,
         stateSave: true,
         destroy: true,
@@ -2880,6 +3189,7 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
     };
     
     vm.dtOptionsRegs = {
+        paging:false,
         bAutoWidth:true,
         stateSave: true,
         destroy: true,
@@ -2906,26 +3216,33 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
             var stopTime;
            var ws = new WebSocket("ws://logycus360.com/notificaciones"); 
             var audio = new Audio('../css/sounds/timbre.mp3');
-
+            vm.conectado = false;
+            
             vm.listaTickets = function(){
                 ServiceTables.listTickets().then(function(d) {
                     vm.tickets = d.lista;
                     vm.activo = d.activo;
-                    console.log(d.activo);
-                    if(d.activo.ticket!==null){
+                    if(d.activo.sonar===1){
+                        console.log(d.activo.sonar);
+                        console.log("entro");
+                        postToServer();
                         audio.play();
+                    }else{
+                        console.log("no entro");
+                        console.log(d.activo.sonar);
                     }
                 },function(errResponse){
                    console.error('Error en sendPunto');
                });
             };
             
-            stopTime = $interval(vm.listaTickets, 10 * 1000 *  60);
-            
+          
             vm.siguiente = function(){
                 ServiceTables.SaveNextTicket().then(function(d) {
                     if(d.mensaje==="OK"){
+                        vm.listaTickets();
                         postToServer();
+                        audio.play();
                     }else if(d.mensaje==="NO"){
                         alert("No existe mas turnos en cola en el momento");
                         vm.listaTickets();
@@ -2954,6 +3271,7 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
            
             ws.onopen = function(){
                 console.log("conecto");
+                vm.listaTickets();
             };
             
             ws.onmessage = function(mensaje){
@@ -2969,7 +3287,7 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
                 ws.close();
             }
             
-            vm.listaTickets();
+            stopTime = $interval(vm.listaTickets, 1 * 1000 *  60);
             
             vm.dtOptions = {
                 stateSave: true,
@@ -3000,5 +3318,20 @@ function($http, $templateCache, $timeout, $alert, $interval, ServiceTables, stor
                 {ID:1, Value:"Lanzada"},
                 {ID:11, Value:"Viaje finalizado"}
             ];
+//NotificacionesController
+}]).controller('NotificacionesController', ['ServiceTables',
+    function(ServiceTables) {
+            var vm = this;
+            vm.notificaciones = [];
 
+            vm.listaNotificaciones = function(){
+                ServiceTables.ListaNotificaciones({fecha:""}).then(function(d) {
+                    vm.notificaciones = d;
+                },function(errResponse){
+                   console.error('Error en sendPunto');
+               });
+            };
+            
+            vm.listaNotificaciones();
+            
 }]);

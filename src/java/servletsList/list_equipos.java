@@ -26,8 +26,13 @@ public class list_equipos extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             if(session.getAttribute("user")!=null){
-                Usuario u = (Usuario)session.getAttribute("user"); 
-                JSONArray objeto = Listas.listaVehiculosByPropietario(u.getNit());
+                Usuario u = (Usuario)session.getAttribute("user");
+                JSONArray objeto = new JSONArray();
+                if(u.getTipo()==1){
+                    objeto = Listas.listaVehiculosByGeneradora(u.getNit(), false);
+                }else{
+                    objeto = Listas.listaVehiculosByPropietario(u.getNit());
+                }
                 System.out.println(objeto.toJSONString());
                 out.println(objeto.toJSONString());
             }else{
