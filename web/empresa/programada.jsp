@@ -195,22 +195,21 @@ if(session.getAttribute("user") != null){
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Punto de cargue:</label>
-                        <select ng-disabled="ctrl.enviado" ng-model="ctrl.nuevaSol.id_inicio"
+                        <select ng-disabled="ctrl.enviado" ng-model="ctrl.nuevaSol.inicio"
                         type="text" name="nameOrigin"
                         clase="text_valid" class="form-control"
                         required-message="'El campo no puede estar vacio'" 
-                        required ng-options="punto.id as punto.desc for punto in ctrl.puntos"
-                        ng-change="ctrl.selectInicio()">
+                        required ng-options="punto as punto.desc for punto in ctrl.puntos">
                             <option value="">--- Seleccione inicio ---</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Punto de descargue:</label>
-                        <select ng-disabled="ctrl.enviado" ng-model="ctrl.nuevaSol.id_fin"
+                        <select ng-disabled="ctrl.enviado" ng-model="ctrl.nuevaSol.fin"
                         type="text" name="nameDestination"
                         clase="text_valid" class="form-control"
                         required-message="'El campo no puede estar vacio'" 
-                        required ng-options="punto.id as punto.desc for punto in ctrl.puntos">
+                        required ng-options="punto as punto.desc for punto in ctrl.puntos">
                             <option value="">--- Seleccione fin ---</option>
                         </select>
                     </div>
@@ -229,8 +228,8 @@ if(session.getAttribute("user") != null){
                     </div>
                     <div class="form-group">
                         <label>Tipo de cargue:</label>
-                        <select class="form-control" ng-model="ctrl.nuevaSol.id_tipocargue" 
-                        ng-options="Tipo.id as Tipo.desc for Tipo in ctrl.cargues"
+                        <select class="form-control" ng-model="ctrl.nuevaSol.tipocargue" 
+                        ng-options="Tipo as Tipo.desc for Tipo in ctrl.cargues"
                         name="carga" clase="text_valid" required-message="'Debe seleccionar una opcion'">
                             <option value="">--- Seleccione Tipo ---</option>
                         </select>

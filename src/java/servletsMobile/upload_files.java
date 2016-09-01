@@ -1,7 +1,6 @@
 package servletsMobile;
 
-import datos.save.Guardar;
-import static datos.save.Guardar.CambioEstadoServicio;
+import static datos.save.Guardar.GuardarFoto;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -56,7 +55,7 @@ public class upload_files extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             JSONObject jSONObject = new JSONObject();
             /* TODO output your page here. You may use following sample code. */
-            int resultado = CambioEstadoServicio(vector_nombre[0], (tipo==1)?5:10, 0, nuevo_nombre, tipo_serv, 0);
+            int resultado = GuardarFoto(vector_nombre[0], nuevo_nombre, (tipo==1)?8:11);
             if(resultado<=-1){
                 jSONObject.put("mensaje", false);
             }else{

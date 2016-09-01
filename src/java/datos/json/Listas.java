@@ -197,7 +197,7 @@ public class Listas {
                 String instruccion="SELECT mes_programado, anio_programado, dia_programado FROM logycus360.tblDiaProgramado WHERE activo_diaprogramado = 1 AND mes_programado = ? AND anio_programado = ? ";        
                  
                 if(actual){
-                    instruccion += " AND dia_programado > DATE_FORMAT(NOW(), '%d') ";
+                    instruccion += " AND dia_programado > CASE WHEN logycus360.DiasMes(DATE_FORMAT(NOW(), '%Y') , DATE_FORMAT(NOW(), '%m') ) = DATE_FORMAT(NOW(), '%d') THEN 0 ELSE DATE_FORMAT(NOW(), '%d') END; ";
                 }
                 
                 st=conn.prepareStatement(instruccion);

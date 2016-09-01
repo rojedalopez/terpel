@@ -20,7 +20,7 @@ public class PushyAPI {
     public static ObjectMapper mapper = new ObjectMapper();
     
     // Insert your Secret API Key here
-    public static final String SECRET_API_KEY = "79abeae53ea7d50510640d89c8d2c4122c14f1f8be0b0cf8d7532f24fba42412";
+    public static final String SECRET_API_KEY = "6cd74182bfbac4df532eb59e3148bbff269e4832af4b8f8888654ace4b6e6954";
     public static final String SECRET_API_KEY_ENTURNEX = "403f57652d1fee37ea80541da9033f78faa826ffd617a3d2c4fa714667120595";
 
     public static void sendPush(PushyPushRequest req, int app) throws Exception {

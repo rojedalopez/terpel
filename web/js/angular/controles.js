@@ -365,9 +365,9 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
             vm.cargues = [];
             vm.alerta = {title: 'Solicitud Enviada', container:'#alerta-submit', duration:5, animation:'am-fade-and-slide-top', show: false};
             vm.date = new Date();
-            vm.nuevaSol = {id:"-1", dia:"", mes:"", anio:2016, desc_inicio:"", desc_fin:"", desc_tipocargue:"", id_inicio:"", id_fin:"", min_carg:"", max_carg:"", min_desc:"", max_desc:"", id_tipocargue:"", equipos:"", id_ccosto:""};
+            vm.nuevaSol = {id:"-1", dia:"", mes:"", anio:2016, inicio:"", fin:"", tipocargue:"", desc_inicio:"", desc_fin:"", desc_tipocargue:"", id_inicio:"", id_fin:"", min_carg:"", max_carg:"", min_desc:"", max_desc:"", id_tipocargue:"", equipos:"", id_ccosto:""};
             vm.calendario = [];            
-            vm.meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            vm.meses = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             vm.mes;
             vm.mes_num;
             vm.anio_num;
@@ -449,10 +449,41 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                }
             };
             
+            vm.diasDelMes = function(mes, año){
+                switch(mes){
+                    case 0:  // Enero
+                    case 2:  // Marzo
+                    case 4:  // Mayo
+                    case 6:  // Julio
+                    case 7:  // Agosto
+                    case 9:  // Octubre
+                    case 11: // Diciembre
+                    return 31;
+                    case 3:  // Abril
+                    case 5:  // Junio
+                    case 8:  // Septiembre
+                    case 10: // Noviembre
+                    return 30;
+                    case 1:  // Febrero
+                    if ( ((año%100 == 0) && (año%400 == 0)) ||
+                    ((año%100 != 0) && (año%  4 == 0))   )
+                    return 29;  // Año Bisiesto
+                    else
+                    return 28;
+                    default:
+                    alert("El mes debe estar entre 0 y 11");
+                }
+            };
+            
             vm.listaProgramadas = function(){
                 var date = new Date();
-                vm.mes = vm.meses[date.getMonth()];
-                vm.mes_num = date.getMonth()+1;
+                var dias = vm.diasDelMes(date.getMonth(), date.getFullYear());
+                if(dias===date.getDate()){
+                    vm.mes_num = date.getMonth()+2;
+                }else{
+                    vm.mes_num = date.getMonth()+1;
+                }
+                vm.mes = vm.meses[vm.mes_num];
                 vm.anio_num = date.getFullYear();
                 vm.calendario = storageService.getCalendario();
                 if(vm.calendario.length===0){
@@ -503,31 +534,7 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 vm.map.showInfoWindow('foo-iw', vehiculo.placa);
             };
             
-            vm.diasDelMes = function(mes, año){
-                switch(mes){
-                    case 0:  // Enero
-                    case 2:  // Marzo
-                    case 4:  // Mayo
-                    case 6:  // Julio
-                    case 7:  // Agosto
-                    case 9:  // Octubre
-                    case 11: // Diciembre
-                    return 31;
-                    case 3:  // Abril
-                    case 5:  // Junio
-                    case 8:  // Septiembre
-                    case 10: // Noviembre
-                    return 30;
-                    case 1:  // Febrero
-                    if ( ((año%100 == 0) && (año%400 == 0)) ||
-                    ((año%100 != 0) && (año%  4 == 0))   )
-                    return 29;  // Año Bisiesto
-                    else
-                    return 28;
-                    default:
-                    alert("El mes debe estar entre 0 y 11");
-                }
-            };
+            
             
             vm.abrirVentana = function(dia){
                 AgregarSolicitud.modal("show");
@@ -554,15 +561,18 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                 vm.nuevaSol.max_carg = new Date(vm.dateMaxCargue).toString("HH:mm:ss");
                 vm.nuevaSol.min_desc = new Date(vm.dateMinDescargue).toString("HH:mm:ss");
                 vm.nuevaSol.max_desc = new Date(vm.dateMaxDescargue).toString("HH:mm:ss");
+                vm.nuevaSol.id_inicio = vm.nuevaSol.inicio.id;
+                vm.nuevaSol.desc_inicio = vm.nuevaSol.inicio.desc;
+                vm.nuevaSol.id_fin = vm.nuevaSol.fin.id;
+                vm.nuevaSol.desc_fin = vm.nuevaSol.fin.desc;
+                vm.nuevaSol.id_tipocargue = vm.nuevaSol.tipocargue.id;
+                vm.nuevaSol.desc_tipocargue = vm.nuevaSol.tipocargue.desc;
                 ServiceTables.SaveSolicitudProgramada(vm.nuevaSol).then(function(d) {
                         if(d.mensaje!=="Error"){
                             for(var i = 0; i < vm.calendario.length; i++){
                                 if(vm.calendario[i].dia === vm.nuevaSol.dia){
                                     if(vm.nuevaSol.id === "-1"){
                                         vm.nuevaSol.id = d.id;
-                                        vm.nuevaSol.desc_inicio = vm.nuevaSol.inicio.desc;
-                                        vm.nuevaSol.desc_fin = vm.nuevaSol.fin.desc;
-                                        vm.nuevaSol.desc_tipocargue = vm.nuevaSol.cargue.desc;
                                     }else{
                                         for(var j=0; j <vm.calendario[i].spots.length; j++){
                                             if(vm.calendario[i].spots[j].id === d.id){
@@ -571,13 +581,10 @@ angular.module('MyApp.Servicios', []).controller('SpotController', ['NgMap', '$h
                                             }
                                         }
                                         vm.nuevaSol.id = d.id;
-                                        vm.nuevaSol.desc_inicio = vm.nuevaSol.inicio.desc;
-                                        vm.nuevaSol.desc_fin = vm.nuevaSol.fin.desc;
-                                        vm.nuevaSol.desc_tipocargue = vm.nuevaSol.cargue.desc;
                                     }
                                     vm.calendario[i].spots.push(vm.nuevaSol);
                                     AgregarSolicitud.modal("hide");
-                                    vm.nuevaSol = {id:"-1", dia:"", mes:"", anio:2016, desc_inicio:"", desc_fin:"", desc_tipocargue:"", id_inicio:"", id_fin:"", min_carg:"", max_carg:"", min_desc:"", max_desc:"", id_tipocargue:"", equipos:"", id_ccosto:""};
+                                    vm.nuevaSol = {id:"-1", dia:"", mes:"", anio:2016, inicio:"", fin:"", tipocargue:"", desc_inicio:"", desc_fin:"", desc_tipocargue:"", id_inicio:"", id_fin:"", min_carg:"", max_carg:"", min_desc:"", max_desc:"", id_tipocargue:"", equipos:"", id_ccosto:""};
                                     vm.dateMinCargue=null;
                                     vm.dateMinDescargue=null;
                                     vm.dateMaxCargue=null;

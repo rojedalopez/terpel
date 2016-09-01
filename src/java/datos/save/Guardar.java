@@ -1114,6 +1114,40 @@ public class Guardar {
 
     }
     
+    public static int GuardarFoto(String servicio, String imagen, int tipo) throws ClassNotFoundException, SQLException{
+        Connection conn=null;
+        PreparedStatement insertar=null;
+        conn=conexion();
+        String pp = "{CALL logycus360.new_foto(?, ?, ?, ?)}";
+        
+            try (CallableStatement cs = conn.prepareCall(pp)) {
+                cs.setString(1, imagen);
+                cs.setString(2, servicio);
+                cs.setInt(3, tipo);
+                cs.registerOutParameter(4, Types.INTEGER);
+                
+                cs.executeQuery();
+                
+                int retorno = cs.getInt(4);
+                
+                return retorno;
+                
+
+            }catch (SQLException e) {
+                System.out.println("error SQLException en CambioEstadoServicio");
+                System.out.println(e.toString());
+            }catch (Exception e){
+                System.out.println("error Exception en CambioEstadoServicio");
+                System.out.println(e.toString());
+            }finally{
+                if(!conn.isClosed()){
+                    conn.close();
+                }
+            }
+            return -1;
+
+    }
+    
     public static Boolean CambioEstadoTicket(String ticket, String registro) throws ClassNotFoundException, SQLException{
         Connection conn=null;
         PreparedStatement insertar=null;
